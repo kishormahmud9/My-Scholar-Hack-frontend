@@ -15,7 +15,7 @@ export default function VerifyEmailPage() {
 
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h2>
                     <p className="text-gray-500 text-sm mb-8">
-                        We've sent a verification link to<br />
+                        We've sent a verification code to<br />
                         <span className="font-semibold text-gray-900">name@example.com</span>
                     </p>
 
@@ -25,7 +25,7 @@ export default function VerifyEmailPage() {
                     />
 
                     <div className="text-center">
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 text-sm">      
                             Didn't receive the email?{' '}
                             <button className="text-[#FFCA42] hover:text-[#eeb526] font-semibold transition-colors">
                                 Click to resend

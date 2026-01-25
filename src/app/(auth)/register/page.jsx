@@ -4,25 +4,14 @@ import { Icon } from "@iconify/react";
 import PrimaryBtn from "@/components/landing/PrimaryBtn";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-
 import { useRouter } from "next/navigation";
+import { apiPost } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
-
-  useEffect(() => {
-    if (!toastMessage) return undefined;
-
-    const timer = setTimeout(() => {
-      setToastMessage("");
-      router.push("/otp");
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [toastMessage, router]);
 
   const handleRegistration = async (e) => {
     e.preventDefault();
@@ -34,22 +23,93 @@ export default function RegisterPage() {
     const email = form.email.value.trim();
     const password = form.password.value;
 
+    // Validation
+    if (!fullName || !email || !password) {
+      setSubmitError("Please fill in all fields");
+      return;
+    }
+
+    if (password.length < 6) {
+      setSubmitError("Password must be at least 6 characters");
+      return;
+    }
+
     const data = { name: fullName, email, password };
 
     setIsSubmitting(true);
     setSubmitError("");
-    setToastMessage("");
 
     try {
-      const response = await registerUser(data);
+      const response = await apiPost("/user/register", data);
+
+
+      // Handle different response structures
       if (response?.success) {
         form.reset();
-        setToastMessage("Account created successfully.");
+
+
+        // Send OTP to email
+        try {
+          const otpResponse = await apiPost("/otp/send", { email });
+
+          if (otpResponse?.success) {
+            toast.success("Verification code sent to your email!");
+            // Store email in sessionStorage for OTP page to use for resend
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('pendingVerificationEmail', email);
+            }
+            // Redirect to OTP page
+            router.push("/verify-email");
+          } else {
+            const errorMsg = otpResponse?.message || "Failed to send verification code";
+            toast.error(errorMsg);
+            // Store email anyway for resend functionality
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('pendingVerificationEmail', email);
+            }
+            // Still redirect to OTP page even if send fails (user can resend)
+            router.push("/verify-email");
+          }
+        } catch (otpError) {
+          console.error("Error sending OTP:", otpError);
+          const otpErrorMessage =
+            otpError?.data?.message ||
+            otpError?.data?.error ||
+            otpError?.response?.data?.message ||
+            otpError?.response?.data?.error ||
+            otpError?.message ||
+            otpError?.response?.message ||
+            "Failed to send verification code";
+
+          toast.error(otpErrorMessage);
+          // Store email anyway for resend functionality
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('pendingVerificationEmail', email);
+          }
+          // Still redirect to OTP page (user can resend)
+          router.push("/otp");
+        }
       } else {
-        setSubmitError(response?.message || "Registration failed. Please try again later.");
+        const errorMsg = response?.message || "Registration failed. Please try again later.";
+        setSubmitError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
-      setSubmitError(err?.message || "Registration failed. Please try again later.");
+      console.error("Registration error:", err);
+      console.error("Error data:", err?.data);
+      console.error("Error response:", err?.response);
+
+      const errorMessage =
+        err?.data?.message ||
+        err?.data?.error ||
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        err?.response?.message ||
+        "Registration failed. Please try again later.";
+
+      setSubmitError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -57,11 +117,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50/50 p-4">
-      {toastMessage ? (
-        <div className="fixed top-6 right-6 z-50 rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg">
-          {toastMessage}
-        </div>
-      ) : null}
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-8">
           <div className="text-center mb-8">
