@@ -446,7 +446,7 @@ export const createAdmin = async (payload) => {
  * @returns {Promise} API response
  */
 export const updateUser = async (id, payload) => {
-    const response = await apiClient.put(`/admin/users/${id}`, payload);
+    const response = await apiClient.patch(`/admin/users/${id}/status`, payload);
     return response.data;
 };
 

@@ -1,27 +1,66 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 
-export default function Table({ TableHeads, TableRows }) {
+export default function Table({
+  TableHeads,
+  TableRows,
+  // Server-side pagination props
+  pagination = null, // { total, page, limit }
+  onPageChange = null,
+  onLimitChange = null,
+}) {
+  // Client-side pagination state (used when pagination prop is not provided)
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // Use server-side pagination if provided, otherwise use client-side
+  const isServerSide = pagination !== null;
+  const totalItems = isServerSide ? pagination.total : TableRows.length;
+  const totalPages = Math.ceil(totalItems / (isServerSide ? pagination.limit : itemsPerPage));
+  const currentPageValue = isServerSide ? pagination.page : currentPage;
+  const currentLimit = isServerSide ? pagination.limit : itemsPerPage;
 
-  const totalPages = Math.ceil(TableRows.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = TableRows.slice(startIndex, endIndex);
+  // For server-side, use all rows (already paginated by server)
+  // For client-side, slice the rows
+  const currentItems = isServerSide
+    ? TableRows
+    : TableRows.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const startIndex = isServerSide
+    ? (currentPageValue - 1) * currentLimit + 1
+    : (currentPage - 1) * itemsPerPage + 1;
+  const endIndex = isServerSide
+    ? Math.min(currentPageValue * currentLimit, totalItems)
+    : Math.min(currentPage * itemsPerPage, totalItems);
+
+  // Sync local state with server-side pagination
+  useEffect(() => {
+    if (isServerSide && pagination) {
+      setCurrentPage(pagination.page);
+      setItemsPerPage(pagination.limit);
+    }
+  }, [isServerSide, pagination]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+      if (isServerSide && onPageChange) {
+        onPageChange(page);
+      } else {
+        setCurrentPage(page);
+      }
     }
   };
 
   const handleItemsPerPageChange = (e) => {
-    setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1);
+    const newLimit = Number(e.target.value);
+    if (isServerSide && onLimitChange) {
+      onLimitChange(newLimit);
+    } else {
+      setItemsPerPage(newLimit);
+      setCurrentPage(1);
+    }
   };
 
   // Smart pagination: show page range instead of all pages
@@ -116,7 +155,7 @@ export default function Table({ TableHeads, TableRows }) {
         <div className="flex items-center gap-2">
           <span className="text-sm text-[#6D6E73]">Show</span>
           <select
-            value={itemsPerPage}
+            value={currentLimit}
             onChange={handleItemsPerPageChange}
             className="border border-[#CED2E5] rounded px-3 py-1 text-sm text-black focus:outline-none focus:border-[#FFCA42]"
           >
@@ -131,8 +170,8 @@ export default function Table({ TableHeads, TableRows }) {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1 || TableRows.length === 0}
+            onClick={() => handlePageChange(currentPageValue - 1)}
+            disabled={currentPageValue === 1 || currentItems.length === 0}
             aria-label="Previous page"
             className="px-4 py-2 text-sm text-[#6D6E73] hover:bg-[#F8F9FA] rounded disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -148,8 +187,8 @@ export default function Table({ TableHeads, TableRows }) {
                 key={page}
                 onClick={() => handlePageChange(page)}
                 aria-label={`Page ${page}`}
-                aria-current={currentPage === page ? "page" : undefined}
-                className={`px-3 py-1 text-sm rounded ${currentPage === page
+                aria-current={currentPageValue === page ? "page" : undefined}
+                className={`px-3 py-1 text-sm rounded ${currentPageValue === page
                   ? "bg-[#FFCA42] text-[#0C0C0D]"
                   : "text-[#6D6E73] hover:bg-[#F8F9FA]"
                   }`}
@@ -159,8 +198,8 @@ export default function Table({ TableHeads, TableRows }) {
             )
           ))}
           <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages || TableRows.length === 0}
+            onClick={() => handlePageChange(currentPageValue + 1)}
+            disabled={currentPageValue === totalPages || currentItems.length === 0}
             aria-label="Next page"
             className="px-4 py-2 text-sm text-[#6D6E73] hover:bg-[#F8F9FA] rounded disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -169,8 +208,7 @@ export default function Table({ TableHeads, TableRows }) {
         </div>
 
         <div className="text-sm text-[#6D6E73]">
-          Showing {startIndex + 1} to {Math.min(endIndex, TableRows.length)} of{" "}
-          {TableRows.length} entries
+          Showing {startIndex} to {endIndex} of {totalItems} entries
         </div>
       </div>
     </>
