@@ -430,12 +430,31 @@ export const getUserById = async (id) => {
 };
 
 /**
+ * Get all admins (Admin only)
+ * @param {Object} params - Query parameters (optional)
+ * @param {number} params.page - Page number
+ * @param {number} params.limit - Items per page
+ * @returns {Promise} API response with admins list
+ */
+export const getAllAdmins = async () => {
+    const response = await apiClient.get("/admin/admins");
+    return response.data;
+};
+
+/**
  * Create admin user (Admin only)
  * @param {Object} payload - Admin user data
+ * @param {string} payload.name - Admin name
+ * @param {string} payload.email - Admin email
+ * @param {string} payload.phoneNumber - Admin phone number
+ * @param {string} payload.password - Admin password (optional)
  * @returns {Promise} API response
  */
 export const createAdmin = async (payload) => {
-    const response = await apiClient.post("/admin/users", payload);
+    const response = await apiClient.post("/admin/admins", {
+        ...payload,
+        role: "ADMIN",
+    });
     return response.data;
 };
 
@@ -603,6 +622,75 @@ export const getSettings = async () => {
 export const updateSettings = async (payload) => {
     const response = await apiClient.put("/admin/settings", payload);
     return response.data;
+};
+
+// ==================== GENERIC API METHODS ====================
+
+// ==================== OFFERS API ====================
+
+/**
+ * Get all offers (Admin only)
+ * @param {Object} params - Query parameters (page, limit, etc.)
+ * @returns {Promise} API response with offers list
+ */
+export const getAllOffers = async (params = {}) => {
+    return apiGet("/admin/offers", params);
+};
+
+/**
+ * Get offer by ID
+ * @param {string} id - Offer ID
+ * @returns {Promise} API response with offer data
+ */
+export const getOfferById = async (id) => {
+    return apiGet(`/admin/offers/${id}`);
+};
+
+/**
+ * Create a new offer
+ * @param {Object} payload - Offer data
+ * @param {string} payload.heading - Offer heading
+ * @param {string} payload.subheading - Offer subheading
+ * @param {string} payload.ctaText - CTA text
+ * @param {string} payload.startDate - Start date
+ * @param {string} payload.endDate - End date
+ * @param {number} payload.discount - Discount percentage
+ * @returns {Promise} API response
+ */
+export const createOffer = async (payload) => {
+    return apiPost("/admin/offers", payload);
+};
+
+/**
+ * Update an offer
+ * @param {string} id - Offer ID
+ * @param {Object} payload - Updated offer data
+ * @returns {Promise} API response
+ */
+export const updateOffer = async (id, payload) => {
+    return apiPut(`/admin/offers/${id}`, payload);
+};
+
+/**
+ * Update offer status (activate/deactivate)
+ * @param {string} id - Offer ID
+ * @param {Object} payload - Status update data
+ * @param {boolean} payload.status - Offer status
+ * @param {string} payload.startDate - Start date (optional)
+ * @param {string} payload.endDate - End date (optional)
+ * @returns {Promise} API response
+ */
+export const updateOfferStatus = async (id, payload) => {
+    return apiPatch(`/admin/offers/toggle/${id}`, payload);
+};
+
+/**
+ * Delete an offer
+ * @param {string} id - Offer ID
+ * @returns {Promise} API response
+ */
+export const deleteOffer = async (id) => {
+    return apiDelete(`/admin/offers/${id}`);
 };
 
 // ==================== GENERIC API METHODS ====================
