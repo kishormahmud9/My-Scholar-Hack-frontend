@@ -40,10 +40,10 @@ export default function offer_plan() {
     queryFn: async () => {
       try {
         const response = await apiGet("/admin/offers");
-        console.log("Fetched offers response:", response);
+        
         return response;
       } catch (error) {
-        console.error("Error fetching offers:", error);
+        
         throw error;
       }
     },
@@ -66,10 +66,9 @@ export default function offer_plan() {
 
   // Transform API data to table format
   const offers = useMemo(() => {
-    console.log("Transforming offers data. Response:", offersResponse);
-
+    
     if (!offersResponse) {
-      console.log("No offersResponse");
+      
       return [];
     }
 
@@ -97,7 +96,7 @@ export default function offer_plan() {
       }
     }
 
-    console.log("Extracted offers list:", offersList);
+    
 
     return offersList.map((offer, index) => {
       const startDate = offer.startDate || offer.start_date;
@@ -191,20 +190,8 @@ export default function offer_plan() {
         toast.error(response?.message || "Failed to create offer");
       }
     } catch (error) {
-      console.error("Error creating offer:", error);
-      console.error("Error response:", error?.response);
-      console.error("Error response data:", error?.response?.data);
-      console.error("Error data:", error?.data);
-
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.data?.message ||
-        error?.response?.data?.error ||
-        error?.response?.message ||
-        error?.message ||
-        "Failed to create offer";
-
-      toast.error(errorMessage);
+      
+      toast.error("Failed to create offer");
     } finally {
       setIsCreating(false);
     }
@@ -228,9 +215,9 @@ export default function offer_plan() {
 
     setIsDeleting(true);
     try {
-      console.log("Deleting offer with ID:", offerToDelete.id);
+      
       const response = await apiDelete(`/admin/offers/${offerToDelete.id}`);
-      console.log("Delete offer response:", response);
+      
 
       if (response?.success) {
         toast.success("Offer deleted successfully");
@@ -240,8 +227,7 @@ export default function offer_plan() {
         toast.error(response?.message || "Failed to delete offer");
       }
     } catch (error) {
-      console.error("Error deleting offer:", error);
-      console.error("Error response:", error?.response);
+      
       toast.error(error?.response?.data?.message || error?.message || "Failed to delete offer");
     } finally {
       setIsDeleting(false);
@@ -268,9 +254,9 @@ export default function offer_plan() {
       // If already active, deactivate immediately
       setIsUpdating(true);
       try {
-        console.log("Deactivating offer with ID:", row.id);
+        
         const response = await apiPatch(`/admin/offers/toggle/${row.id}`, { status: false });
-        console.log("Update offer status response:", response);
+        
 
         if (response?.success) {
           toast.success("Offer deactivated successfully");
@@ -279,8 +265,7 @@ export default function offer_plan() {
           toast.error(response?.message || "Failed to update offer status");
         }
       } catch (error) {
-        console.error("Error updating offer status:", error);
-        console.error("Error response:", error?.response);
+        
         toast.error(error?.response?.data?.message || error?.message || "Failed to update offer status");
       } finally {
         setIsUpdating(false);
@@ -312,9 +297,9 @@ export default function offer_plan() {
         startDate: reactivateDates.start_date,
         endDate: reactivateDates.end_date,
       };
-      console.log("Activating offer with ID:", offerToReactivate.id, "Payload:", payload);
+      
       const response = await apiPatch(`/admin/offers/toggle/${offerToReactivate.id}`, payload);
-      console.log("Activate offer response:", response);
+      
 
       if (response?.success) {
         toast.success("Offer activated successfully");
@@ -324,8 +309,7 @@ export default function offer_plan() {
         toast.error(response?.message || "Failed to activate offer");
       }
     } catch (error) {
-      console.error("Error activating offer:", error);
-      console.error("Error response:", error?.response);
+      
       toast.error(error?.response?.data?.message || error?.message || "Failed to activate offer");
     } finally {
       setIsUpdating(false);

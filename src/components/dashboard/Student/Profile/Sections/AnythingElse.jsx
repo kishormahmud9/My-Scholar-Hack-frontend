@@ -7,7 +7,7 @@ export default function AnythingElse() {
         <SectionWrapper
             title="Anything Else"
             description="Is there anything else you want to share that didn't fit elsewhere?"
-            onSave={() => console.log("Saving Anything Else...")}
+            onSave={() => {}}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">

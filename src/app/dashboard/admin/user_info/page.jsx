@@ -2,7 +2,7 @@
 import { useState, useMemo } from "react";
 import Table from "@/components/dashboard/Table";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllUsers, updateUser, deleteUser } from "@/lib/api/apiService";
+import { apiGet, apiPatch, apiDelete } from "@/lib/api";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import Loading from "@/components/Loading/Loading";
@@ -87,7 +87,7 @@ export default function UserInfo() {
 
   const { data: usersResponse, isLoading } = useQuery({
     queryKey: ["users", page, limit],
-    queryFn: () => getAllUsers({ page, limit }),
+    queryFn: () => apiGet("/admin/users", { page, limit }),
   });
 
   // Format subscription plan name
@@ -173,7 +173,7 @@ export default function UserInfo() {
 
     setIsUpdating(true);
     try {
-      const response = await updateUser(userId, { status: newStatus });
+      const response = await apiPatch(`/admin/users/${userId}/status`, { status: newStatus });
 
       if (response?.success) {
         toast.success("User status updated successfully");
@@ -188,7 +188,6 @@ export default function UserInfo() {
         || error?.message
         || `Failed to update user status${error?.status ? ` (Status: ${error.status})` : ''}`;
       toast.error(errorMessage);
-      console.error("Update user error:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -198,7 +197,7 @@ export default function UserInfo() {
   const handleDeleteUser = async (userId) => {
     setIsDeleting(true);
     try {
-      const response = await deleteUser(userId);
+      const response = await apiDelete(`/admin/users/${userId}`);
       if (response?.success) {
         toast.success("User deleted successfully");
         // If current page has only one item and we're not on page 1, go to previous page

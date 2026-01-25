@@ -7,7 +7,7 @@ export default function DiversityIdentity() {
         <SectionWrapper
             title="Diversity and Identity"
             description="Optional information to find scholarships relevant to your background."
-            onSave={() => console.log("Saving Diversity & Identity...")}
+            onSave={() => {}}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">

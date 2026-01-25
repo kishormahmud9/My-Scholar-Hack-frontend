@@ -7,7 +7,7 @@ export default function AcademicInterests() {
         <SectionWrapper
             title="Academic Interests"
             description="Share your educational background and future goals."
-            onSave={() => console.log("Saving Academic Interests...")}
+            onSave={() => {}}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">

@@ -9,7 +9,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
-import { getAdminDashboardSalesTrack } from "@/lib/api/apiService";
+import { apiGet } from "@/lib/api";
 
 export default function SalesTrackGraph() {
     const [filter, setFilter] = useState("Day");
@@ -54,7 +54,7 @@ export default function SalesTrackGraph() {
 
             try {
                 const apiType = getApiType(filter);
-                const response = await getAdminDashboardSalesTrack(apiType);
+                const response = await apiGet(`/admin/dashboard/sales-track?type=${apiType}`);
 
                 if (response?.success && response?.data) {
                     setSalesTrackData(response);

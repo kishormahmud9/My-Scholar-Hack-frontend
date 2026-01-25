@@ -7,7 +7,7 @@ export default function ExtraCurricular() {
         <SectionWrapper
             title="Extra Curricular Activities"
             description="Highlight your involvement in clubs, sports, and other organizations."
-            onSave={() => console.log("Saving Extra Curricular...")}
+            onSave={() => {}}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">

@@ -5,7 +5,7 @@ import PrimaryBtn from "@/components/landing/PrimaryBtn";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginUser } from "@/lib/api/apiService";
+import { apiPost } from "@/lib/api";
 import { storeAuthData, getDashboardRoute } from "@/lib/auth";
 import toast from "react-hot-toast";
 
@@ -27,10 +27,10 @@ export default function SignInPage() {
     setSubmitError("");
 
     try {
-      const response = await loginUser({ email, password });
+      const response = await apiPost("/auth/login", { email, password });
 
       // Check if response has the expected structure
-      if (response?.success && response?.data) {
+      if (response?.success) {
         const { accessToken, refreshToken, user } = response.data;
 
         // Store authentication data (tokens and user info)

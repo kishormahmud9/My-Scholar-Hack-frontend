@@ -7,7 +7,7 @@ export default function BasicInfo() {
         <SectionWrapper
             title="Basic Information"
             description="Manage your personal details and contact information."
-            onSave={() => console.log("Saving Basic Info...")}
+            onSave={() => {}}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">

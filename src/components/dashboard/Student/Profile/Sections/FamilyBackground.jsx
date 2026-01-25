@@ -7,7 +7,7 @@ export default function FamilyBackground() {
         <SectionWrapper
             title="Community Service (Family Background)"
             description="Information about your family background for scholarship eligibility."
-            onSave={() => console.log("Saving Family Info...")}
+            onSave={() => {}}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">

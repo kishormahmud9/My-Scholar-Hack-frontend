@@ -1,106 +1,118 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Icon } from "@iconify/react";
 import PrimaryBtn from "@/components/landing/PrimaryBtn";
+import Loading from "@/components/Loading/Loading";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function FAQs() {
-  const [activeTab, setActiveTab] = useState("Pricing");
-  const [openIndex, setOpenIndex] = useState(0);
+  const queryClient = useQueryClient();
+  const [openIndex, setOpenIndex] = useState(-1);
 
-  const [faqData, setFaqData] = useState({
-    Pricing: [
-      {
-        question: "What's included in the free trial?",
-        answer:
-          "A: You can write 1 complete essay with up to 3 iterations (refinements). This lets you experience our voice matching and essay generation before committing to a paid plan.",
-      },
-      {
-        question: "What happens after my free trial?",
-        answer:
-          "After your free trial, you can choose a subscription plan that best fits your needs. Your data will be saved.",
-      },
-      {
-        question: "Can I cancel anytime?",
-        answer:
-          "Yes, you can cancel your subscription at any time. There are no long-term contracts or cancellation fees.",
-      },
-      {
-        question: "What if I need more essays than my plan allows?",
-        answer:
-          "You can upgrade your plan or purchase additional essay credits as needed.",
-      },
-      {
-        question: "Do unused essays roll over?",
-        answer:
-          "Unused essays typically do not roll over to the next billing cycle, but please check your specific plan details.",
-      },
-      {
-        question: "Is there a discount for paying annually?",
-        answer:
-          "Yes, we offer a significant discount for annual subscriptions compared to monthly billing.",
-      },
-      {
-        question: "Do you offer student discounts?",
-        answer:
-          "Our pricing is designed to be affordable for students. We also run special promotions periodically.",
-      },
-    ],
-    "Getting Started": [
-      {
-        question: "How do I sign up?",
-        answer:
-          "Click the 'Get Started' button on the homepage and follow the instructions.",
-      },
-      {
-        question: "Is my data secure?",
-        answer:
-          "Yes, we prioritize data security and use encryption to protect your information.",
-      },
-    ],
-    "How It Works": [
-      {
-        question: "How does the essay generation work?",
-        answer:
-          "Our AI analyzes your inputs and generates a unique essay tailored to your requirements.",
-      },
-    ],
-    Privacy: [
-      {
-        question: "Do you share my data?",
-        answer:
-          "No, we do not share your personal data with third parties without your consent.",
-      },
-    ],
-    Scholarships: [
-      {
-        question: "How do I find scholarships?",
-        answer:
-          "Our platform provides a curated list of scholarships matched to your profile.",
-      },
-    ],
-    "Technical Questions": [
-      {
-        question: "What browsers are supported?",
-        answer:
-          "We support all modern browsers including Chrome, Firefox, Safari, and Edge.",
-      },
-    ],
-    Support: [
-      {
-        question: "How can I contact support?",
-        answer: "You can reach our support team via the contact form or email.",
-      },
-    ],
-    "Academic Integrity": [
-      {
-        question: "Is using this tool cheating?",
-        answer:
-          "Our tool is designed to assist you in writing and brainstorming. We encourage you to review and edit all generated content to ensure it reflects your own work and adheres to your institution's academic integrity policies.",
-      },
-    ],
+  const { data: faqsResponse, isLoading, error: fetchError } = useQuery({
+    queryKey: ["faqs"],
+    queryFn: async () => {
+      try {
+        const response = await apiGet("/admin/faqs");
+        
+        return response;
+      } catch (error) {
+          
+        throw error;
+      }
+    },
   });
 
-  const categories = Object.keys(faqData);
+  // Extract FAQs from response and group by category
+  const { faqs, categories } = useMemo(() => {
+    if (!faqsResponse) return { faqs: [], categories: [] };
+
+    let faqsList = [];
+
+    // Handle different response structures
+    if (Array.isArray(faqsResponse)) {
+      faqsList = faqsResponse;
+    } else if (faqsResponse?.data) {
+      if (Array.isArray(faqsResponse.data)) {
+        faqsList = faqsResponse.data;
+      } else if (faqsResponse.data.faqs && Array.isArray(faqsResponse.data.faqs)) {
+        faqsList = faqsResponse.data.faqs;
+      }
+    }
+
+    // Extract unique categories
+    const uniqueCategories = [...new Set(faqsList.map(faq => faq.category).filter(Boolean))];
+
+    return {
+      faqs: faqsList,
+      categories: uniqueCategories.length > 0 ? uniqueCategories : ["General"]
+    };
+  }, [faqsResponse]);
+
+  // Get active category (first category by default)
+  const [activeTab, setActiveTab] = useState(categories[0] || "General");
+
+  // Filter FAQs by active category
+  const filteredFaqs = useMemo(() => {
+    if (!activeTab) return faqs;
+    return faqs.filter(faq => faq.category === activeTab);
+  }, [faqs, activeTab]);
+
+  // Mutations
+  const createMutation = useMutation({
+    mutationFn: async (payload) => {
+      
+      const response = await apiPost("/admin/faqs", payload);
+      
+      return response;
+    },
+    onSuccess: () => {
+      toast.success("FAQ created successfully");
+      queryClient.invalidateQueries({ queryKey: ["faqs"] });
+    },
+    onError: (error) => {
+      
+      // Handle error structure from apiClient interceptor (error.data) or axios (error.response.data)
+      
+      toast.error("Failed to create FAQ");
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, payload }) => {
+      
+      const response = await apiPut(`/admin/faqs/${id}`, payload);
+      
+      return response;
+    },
+    onSuccess: () => {
+      toast.success("FAQ updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["faqs"] });
+    },
+    onError: (error) => {
+      
+      toast.error("Failed to update FAQ");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      
+      const response = await apiDelete(`/admin/faqs/${id}`);
+      
+      return response;
+    },
+    onSuccess: () => {
+      toast.success("FAQ deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["faqs"] });
+    },
+    onError: (error) => {
+      
+      toast.error("Failed to delete FAQ");
+    },
+  });
 
   const toggleFaq = (index) => {
     setOpenIndex(openIndex === index ? -1 : index);
@@ -108,12 +120,12 @@ export default function FAQs() {
 
   // Edit Modal State
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingFaq, setEditingFaq] = useState(null); // { category, index, question, answer }
+  const [editingFaq, setEditingFaq] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const openEditModal = (e, index) => {
-    e.stopPropagation(); // Prevent toggling accordion when clicking edit
-    const faq = faqData[activeTab][index];
-    setEditingFaq({ ...faq, category: activeTab, index });
+  const openEditModal = (e, faq) => {
+    e.stopPropagation();
+    setEditingFaq({ ...faq });
     setShowEditModal(true);
   };
 
@@ -122,140 +134,231 @@ export default function FAQs() {
     setEditingFaq(null);
   };
 
-  const saveFaq = () => {
-    if (!editingFaq) return;
+  const saveFaq = async () => {
+    if (!editingFaq || !editingFaq.question || !editingFaq.answer) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
 
-    const updatedFaqs = { ...faqData };
-    updatedFaqs[editingFaq.category][editingFaq.index] = {
-      question: editingFaq.question,
-      answer: editingFaq.answer,
-    };
+    setIsUpdating(true);
+    try {
+      const payload = {
+        question: editingFaq.question.trim(),
+        answer: editingFaq.answer.trim(),
+        ...(editingFaq.category && { category: editingFaq.category }),
+      };
 
-    setFaqData(updatedFaqs); // Update global state
-    alert("FAQ Updated Successfully"); // Optional feedback
-    closeEditModal();
+      await updateMutation.mutateAsync({ id: editingFaq.id || editingFaq._id, payload });
+      closeEditModal();
+    } catch (error) {
+      // Error handled by mutation
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   // Add FAQ Modal State
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newFaq, setNewFaq] = useState({ category: "", question: "", answer: "" });
+  const [isCreating, setIsCreating] = useState(false);
+  const [newFaq, setNewFaq] = useState({
+    category: categories[0] || "",
+    question: "",
+    answer: ""
+  });
 
   const handleAddFaq = () => {
-    setNewFaq({ category: categories[0], question: "", answer: "" }); // Default to first category
+    setNewFaq({
+      category: categories[0] || "",
+      question: "",
+      answer: ""
+    });
     setShowAddModal(true);
   };
 
   const closeAddModal = () => {
     setShowAddModal(false);
-    setNewFaq({ category: "", question: "", answer: "" });
+    setNewFaq({ category: categories[0] || "", question: "", answer: "" });
   };
 
-  const saveNewFaq = () => {
+  const saveNewFaq = async () => {
     if (!newFaq.question || !newFaq.answer) {
-      alert("Please fill in all fields");
+      toast.error("Please fill in all required fields");
       return;
     }
 
-    const updatedFaqs = { ...faqData };
-    // Initialize category array if strictly necessary, though keys exist
-    if (!updatedFaqs[newFaq.category]) {
-      updatedFaqs[newFaq.category] = [];
+    if (!newFaq.category) {
+      toast.error("Please select a category");
+      return;
     }
 
-    updatedFaqs[newFaq.category].push({
-      question: newFaq.question,
-      answer: newFaq.answer,
-    });
+    setIsCreating(true);
+    try {
+      const payload = {
+        question: newFaq.question.trim(),
+        answer: newFaq.answer.trim(),
+        category: newFaq.category || "General",
+      };
 
-    setFaqData(updatedFaqs); // Update global state
-    alert("FAQ Added Successfully");
-    closeAddModal();
+      
+      await createMutation.mutateAsync(payload);
+      closeAddModal();
+    } catch (error) {
+      // Error is handled by mutation's onError callback
+      // But we log it here for additional debugging
+      
+    } finally {
+      setIsCreating(false);
+    }
   };
+
+  // Delete FAQ
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [faqToDelete, setFaqToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const openDeleteConfirm = (e, faq) => {
+    e.stopPropagation();
+    setFaqToDelete(faq);
+    setShowDeleteConfirm(true);
+  };
+
+  const closeDeleteConfirm = () => {
+    setShowDeleteConfirm(false);
+    setFaqToDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!faqToDelete?.id && !faqToDelete?._id) {
+      toast.error("Invalid FAQ data");
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteMutation.mutateAsync(faqToDelete.id || faqToDelete._id);
+      closeDeleteConfirm();
+    } catch (error) {
+      // Error handled by mutation
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Update activeTab when categories change
+  React.useEffect(() => {
+    if (categories.length > 0 && !categories.includes(activeTab)) {
+      setActiveTab(categories[0]);
+    }
+  }, [categories, activeTab]);
+
+  if (isLoading) return <Loading />;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 ">Edit FAQ</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Edit FAQ</h1>
           <p className="text-gray-500 mt-1">Manage the frequently asked questions.</p>
         </div>
 
         <div>
           <PrimaryBtn
-            title={"Add Question & Ansewr"}
+            title={"Add Question & Answer"}
             style={"rounded-full flex-row-reverse"}
             icon={'mdi:book-add'}
             hendleClick={handleAddFaq}
           />
         </div>
       </div>
+
+      {fetchError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          Error loading FAQs: {fetchError?.response?.data?.message || fetchError?.message || "Unknown error"}
+        </div>
+      )}
+
       {/* Tabs */}
-      <div className="flex flex-wrap gap-3 mb-8">
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => {
-              setActiveTab(category);
-              setOpenIndex(0);
-            }}
-            className={`px-5 py-2 rounded-full border text-sm font-medium transition-all duration-200 ${activeTab === category
-              ? "bg-[#FCD34D] border-[#FCD34D] text-gray-900"
-              : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
+      {categories.length > 0 && (
+        <div className="flex flex-wrap gap-3 mb-8">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => {
+                setActiveTab(category);
+                setOpenIndex(-1);
+              }}
+              className={`px-5 py-2 rounded-full border text-sm font-medium transition-all duration-200 cursor-pointer ${activeTab === category
+                ? "bg-[#FCD34D] border-[#FCD34D] text-gray-900"
+                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Accordion */}
       <div className="space-y-4">
-        {faqData[activeTab]?.map((faq, index) => (
-          <div
-            key={index}
-            className={`border rounded-xl transition-all duration-300 bg-white overflow-hidden ${openIndex === index
-              ? "border-yellow-400 shadow-sm"
-              : "border-gray-100"
-              }`}
-          >
+        {filteredFaqs.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            No FAQs available in this category. Add your first FAQ!
+          </div>
+        ) : (
+          filteredFaqs.map((faq, index) => (
             <div
-              onClick={() => toggleFaq(index)}
-              className="w-full flex justify-between items-center p-6 cursor-pointer select-none"
-            >
-              <span
-                className={`text-lg font-medium pr-8 ${openIndex === index ? "text-gray-900" : "text-gray-700"
-                  }`}
-              >
-                {faq.question}
-              </span>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={(e) => openEditModal(e, index)}
-                  className="p-2 text-gray-400 hover:text-[#FFCA42] hover:bg-yellow-50 rounded-full transition-colors"
-                  title="Edit FAQ"
-                >
-                  <Icon icon="lucide:edit-2" width="20" height="20" />
-                </button>
-                <span
-                  className={`transform transition-transform duration-300 text-gray-400 ${openIndex === index ? "rotate-180" : ""
-                    }`}
-                >
-                  <Icon icon="lucide:chevron-down" width="24" height="24" />
-                </span>
-              </div>
-            </div>
-            <div
-              className={`transition-all duration-300 ease-in-out px-6 ${openIndex === index
-                ? "max-h-96 opacity-100 pb-6"
-                : "max-h-0 opacity-0 pb-0"
+              key={faq.id || faq._id || index}
+              className={`border rounded-xl transition-all duration-300 bg-white overflow-hidden ${openIndex === index
+                ? "border-yellow-400 shadow-sm"
+                : "border-gray-100"
                 }`}
             >
-              <div className="text-gray-500 leading-relaxed border-t border-gray-100 pt-4">
-                {faq.answer}
+              <div
+                onClick={() => toggleFaq(index)}
+                className="w-full flex justify-between items-center p-6 cursor-pointer select-none"
+              >
+                <span
+                  className={`text-lg font-medium pr-8 ${openIndex === index ? "text-gray-900" : "text-gray-700"
+                    }`}
+                >
+                  {faq.question}
+                </span>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={(e) => openEditModal(e, faq)}
+                    className="p-2 text-gray-400 hover:text-[#FFCA42] hover:bg-yellow-50 rounded-full transition-colors cursor-pointer"
+                    title="Edit FAQ"
+                  >
+                    <Icon icon="lucide:edit-2" width="20" height="20" />
+                  </button>
+                  <button
+                    onClick={(e) => openDeleteConfirm(e, faq)}
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
+                    title="Delete FAQ"
+                  >
+                    <Icon icon="line-md:trash" width="20" height="20" />
+                  </button>
+                  <span
+                    className={`transform transition-transform duration-300 text-gray-400 ${openIndex === index ? "rotate-180" : ""
+                      }`}
+                  >
+                    <Icon icon="lucide:chevron-down" width="24" height="24" />
+                  </span>
+                </div>
+              </div>
+              <div
+                className={`transition-all duration-300 ease-in-out px-6 ${openIndex === index
+                  ? "max-h-96 opacity-100 pb-6"
+                  : "max-h-0 opacity-0 pb-0"
+                  }`}
+              >
+                <div className="text-gray-500 leading-relaxed border-t border-gray-100 pt-4">
+                  {faq.answer}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Add FAQ Modal */}
@@ -266,38 +369,40 @@ export default function FAQs() {
               <h2 className="text-2xl font-bold text-gray-900">Add New FAQ</h2>
               <button
                 onClick={closeAddModal}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <Icon icon="lucide:x" width="24" height="24" />
               </button>
             </div>
 
             <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Category
-                </label>
-                <div className="relative">
-                  <select
-                    className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-[#FFCA42] focus:ring-1 focus:ring-[#FFCA42] transition-colors bg-white cursor-pointer"
-                    value={newFaq.category}
-                    onChange={(e) => setNewFaq({ ...newFaq, category: e.target.value })}
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                    <Icon icon="lucide:chevron-down" width="16" height="16" />
+              {categories.length > 0 && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <div className="relative">
+                    <select
+                      className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-[#FFCA42] focus:ring-1 focus:ring-[#FFCA42] transition-colors bg-white cursor-pointer"
+                      value={newFaq.category}
+                      onChange={(e) => setNewFaq({ ...newFaq, category: e.target.value })}
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                      <Icon icon="lucide:chevron-down" width="16" height="16" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Question
+                  Question *
                 </label>
                 <input
                   type="text"
@@ -312,7 +417,7 @@ export default function FAQs() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Answer
+                  Answer *
                 </label>
                 <textarea
                   placeholder="Enter the answer"
@@ -328,15 +433,16 @@ export default function FAQs() {
             <div className="flex gap-4 mt-8">
               <button
                 onClick={closeAddModal}
-                className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 font-medium rounded-full hover:bg-gray-50 transition-colors"
+                className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 font-medium rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={saveNewFaq}
-                className="flex-1 px-6 py-3 bg-[#FFCA42] text-gray-900 font-semibold rounded-full hover:bg-[#ffc942c2] transition-colors shadow-sm"
+                disabled={isCreating}
+                className="flex-1 px-6 py-3 bg-[#FFCA42] text-gray-900 font-semibold rounded-full hover:bg-[#ffc942c2] transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Changes
+                {isCreating ? "Creating..." : "Save Changes"}
               </button>
             </div>
           </div>
@@ -351,21 +457,47 @@ export default function FAQs() {
               <h2 className="text-2xl font-bold text-gray-900">Edit FAQ</h2>
               <button
                 onClick={closeEditModal}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <Icon icon="lucide:x" width="24" height="24" />
               </button>
             </div>
 
             <div className="space-y-5">
+              {categories.length > 0 && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <div className="relative">
+                    <select
+                      className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-[#FFCA42] focus:ring-1 focus:ring-[#FFCA42] transition-colors bg-white cursor-pointer"
+                      value={editingFaq.category || categories[0]}
+                      onChange={(e) =>
+                        setEditingFaq({ ...editingFaq, category: e.target.value })
+                      }
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                      <Icon icon="lucide:chevron-down" width="16" height="16" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Question
+                  Question *
                 </label>
                 <input
                   type="text"
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-[#FFCA42] focus:ring-1 focus:ring-[#FFCA42] transition-colors"
-                  value={editingFaq.question}
+                  value={editingFaq.question || ""}
                   onChange={(e) =>
                     setEditingFaq({ ...editingFaq, question: e.target.value })
                   }
@@ -373,11 +505,11 @@ export default function FAQs() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Answer
+                  Answer *
                 </label>
                 <textarea
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-[#FFCA42] focus:ring-1 focus:ring-[#FFCA42] transition-colors min-h-[120px]"
-                  value={editingFaq.answer}
+                  value={editingFaq.answer || ""}
                   onChange={(e) =>
                     setEditingFaq({ ...editingFaq, answer: e.target.value })
                   }
@@ -388,15 +520,49 @@ export default function FAQs() {
             <div className="flex gap-4 mt-8">
               <button
                 onClick={closeEditModal}
-                className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 font-medium rounded-full hover:bg-gray-50 transition-colors"
+                className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 font-medium rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={saveFaq}
-                className="flex-1 px-6 py-3 bg-[#FFCA42] text-gray-900 font-semibold rounded-full hover:bg-[#ffc942c2] transition-colors shadow-sm"
+                disabled={isUpdating}
+                className="flex-1 px-6 py-3 bg-[#FFCA42] text-gray-900 font-semibold rounded-full hover:bg-[#ffc942c2] transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Changes
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && faqToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all scale-100 flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4 text-red-600">
+              <Icon icon="fluent:delete-24-regular" width="24" height="24" />
+            </div>
+
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete FAQ?</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to remove <span className="font-semibold text-gray-700">{faqToDelete.question}</span>? This action cannot be undone.
+            </p>
+
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={closeDeleteConfirm}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>

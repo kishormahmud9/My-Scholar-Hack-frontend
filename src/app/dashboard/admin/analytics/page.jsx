@@ -3,7 +3,7 @@ import RevenueChart from "@/components/dashboard/Admin/Analytics/RevenueChart";
 import EssayGenerationChart from "@/components/dashboard/Admin/Analytics/EssayGenerationChart";
 import ActiveUserChart from "@/components/dashboard/Admin/Analytics/ActiveUserChart";
 import Loading from "@/components/Loading/Loading";
-import { getAdminAnalyticsRevenue, getAdminAnalyticsOverview } from "@/lib/api/apiService";
+import { apiGet } from "@/lib/api";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -15,8 +15,8 @@ export default function Analytics() {
         const fetchAnalytics = async () => {
             setIsLoading(true);
             try {
-                const revenueResponse = await getAdminAnalyticsRevenue();
-                const overviewResponse = await getAdminAnalyticsOverview();
+                const revenueResponse = await apiGet("/admin/analytics/revenue");
+                const overviewResponse = await apiGet("/admin/analytics/overview");
 
                 if (revenueResponse?.success && overviewResponse?.success) {
                     setRevenue(revenueResponse?.data);
@@ -26,7 +26,6 @@ export default function Analytics() {
                 }
             } catch (error) {
                 toast.error("An error occurred while fetching analytics data");
-                console.error(error);
             } finally {
                 setIsLoading(false);
             }

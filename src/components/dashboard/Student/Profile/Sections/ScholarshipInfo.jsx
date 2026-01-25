@@ -13,7 +13,7 @@ export default function ScholarshipInfo() {
         <SectionWrapper
             title="Scholarship Specific Info"
             description="Information specific to scholarship eligibility requirements."
-            onSave={() => console.log("Saving Scholarship Info...")}
+            onSave={() => {}}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">

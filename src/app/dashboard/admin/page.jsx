@@ -2,7 +2,7 @@
 import AdminStatsCard from "@/components/dashboard/Admin/AdminStatsCard";
 import SalesTrackGraph from "@/components/dashboard/Admin/SalesTrackGraph";
 import SubscriptionPieChart from "@/components/dashboard/Admin/SubscriptionPieChart";
-import { getAdminDashboardOverview } from "@/lib/api/apiService";
+import { apiGet } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Loading from "@/components/Loading/Loading";
 export default function AdminDashboard() {
@@ -14,16 +14,16 @@ export default function AdminDashboard() {
         const fetchStats = async () => {
             setIsLoading(true);
             try {
-                const response = await getAdminDashboardOverview();
+                const response = await apiGet("/admin/dashboard/overview");
 
                 if (response?.success) {
                     setSummary(response?.data?.summary);
                     setSubscriptionSummary(response?.data?.subscriptionSummary);
                 } else {
-                    console.error(response?.message || "Failed to fetch dashboard data");
+                    toast.error(response?.message || "Failed to fetch dashboard data");
                 }
             } catch (error) {
-                console.error("Error fetching dashboard data:", error);
+                
             } finally {
                 setIsLoading(false);
             }

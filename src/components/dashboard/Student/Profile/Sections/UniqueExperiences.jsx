@@ -7,7 +7,7 @@ export default function UniqueExperiences() {
         <SectionWrapper
             title="Unique Experiences"
             description="Share distinct experiences that help tell your ambition story."
-            onSave={() => console.log("Saving Unique Experiences...")}
+            onSave={() => { }}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">

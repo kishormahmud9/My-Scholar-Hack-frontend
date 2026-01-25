@@ -7,7 +7,7 @@ export default function CommunityService() {
         <SectionWrapper
             title="Community Service (Volunteer Work)"
             description="Detail your volunteer work and community engagement."
-            onSave={() => console.log("Saving Community Service...")}
+            onSave={() => {}}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">

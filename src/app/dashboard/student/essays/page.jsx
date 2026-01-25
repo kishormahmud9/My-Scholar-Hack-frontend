@@ -88,7 +88,7 @@ export default function Essays() {
                 setRecordingTime(prev => prev + 1);
             }, 1000);
         } catch (error) {
-            console.error('Error accessing microphone:', error);
+            
             alert('Could not access microphone. Please grant permission.');
         }
     };

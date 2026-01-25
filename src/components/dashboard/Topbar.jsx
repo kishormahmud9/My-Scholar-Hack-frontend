@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { logoutUser } from "@/lib/api/apiService";
+import { apiPost } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function Topbar({ onMenuClick }) {
@@ -29,7 +29,7 @@ export default function Topbar({ onMenuClick }) {
   }, []);
 
   const handleLogout = () => {
-    logoutUser();
+    apiPost("/auth/logout");
     toast.success("Logged out successfully");
     router.push("/signin");
   };

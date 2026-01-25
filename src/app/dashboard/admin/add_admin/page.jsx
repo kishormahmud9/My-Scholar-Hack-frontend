@@ -4,7 +4,7 @@ import Table from "@/components/dashboard/Table";
 import PrimaryBtn from "@/components/landing/PrimaryBtn";
 import { Icon } from "@iconify/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllAdmins, createAdmin, deleteUser } from "@/lib/api/apiService";
+import { apiGet, apiPost, apiDelete } from "@/lib/api";
 import toast from "react-hot-toast";
 import Loading from "@/components/Loading/Loading";
 
@@ -22,20 +22,19 @@ export default function AddAdmin() {
   // Fetch admins
   const { data: adminsResponse, isLoading } = useQuery({
     queryKey: ["admins", page, limit],
-    queryFn: () => getAllAdmins(),
+    queryFn: () => apiGet("/admin/admins", { page, limit }),
   });
 
   // Transform API data to table format
   const TableRows = useMemo(() => {
-    console.log("Admins Response:", adminsResponse);
+    
 
     if (!adminsResponse?.success) {
-      console.log("No success in response");
+    
       return [];
     }
 
     if (!adminsResponse?.data?.admins || !Array.isArray(adminsResponse.data.admins)) {
-      console.log("No admins array found in response.data");
       return [];
     }
 
@@ -83,7 +82,7 @@ export default function AddAdmin() {
         ...(newAdmin.password && { password: newAdmin.password }),
       };
 
-      const response = await createAdmin(payload);
+      const response = await apiPost("/admin/admins", payload);
       if (response?.success) {
         toast.success("Admin added successfully");
         queryClient.invalidateQueries({ queryKey: ["admins", page, limit] });
@@ -92,9 +91,11 @@ export default function AddAdmin() {
         toast.error(response?.message || "Failed to add admin");
       }
     } catch (error) {
-      const errorMessage = error?.data?.message || error?.message || "An error occurred while adding admin";
-      toast.error(errorMessage);
-      console.error("Add admin error:", error);
+
+
+
+
+      toast.error("An error occurred while adding admin");
     } finally {
       setIsSubmitting(false);
     }
@@ -109,8 +110,12 @@ export default function AddAdmin() {
 
     setIsDeleting(true);
     try {
-      const response = await deleteUser(userToDelete.id);
-      if (response?.success) {
+      
+      // Try using the same endpoint as users since admins are also users
+      const response = await apiDelete(`/admin/users/${userToDelete.id}`);
+
+      // Handle different response structures
+      if (response?.success || (response && !response.error)) {
         toast.success("Admin deleted successfully");
         // If current page becomes empty after deletion, go to previous page
         const currentPageItemCount = adminsResponse?.data?.admins?.length || 0;
@@ -121,12 +126,13 @@ export default function AddAdmin() {
         queryClient.invalidateQueries({ queryKey: ["admins", newPage, limit] });
         closeDeleteConfirmation();
       } else {
-        toast.error(response?.message || "Failed to delete admin");
+        toast.error(response?.message || response?.error || "Failed to delete admin");
       }
     } catch (error) {
-      const errorMessage = error?.data?.message || error?.message || "An error occurred while deleting admin";
-      toast.error(errorMessage);
-      console.error("Delete admin error:", error);
+
+
+
+      toast.error("An error occurred while deleting admin");
     } finally {
       setIsDeleting(false);
     }

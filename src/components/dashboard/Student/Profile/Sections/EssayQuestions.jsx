@@ -7,7 +7,7 @@ export default function EssayQuestions() {
         <SectionWrapper
             title="Essay Specific Questions"
             description="Pre-answer common essay prompts to speed up generation."
-            onSave={() => console.log("Saving Essay Questions...")}
+            onSave={() => {}}
         >
             {({ isEditing }) => (
                 <form className="space-y-6">
