@@ -480,6 +480,23 @@ export const getAdminDashboardSalesTrack = async (type) => {
 };
 
 /**
+ * Get admin analytics revenue
+* @returns {Promise} API response with revenue data
+*/
+export const getAdminAnalyticsRevenue = async () => {
+    const response = await apiClient.get(`/admin/analytics/revenue`);
+    return response.data;
+};
+/*
+ * Get admin analytics overview
+* @returns {Promise} API response with overview data
+*/
+export const getAdminAnalyticsOverview = async () => {
+    const response = await apiClient.get(`/admin/analytics/overview`);
+    return response.data;
+};
+
+/**
  * Get analytics data (Admin only)
  * @param {Object} params - Query parameters (optional)
  * @param {string} params.startDate - Start date
