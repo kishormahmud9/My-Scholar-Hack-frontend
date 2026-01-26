@@ -5,7 +5,6 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import { apiPost } from "@/lib/api";
-import { storeAuthData, getDashboardRoute } from "@/lib/auth";
 import toast from "react-hot-toast";
 
 export default function OTPPage() {
@@ -36,9 +35,7 @@ export default function OTPPage() {
         }
     };
 
-    const handleVerifyOTP = async (e) => {
-        e.preventDefault();
-
+    const handleVerifyOTP = async () => {
         const otpCode = otp.join('');
 
         if (otpCode.length !== 6) {
@@ -51,37 +48,140 @@ export default function OTPPage() {
         setError("");
 
         try {
-            const response = await apiPost("/auth/verify-otp", { otp: otpCode });
+            const email = typeof window !== 'undefined'
+                ? sessionStorage.getItem('pendingVerificationEmail')
+                : null;
 
-            if (response?.success) {
-                // If verification returns auth tokens, store them
-                if (response?.data?.accessToken && response?.data?.refreshToken && response?.data?.user) {
-                    const { accessToken, refreshToken, user } = response.data;
-                    storeAuthData(accessToken, refreshToken, user);
+            if (!email) {
+                setError("Email not found. Please start the verification process again.");
+                toast.error("Email not found. Please start the verification process again.");
+                setIsVerifying(false);
+                return;
+            }
 
-                    // Clear pending email from sessionStorage
-                    if (typeof window !== 'undefined') {
-                        sessionStorage.removeItem('pendingVerificationEmail');
+            console.log("Verifying OTP with:", { email, otp: otpCode });
+
+            // Prevent redirects by checking if we're on OTP page before API call
+            const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+            const isOnOTPPage = currentPath.includes('/otp') || currentPath.includes('/verify-email');
+
+            let response;
+            try {
+                response = await apiPost("/otp/verify", { email: email, otp: otpCode });
+            } catch (apiError) {
+                // Handle API errors (including 401) without redirecting
+                console.error("API Error caught:", apiError);
+                console.error("Error status:", apiError?.status);
+                console.error("Error data:", apiError?.data);
+
+                // If we're on OTP page and got an error, prevent redirect
+                if (isOnOTPPage && typeof window !== 'undefined') {
+                    // Override any redirect attempts
+                    const errorMessage =
+                        apiError?.data?.message ||
+                        apiError?.data?.error ||
+                        apiError?.message ||
+                        apiError?.data?.message ||
+                        "Invalid verification code. Please try again.";
+
+                    setError(errorMessage);
+                    toast.error(errorMessage);
+
+                    // Reset OTP inputs
+                    setOtp(['', '', '', '', '', '']);
+                    if (inputRefs.current[0]) {
+                        inputRefs.current[0].focus();
                     }
-                    // Redirect to appropriate dashboard
-                    const dashboardRoute = getDashboardRoute();
-                    toast.success("Email verified successfully!");
-                    router.push(dashboardRoute);
-                } else {
-                    // Clear pending email from sessionStorage
-                    if (typeof window !== 'undefined') {
-                        sessionStorage.removeItem('pendingVerificationEmail');
-                    }
-                    // If just verification success without tokens, redirect to signin
-                    toast.success("Email verified successfully! Please sign in.");
-                    router.push("/signin");
+
+                    setIsVerifying(false);
+                    return; // Exit early, don't let error propagate
                 }
+
+                // Re-throw if not on OTP page
+                throw apiError;
+            }
+
+            console.log("=== OTP VERIFICATION RESPONSE ===");
+            console.log("Full response:", response);
+            console.log("Response success:", response?.success);
+            console.log("Response success type:", typeof response?.success);
+            console.log("Response success === true?", response?.success === true);
+            console.log("Response message:", response?.message);
+            console.log("================================");
+
+            // CRITICAL: Only redirect if success is EXPLICITLY true
+            // If success is false, undefined, null, or anything else, stay on page
+            if (response && response.success === true) {
+                console.log("✅ VALID OTP - Redirecting to signin");
+
+                // Clear pending email from sessionStorage
+                if (typeof window !== 'undefined') {
+                    sessionStorage.removeItem('pendingVerificationEmail');
+                }
+
+                toast.success("Email verified successfully!");
+
+                // Redirect to signin page ONLY on valid OTP
+                setTimeout(() => {
+                    router.push("/signin");
+                }, 500);
             } else {
-                const errorMsg = response?.message || "Invalid verification code";
+                // INVALID OTP - Stay on this page, do NOT redirect
+                console.log("❌ INVALID OTP - Staying on OTP page");
+                console.log("Response success value:", response?.success);
+                console.log("Response:", response);
+
+                const errorMsg = response?.message ||
+                    response?.data?.message ||
+                    response?.error ||
+                    "Invalid verification code. Please try again.";
+
                 setError(errorMsg);
                 toast.error(errorMsg);
+
+                // Reset OTP inputs so user can try again
+                setOtp(['', '', '', '', '', '']);
+                if (inputRefs.current[0]) {
+                    inputRefs.current[0].focus();
+                }
+
+                // IMPORTANT: Do NOT redirect - stay on this page
+                setIsVerifying(false);
+                return;
             }
         } catch (err) {
+            // This catch handles any unexpected errors
+            console.error("OTP Verification Error:", err);
+            console.error("Error status:", err?.status);
+            console.error("Error data:", err?.data);
+            console.error("Error response:", err?.response);
+
+            // Check if we're still on OTP page - if so, don't let interceptor redirect
+            const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+            const isOnOTPPage = currentPath.includes('/otp') || currentPath.includes('/verify-email');
+
+            if (isOnOTPPage && err?.status === 401) {
+                // Handle 401 on OTP page without redirecting
+                console.log("401 error on OTP page - preventing redirect");
+                const errorMessage =
+                    err?.data?.message ||
+                    err?.data?.error ||
+                    err?.message ||
+                    "Invalid verification code. Please try again.";
+
+                setError(errorMessage);
+                toast.error(errorMessage);
+
+                // Reset OTP inputs
+                setOtp(['', '', '', '', '', '']);
+                if (inputRefs.current[0]) {
+                    inputRefs.current[0].focus();
+                }
+
+                setIsVerifying(false);
+                return; // Exit early to prevent any redirect
+            }
+
             const errorMessage =
                 err?.data?.message ||
                 err?.data?.error ||
@@ -93,6 +193,12 @@ export default function OTPPage() {
 
             setError(errorMessage);
             toast.error(errorMessage);
+
+            // Reset OTP inputs on error
+            setOtp(['', '', '', '', '', '']);
+            if (inputRefs.current[0]) {
+                inputRefs.current[0].focus();
+            }
         } finally {
             setIsVerifying(false);
         }
@@ -128,16 +234,7 @@ export default function OTPPage() {
                 toast.error(errorMsg);
             }
         } catch (err) {
-            const errorMessage =
-                err?.data?.message ||
-                err?.data?.error ||
-                err?.response?.data?.message ||
-                err?.response?.data?.error ||
-                err?.message ||
-                err?.response?.message ||
-                "Failed to resend code. Please try again.";
-
-            toast.error(errorMessage);
+            toast.error(err?.message || "Failed to resend code");
         } finally {
             setIsResending(false);
         }
@@ -157,7 +254,7 @@ export default function OTPPage() {
                         </p>
                     </div>
 
-                    <form onSubmit={handleVerifyOTP} className="space-y-8">
+                    <form className="space-y-8">
                         <div className="flex justify-between gap-2">
                             {otp.map((data, index) => (
                                 <input
@@ -185,12 +282,13 @@ export default function OTPPage() {
                         )}
 
                         <button
-                            type="submit"
+                            type="button"
+                            onClick={handleVerifyOTP}
                             disabled={isVerifying}
                             className={cn(
                                 "w-full font-medium text-sm md:text-base text-[#1B1B1B] bg-[#FFCA42] py-3.5 px-6 rounded-xl",
                                 "hover:bg-[#ffc942c2] duration-300 transition-colors",
-                                "disabled:opacity-50 disabled:cursor-not-allowed"
+                                "disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             )}
                         >
                             {isVerifying ? "Verifying..." : "Verify Code"}

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Icon } from "@iconify/react";
 import PrimaryBtn from "@/components/landing/PrimaryBtn";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiPost } from "@/lib/api";
 import toast from "react-hot-toast";
@@ -41,75 +41,23 @@ export default function RegisterPage() {
 
     try {
       const response = await apiPost("/user/register", data);
-
+      console.log(response);
 
       // Handle different response structures
       if (response?.success) {
+        sessionStorage.setItem("pendingVerificationEmail", email);
         form.reset();
-
-
-        // Send OTP to email
-        try {
-          const otpResponse = await apiPost("/otp/send", { email });
-
-          if (otpResponse?.success) {
-            toast.success("Verification code sent to your email!");
-            // Store email in sessionStorage for OTP page to use for resend
-            if (typeof window !== 'undefined') {
-              sessionStorage.setItem('pendingVerificationEmail', email);
-            }
-            // Redirect to OTP page
-            router.push("/verify-email");
-          } else {
-            const errorMsg = otpResponse?.message || "Failed to send verification code";
-            toast.error(errorMsg);
-            // Store email anyway for resend functionality
-            if (typeof window !== 'undefined') {
-              sessionStorage.setItem('pendingVerificationEmail', email);
-            }
-            // Still redirect to OTP page even if send fails (user can resend)
-            router.push("/verify-email");
-          }
-        } catch (otpError) {
-          console.error("Error sending OTP:", otpError);
-          const otpErrorMessage =
-            otpError?.data?.message ||
-            otpError?.data?.error ||
-            otpError?.response?.data?.message ||
-            otpError?.response?.data?.error ||
-            otpError?.message ||
-            otpError?.response?.message ||
-            "Failed to send verification code";
-
-          toast.error(otpErrorMessage);
-          // Store email anyway for resend functionality
-          if (typeof window !== 'undefined') {
-            sessionStorage.setItem('pendingVerificationEmail', email);
-          }
-          // Still redirect to OTP page (user can resend)
-          router.push("/otp");
-        }
+        toast.success("Registration successful");
+        router.push("/verify-email");
       } else {
         const errorMsg = response?.message || "Registration failed. Please try again later.";
         setSubmitError(errorMsg);
         toast.error(errorMsg);
       }
     } catch (err) {
-      console.error("Registration error:", err);
-      console.error("Error data:", err?.data);
-      console.error("Error response:", err?.response);
 
-      const errorMessage =
-        err?.data?.message ||
-        err?.data?.error ||
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        err?.response?.message ||
-        "Registration failed. Please try again later.";
-
-      setSubmitError(errorMessage);
-      toast.error(errorMessage);
+      setSubmitError("Registration failed. Please try again later.");
+      toast.error("Registration failed. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }

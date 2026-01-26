@@ -1,8 +1,4 @@
 import { apiClient } from "@/lib/apiClient";
-
-
-// ==================== GENERIC API METHODS ====================
-
 /**
  * Generic GET request
  * @param {string} endpoint - API endpoint

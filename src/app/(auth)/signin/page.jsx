@@ -14,6 +14,7 @@ export default function SignInPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [notVerified, setNotVerified] = useState(false);
 
   const hendleSignin = async (e) => {
     e.preventDefault();
@@ -25,6 +26,7 @@ export default function SignInPage() {
 
     setIsSubmitting(true);
     setSubmitError("");
+    setNotVerified(false);
 
     try {
       const response = await apiPost("/auth/login", { email, password });
@@ -46,7 +48,36 @@ export default function SignInPage() {
         setSubmitError("Invalid response from server. Please try again.");
       }
     } catch (err) {
-      setSubmitError(err?.message || "Login failed. Please try again.");
+      // Check if error is related to unverified email
+      const errorMessage =
+        err?.data?.message ||
+        err?.data?.error ||
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        err?.response?.message ||
+        "Login failed. Please try again.";
+
+      // Check if user is not verified (common error messages)
+      const isNotVerified =
+        errorMessage.toLowerCase().includes("not verified") ||
+        errorMessage.toLowerCase().includes("email not verified") ||
+        errorMessage.toLowerCase().includes("unverified") ||
+        errorMessage.toLowerCase().includes("verify your email") ||
+        err?.response?.status === 403 ||
+        err?.data?.code === "EMAIL_NOT_VERIFIED";
+
+      if (isNotVerified) {
+        setNotVerified(true);
+        // Store email in sessionStorage for verify-email page
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('pendingVerificationEmail', email);
+        }
+        setSubmitError("Your email is not verified. Please verify your email to continue.");
+      } else {
+        setSubmitError(errorMessage);
+        toast.error(errorMessage);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -114,7 +145,17 @@ export default function SignInPage() {
             </div>
 
             {submitError ? (
-              <p className="text-sm text-red-500">{submitError}</p>
+              <div className="space-y-2">
+                <p className="text-sm text-red-500">{submitError}</p>
+                {notVerified && (
+                  <Link
+                    href="/verify-email"
+                    className="text-sm font-semibold text-[#FFCA42] hover:text-[#eeb526] transition-colors inline-block"
+                  >
+                    Verify Email →
+                  </Link>
+                )}
+              </div>
             ) : null}
 
             <PrimaryBtn

@@ -13,7 +13,7 @@ export default function AddAdmin() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newAdmin, setNewAdmin] = useState({ name: "", email: "", phoneNumber: "", password: "" });
+  const [newAdmin, setNewAdmin] = useState({ name: "", email: "", phone: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [page, setPage] = useState(1);
@@ -43,7 +43,7 @@ export default function AddAdmin() {
       id: admin.id,
       name: admin.name,
       email: admin.email,
-      phone_number: admin.phoneNumber || admin.phone || "-",
+      phone_number: admin.phone || "-",
     }));
   }, [adminsResponse]);
 
@@ -63,12 +63,12 @@ export default function AddAdmin() {
 
   const closeAddModal = () => {
     setShowAddModal(false);
-    setNewAdmin({ name: "", email: "", phoneNumber: "", password: "" });
+    setNewAdmin({ name: "", email: "", phone: "", password: "" });
   };
 
   // Handle add admin
   const saveAdmin = async () => {
-    if (!newAdmin.name.trim() || !newAdmin.email.trim() || !newAdmin.phoneNumber.trim()) {
+    if (!newAdmin.name.trim() || !newAdmin.email.trim() || !newAdmin.phone.trim()) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -78,7 +78,7 @@ export default function AddAdmin() {
       const payload = {
         name: newAdmin.name.trim(),
         email: newAdmin.email.trim(),
-        phoneNumber: newAdmin.phoneNumber.trim(),
+        phone: newAdmin.phone.trim(),
         ...(newAdmin.password && { password: newAdmin.password }),
       };
 
@@ -255,8 +255,8 @@ export default function AddAdmin() {
                   placeholder="Enter phone number"
                   required
                   className="w-full border border-gray-200 rounded-full px-6 py-3.5 text-gray-600 focus:outline-none focus:border-[#FFCA42] focus:ring-1 focus:ring-[#FFCA42] transition-colors"
-                  value={newAdmin.phoneNumber}
-                  onChange={(e) => setNewAdmin({ ...newAdmin, phoneNumber: e.target.value })}
+                  value={newAdmin.phone}
+                  onChange={(e) => setNewAdmin({ ...newAdmin, phone: e.target.value })}
                   disabled={isSubmitting}
                 />
               </div>
