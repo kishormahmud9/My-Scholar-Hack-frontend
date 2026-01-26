@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { apiPost } from "@/lib/api";
 import toast from "react-hot-toast";
 
-export default function OTPPage() {
+export default function ForgotPasswordOTPPage() {
     const router = useRouter();
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const inputRefs = useRef([]);
@@ -49,7 +49,7 @@ export default function OTPPage() {
 
         try {
             const email = typeof window !== 'undefined'
-                ? sessionStorage.getItem('pendingVerificationEmail')
+                ? sessionStorage.getItem('pendingForgotPasswordEmail')
                 : null;
 
             if (!email) {
@@ -59,59 +59,33 @@ export default function OTPPage() {
                 return;
             }
 
-            // Prevent redirects by checking if we're on OTP page before API call
-            const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-            const isOnOTPPage = currentPath.includes('/otp') || currentPath.includes('/verify-email');
+            
+            const response = await apiPost("/auth/verify-forgot-password-otp", { email: email, otp: otpCode });
 
-            let response;
-            try {
-                response = await apiPost("/otp/verify", { email: email, otp: otpCode });
-            } catch (apiError) {
-
-
-                // If we're on OTP page and got an error, prevent redirect
-                if (isOnOTPPage && typeof window !== 'undefined') {
-                    // Override any redirect attempts
-                    const errorMessage =
-                        apiError?.data?.message ||
-                        apiError?.data?.error ||
-                        apiError?.message ||
-                        apiError?.data?.message ||
-                        "Invalid verification code. Please try again.";
-
-                    setError(errorMessage);
-                    toast.error(errorMessage);
-
-                    // Reset OTP inputs
-                    setOtp(['', '', '', '', '', '']);
-                    if (inputRefs.current[0]) {
-                        inputRefs.current[0].focus();
-                    }
-
-                    setIsVerifying(false);
-                    return; // Exit early, don't let error propagate
-                }
-
-                // Re-throw if not on OTP page
-                throw apiError;
-            }
-
+        
 
             if (response && response.success === true) {
+                // Store resetToken from response for password reset
+                const resetToken = response?.data?.resetToken;
 
-                if (typeof window !== 'undefined') {
-                    sessionStorage.removeItem('pendingVerificationEmail');
+                if (resetToken && typeof window !== 'undefined') {
+                    sessionStorage.setItem('resetToken', resetToken);
+                        
+                } else {
+                    console.warn("No resetToken found in response:", response);
+                    toast.error("Reset token not received. Please try again.");
+                    setIsVerifying(false);
+                    return;
                 }
 
-                toast.success("Email verified successfully!");
+                toast.success("Password reset OTP verified successfully!");
 
-                // Redirect to signin page ONLY on valid OTP
+                // Redirect to reset password page
                 setTimeout(() => {
-                    router.push("/signin");
+                    router.push("/reset-password");
                 }, 500);
             } else {
-
-
+                // OTP verification failed
                 const errorMsg = response?.message ||
                     response?.data?.message ||
                     response?.error ||
@@ -126,41 +100,21 @@ export default function OTPPage() {
                     inputRefs.current[0].focus();
                 }
 
-                // IMPORTANT: Do NOT redirect - stay on this page
                 setIsVerifying(false);
                 return;
             }
         } catch (err) {
+            const errorMessage =
+                err?.data?.message ||
+                err?.data?.error ||
+                err?.response?.data?.message ||
+                err?.response?.data?.error ||
+                err?.message ||
+                err?.response?.message ||
+                "Failed to verify code. Please try again.";
 
-
-            // Check if we're still on OTP page - if so, don't let interceptor redirect
-            const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-            const isOnOTPPage = currentPath.includes('/otp') || currentPath.includes('/verify-email');
-
-            if (isOnOTPPage && err?.status === 401) {
-                // Handle 401 on OTP page without redirecting
-
-                const errorMessage =
-                    err?.data?.message ||
-                    err?.data?.error ||
-                    err?.message ||
-                    "Invalid verification code. Please try again.";
-
-                setError(errorMessage);
-                toast.error(errorMessage);
-
-                // Reset OTP inputs
-                setOtp(['', '', '', '', '', '']);
-                if (inputRefs.current[0]) {
-                    inputRefs.current[0].focus();
-                }
-
-                setIsVerifying(false);
-                return; // Exit early to prevent any redirect
-            }
-
-            setError("Failed to verify code. Please try again.");
-            toast.error("Failed to verify code. Please try again.");
+            setError(errorMessage);
+            toast.error(errorMessage);
 
             // Reset OTP inputs on error
             setOtp(['', '', '', '', '', '']);
@@ -178,7 +132,7 @@ export default function OTPPage() {
 
         // Get email from sessionStorage (stored during registration)
         const email = typeof window !== 'undefined'
-            ? sessionStorage.getItem('pendingVerificationEmail')
+            ? sessionStorage.getItem('pendingForgotPasswordEmail')
             : null;
 
         if (!email) {

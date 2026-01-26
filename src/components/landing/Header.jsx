@@ -14,7 +14,8 @@ export default function Header() {
   if (
     !Pathname.startsWith("/signin")&&
     !Pathname.startsWith("/forgot-password")&&
-    !Pathname.startsWith("/otp")&&
+    !Pathname.startsWith("/forgot-password-otp")&&
+    !Pathname.startsWith("/reset-password")&&
     !Pathname.startsWith("/register")&&
     !Pathname.startsWith("/verify-email") &&
     !Pathname.startsWith("/dashboard")

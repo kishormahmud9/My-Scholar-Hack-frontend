@@ -198,7 +198,7 @@ export default function UserInfo() {
     setIsDeleting(true);
     try {
       const response = await apiDelete(`/admin/users/${userId}`);
-      console.log(response);
+      
       if (response?.success) {
         toast.success("User deleted successfully");
         // If current page has only one item and we're not on page 1, go to previous page

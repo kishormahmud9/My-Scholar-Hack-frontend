@@ -41,7 +41,6 @@ export default function RegisterPage() {
 
     try {
       const response = await apiPost("/user/register", data);
-      console.log(response);
 
       // Handle different response structures
       if (response?.success) {
