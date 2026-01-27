@@ -1,12 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/lib/api';
 import toast from 'react-hot-toast';
 import SectionWrapper from '../SectionWrapper';
 import Loading from '../../../../Loading/Loading';
 
 export default function UniqueExperiences() {
+    const queryClient = useQueryClient();
+
     // Form state
     const [formData, setFormData] = useState({
         hobbies: '',
@@ -39,8 +41,8 @@ export default function UniqueExperiences() {
         },
         onSuccess: (response) => {
             toast.success('Unique experiences updated successfully');
-            // Refetch data
-            window.location.reload();
+            // Invalidate and refetch data
+            queryClient.invalidateQueries({ queryKey: ['uniqueExperiences'] });
         },
         onError: (error) => {
             const errorMessage =

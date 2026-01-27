@@ -4,11 +4,14 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { apiPost } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { apiGet, apiPost } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function Topbar({ onMenuClick }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState("/user1.png");
+  const [userName, setUserName] = useState("User");
   const router = useRouter();
   const dropdownRef = useRef(null);
   const pathname = usePathname();
@@ -16,6 +19,44 @@ export default function Topbar({ onMenuClick }) {
   const settingsPath = isAdmin
     ? "/dashboard/admin/settings"
     : "/dashboard/student/settings";
+
+  // Fetch profile data
+  const { data: profileResponse } = useQuery({
+    queryKey: ['userProfile'],
+    queryFn: async () => {
+      try {
+        const response = await apiGet('/profile/me');
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    },
+  });
+
+  // Update profile image and name when data is fetched
+  useEffect(() => {
+    if (profileResponse?.data) {
+      const profileData = profileResponse.data;
+
+      // Set user name
+      if (profileData.fullName) {
+        setUserName(profileData.fullName);
+      }
+
+      // Set profile picture
+      if (profileData.filePath) {
+        // Construct full image URL
+        const baseURL = process.env.NEXT_PUBLIC_API_MAIN_URL || '';
+        const imageUrl = `${baseURL}/${profileData.filePath}`;
+        setProfileImage(imageUrl);
+      } else if (profileData.profilePicture) {
+        // Fallback to profilePicture field if filePath is not available
+        const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const imageUrl = `${baseURL}/uploads/profile/${profileData.profilePicture}`;
+        setProfileImage(imageUrl);
+      }
+    }
+  }, [profileResponse]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -57,18 +98,25 @@ export default function Topbar({ onMenuClick }) {
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="pl-3 sm:pl-6 border-l-2 border-gray-300 flex gap-2 sm:gap-3 items-center cursor-pointer hover:bg-gray-50 p-2 transition-colors"
           >
-            <Image
-              src={"/user1.png"}
-              width={48}
-              height={48}
-              alt="Dashboard user"
-              className="rounded-full"
-            />
+            <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+              <Image
+                src={profileImage}
+                fill
+                alt="Dashboard user"
+                className="object-cover"
+                onError={() => {
+                  // Fallback to default image if API image fails to load
+                  setProfileImage("/user1.png");
+                }}
+              />
+            </div>
             <div className="hidden sm:block">
               <h4 className="text-base font-semibold text-gray-900">
-                Jay Hargudson
+                {userName}
               </h4>
-              <p className="text-sm font-medium text-gray-500">Student</p>
+              <p className="text-sm font-medium text-gray-500">
+                {/* {isAdmin ? "Admin" : "Student"} */}
+              </p>
             </div>
           </div>
 

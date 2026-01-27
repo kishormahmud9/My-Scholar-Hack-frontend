@@ -1,12 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/lib/api';
 import toast from 'react-hot-toast';
 import SectionWrapper from '../SectionWrapper';
 import Loading from '../../../../Loading/Loading';
 
 export default function AcademicInterests() {
+    const queryClient = useQueryClient();
+
     // Form state
     const [formData, setFormData] = useState({
         major: '',
@@ -40,8 +42,8 @@ export default function AcademicInterests() {
         },
         onSuccess: (response) => {
             toast.success('Academic interests updated successfully');
-            // Refetch data
-            window.location.reload();
+            // Invalidate and refetch data
+            queryClient.invalidateQueries({ queryKey: ['academicInterests'] });
         },
         onError: (error) => {
             const errorMessage =

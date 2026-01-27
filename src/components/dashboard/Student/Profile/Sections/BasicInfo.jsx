@@ -1,12 +1,13 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/lib/api';
 import toast from 'react-hot-toast';
 import SectionWrapper from '../SectionWrapper';
 import Loading from '../../../../Loading/Loading';
 
 export default function BasicInfo() {
+    const queryClient = useQueryClient();
 
     // Form state
     const [formData, setFormData] = useState({
@@ -23,7 +24,6 @@ export default function BasicInfo() {
         queryFn: async () => {
             try {
                 const response = await apiGet('/profile/basic-information');
-                console.log(response);
                 return response;
             } catch (error) {
                 throw error;
@@ -43,8 +43,10 @@ export default function BasicInfo() {
         },
         onSuccess: (response) => {
             toast.success('Basic information updated successfully');
-            // Refetch data
-            window.location.reload();
+            // Invalidate and refetch data
+            queryClient.invalidateQueries({ queryKey: ['basicInfo'] });
+            // Also invalidate userProfile since fullName is shown in header
+            queryClient.invalidateQueries({ queryKey: ['userProfile'] });
         },
         onError: (error) => {
             const errorMessage =
@@ -97,7 +99,7 @@ export default function BasicInfo() {
             gpa: formData.gpa ? parseFloat(formData.gpa) : null,
         };
 
-      
+
 
         try {
             await updateMutation.mutateAsync(payload);

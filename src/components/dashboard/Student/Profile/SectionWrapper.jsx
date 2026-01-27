@@ -9,14 +9,19 @@ export default function SectionWrapper({ title, description, children, onSave })
 
     const handleSave = async () => {
         setIsSaving(true);
-        // Simulate API call
-        if (onSave) {
-            await onSave();
-        }
-        setTimeout(() => {
-            setIsSaving(false);
+        try {
+            // Call the save handler (which handles API call)
+            if (onSave) {
+                await onSave();
+            }
+            // Close edit mode after successful save
             setIsEditing(false);
-        }, 800);
+        } catch (error) {
+            // Error handling is done in the mutation, just reset saving state
+            console.error('Save error:', error);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (

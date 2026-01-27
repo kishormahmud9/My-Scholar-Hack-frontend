@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/lib/api';
 import toast from 'react-hot-toast';
 import SectionWrapper from '../SectionWrapper';
@@ -13,6 +13,8 @@ const SCHOLARSHIP_TYPES = [
 ];
 
 export default function ScholarshipInfo() {
+    const queryClient = useQueryClient();
+
     // Form state
     const [formData, setFormData] = useState({
         scholarshipsInterested: [], // Array of selected scholarship types
@@ -45,8 +47,8 @@ export default function ScholarshipInfo() {
         },
         onSuccess: (response) => {
             toast.success('Scholarship specific info updated successfully');
-            // Refetch data
-            window.location.reload();
+            // Invalidate and refetch data
+            queryClient.invalidateQueries({ queryKey: ['scholarshipInfo'] });
         },
         onError: (error) => {
             const errorMessage =
@@ -76,7 +78,7 @@ export default function ScholarshipInfo() {
         setFormData((prev) => {
             const currentInterested = prev.scholarshipsInterested || [];
             const isSelected = currentInterested.includes(type);
-            
+
             return {
                 ...prev,
                 scholarshipsInterested: isSelected
