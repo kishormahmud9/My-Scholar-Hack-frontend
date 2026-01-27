@@ -29,6 +29,7 @@ export default function Footer() {
     !Pathname.startsWith("/forgot-password") &&
     !Pathname.startsWith("/forgot-password-otp") &&
     !Pathname.startsWith("/reset-password") &&
+    !Pathname.startsWith("/otp") &&
     !Pathname.startsWith("/register") &&
     !Pathname.startsWith("/verify-email") &&
     !Pathname.startsWith("/dashboard")

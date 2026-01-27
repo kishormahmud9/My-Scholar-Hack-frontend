@@ -18,6 +18,7 @@ export default function Header() {
     !Pathname.startsWith("/reset-password")&&
     !Pathname.startsWith("/register")&&
     !Pathname.startsWith("/verify-email") &&
+    !Pathname.startsWith("/otp") &&
     !Pathname.startsWith("/dashboard")
   ) {
     return (
