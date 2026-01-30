@@ -2,60 +2,115 @@
 import { Icon } from "@iconify/react";
 import Table from "@/components/dashboard/Table";
 import InvoiceModal from "@/components/dashboard/Student/InvoiceModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getStudentSubscriptions } from "@/lib/api";
 
 export default function SubscriptionsPlan() {
-    // Mock data - replace with actual data from your backend
-    const currentPlan = {
-        name: "3-Month Plan",
-        description: "Perfect for students looking for short-term access to premium scholarship matching and essay assistance tools. Get started quickly with all essential features.",
-        price: "20.00",
-        totalPrice: "20.00",
-        duration: "3 months",
-        features: [
-            "Short-term financial commitment",
-            "Gain market insights quickly",
-            "Standard support included"
-        ]
-    };
-
-    const previousPlans = [
-        {
-            id: 1,
-            plan: "1-Month Trial",
-            start: "Jan 1, 2024",
-            end: "Feb 1, 2024",
-            status: "End",
-            invoice: "INV-001"
-        },
-        {
-            id: 2,
-            plan: "3-Month Plan",
-            start: "Feb 1, 2024",
-            end: "May 1, 2024",
-            status: "Active",
-            invoice: "INV-002"
-        }
-    ];
-
+    const [subscriptions, setSubscriptions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
     const [selectedInvoice, setSelectedInvoice] = useState(null);
 
+    // Filter to get the current active/trail subscription for the "Your Plan" section
+    const currentSubscription = subscriptions.find(s =>
+        s.subscriptionStatus === "ACTIVE" || s.subscriptionStatus === "TRAIL"
+    );
 
+    const currentPlan = currentSubscription ? {
+        name: currentSubscription.subscription?.plan?.name?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || "Subscription Plan",
+        description: currentSubscription.subscription?.plan?.description || "Perfect for students looking for short-term access to premium scholarship matching and essay assistance tools.",
+        price: currentSubscription.subscription?.plan?.monthlyPrice || "0.00",
+        totalPrice: currentSubscription.subscription?.plan?.monthlyPrice || "0.00", // Assuming single month for now or simplify
+        duration: "1 month",
+        features: currentSubscription.subscription?.plan?.features || [
+            "AI “Voice” Matching",
+            "Unlimited Revisions",
+            "Application Trackers",
+            "Deadline reminders",
+            "Unlimited Essays/Month"
+        ]
+    } : {
+        name: "No Active Plan",
+        description: "You don't have an active subscription plan. Upgrade now to unlock all features.",
+        price: "0.00",
+        totalPrice: "0.00",
+        duration: "N/A",
+        features: []
+    };
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchSubscriptions = async () => {
+            setIsLoading(true);
+            setError("");
+
+            try {
+                const response = await getStudentSubscriptions();
+
+                if (!isMounted) return;
+                if (response.success) {
+                    setSubscriptions(response.data || []);
+                } else {
+                    setError(response.message || "Failed to load subscriptions");
+                }
+            } catch (err) {
+                if (!isMounted) return;
+                setError(err?.message || "Failed to load subscriptions. Try again later.");
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+
+        fetchSubscriptions();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "N/A";
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
 
     const TableHeads = [
-        { Title: "Subscription Plan", key: "plan", width: "25%" },
-        { Title: "Start", key: "start", width: "20%" },
-        { Title: "End", key: "end", width: "20%" },
+        {
+            Title: "Subscription Plan",
+            key: "plan",
+            width: "25%",
+            render: (row) => (
+                <span className="font-medium text-gray-900">
+                    {row.subscription?.plan?.name?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || "Unknown Plan"}
+                </span>
+            )
+        },
+        {
+            Title: "Start",
+            key: "start",
+            width: "20%",
+            render: (row) => formatDate(row.purchaseDate)
+        },
+        {
+            Title: "End",
+            key: "end",
+            width: "20%",
+            render: (row) => formatDate(row.endDate)
+        },
         {
             Title: "Status",
             key: "status",
             width: "15%",
             render: (row) => (
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${row.status === 'Active'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-red-100 text-red-700'
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${row.subscriptionStatus === 'ACTIVE' || row.subscriptionStatus === 'TRAIL'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
                     }`}>
-                    {row.status}
+                    {row.subscriptionStatus}
                 </span>
             )
         },
@@ -82,22 +137,26 @@ export default function SubscriptionsPlan() {
                     Subscriptions Plan
                 </h1>
                 <p className="text-base text-gray-600">
-                    Here's your progress this week.
+                    Manage your subscription and billing history.
                 </p>
             </div>
 
             {/* Section 1: Your Plan */}
-            <div className="mb-12 w-[760px] mx-auto">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Plan</h2>
+            <div className="mb-12 w-full lg:w-[760px] mx-auto">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-gray-900">Your Plan</h2>
+                </div>
 
                 {/* Plan Card */}
-                <div className="relative  bg-white border-2 border-[#F6C844] rounded-2xl p-6 shadow-sm mb-6">
+                <div className={`relative bg-white border-2 ${currentSubscription ? 'border-[#F6C844]' : 'border-gray-200'} rounded-2xl p-6 shadow-sm mb-6`}>
                     {/* Active Badge */}
-                    <div className="absolute top-0 right-6">
-                        <p className="bg-[#F6C844] text-gray-900 text-xl font-semibold px-4 py-2 rounded-b-xl">
-                            Active Plan
-                        </p>
-                    </div>
+                    {currentSubscription && (
+                        <div className="absolute top-0 right-6">
+                            <p className="bg-[#F6C844] text-gray-900 text-lg font-semibold px-4 py-2 rounded-b-xl">
+                                {currentSubscription.subscriptionStatus === 'TRAIL' ? 'Trial Plan' : 'Active Plan'}
+                            </p>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pr-0 lg:pr-24">
                         {/* Left Side - Plan Details */}
@@ -117,13 +176,13 @@ export default function SubscriptionsPlan() {
                                     USD ${currentPlan.price}
                                 </p>
                                 <p className="text-sm text-gray-600 mt-1">
-                                    Total for {currentPlan.duration}: USD ${currentPlan.totalPrice}
+                                    {currentSubscription ? `Total for ${currentPlan.duration}: USD $${currentPlan.totalPrice}` : 'Please choose a plan to get started.'}
                                 </p>
                             </div>
 
                             {/* Features */}
                             <ul className="space-y-2">
-                                {currentPlan.features.map((feature, index) => (
+                                {currentPlan.features?.map((feature, index) => (
                                     <li key={index} className="flex items-start gap-2">
                                         <Icon
                                             icon="mdi:check-circle"
@@ -142,23 +201,31 @@ export default function SubscriptionsPlan() {
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
                     <button className="px-6 py-3 bg-[#F6C844] hover:bg-[#EDB91C] text-gray-900 font-semibold rounded-lg transition-colors">
-                        Upgrade Plan
+                        {currentSubscription ? 'Upgrade Plan' : 'Subscribe Now'}
                     </button>
-                    <button className="px-6 py-3 bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 font-semibold rounded-lg transition-colors">
-                        Cancel Plan
-                    </button>
+                    {currentSubscription && (
+                        <button className="px-6 py-3 bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 font-semibold rounded-lg transition-colors">
+                            Cancel Plan
+                        </button>
+                    )}
                 </div>
             </div>
 
             {/* Section 2: Previous Plan */}
             <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Previous Plan</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Subscription History</h2>
 
                 {/* Table Container */}
-                <div className="mt-4">
-                    <div className="mt-4">
-                        <Table TableHeads={TableHeads} TableRows={previousPlans} />
-                    </div>
+                <div className="mt-4 bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                    {isLoading ? (
+                        <div className="text-center py-20 text-gray-500">Loading subscription history...</div>
+                    ) : error ? (
+                        <div className="text-center py-20 text-red-500">{error}</div>
+                    ) : subscriptions.length > 0 ? (
+                        <Table TableHeads={TableHeads} TableRows={subscriptions} />
+                    ) : (
+                        <div className="text-center py-20 text-gray-500">No subscription history found.</div>
+                    )}
 
                     <InvoiceModal
                         isOpen={!!selectedInvoice}
