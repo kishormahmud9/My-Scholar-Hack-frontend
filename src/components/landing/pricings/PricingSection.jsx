@@ -5,84 +5,87 @@ import SectionHead from "../SectionHead";
 import Container from "../Container";
 import PrimaryBtn from "../PrimaryBtn";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { getAllPlans, apiGet } from "@/lib/api";
+import { isAuthenticated, getDashboardRoute } from "@/lib/auth";
+import toast from "react-hot-toast";
 
 export default function PricingSection() {
   const [plans, setPlans] = useState(false);
+  const router = useRouter();
 
-  const pricingPlans = [
-    {
-      name: "Free Trial",
-      Montlyprice: 0,
-      Yearlyprice: 0,
-      period: "per month",
-      description: "Start Your Free Trial and Experience MyScholarHack Today",
-      features: [
-        "1 complete essay",
-        "3 AI-powered revisions",
-        "Basic profile setup",
-        "Budgeting Tools",
-      ],
-      buttonText: "Start Free Trial",
-    },
+  const { data: plansResponse, isLoading, error } = useQuery({
+    queryKey: ["allPlans"],
+    queryFn: getAllPlans,
+  });
 
-    {
-      name: "Essay Hack",
-      Montlyprice: 9.99,
-      Yearlyprice: 89,
-      period: "per month",
-      description: "Perfect for students applying to a few scholarships",
-      features: [
-        "5 essays per month",
-        "Unlimited AI refinements",
-        "AI voice matching",
-        "Application tracker",
-        "Deadline reminders",
-        "Export to DOCX & PDF",
-      ],
-      buttonText: "Start with Essay Hack",
-    },
+  const handlePlanClick = async (planName) => {
+    // Check authentication strictly (dependent on cookies now)
+    const isUserAuthenticated = isAuthenticated();
 
-    {
-      name: "Essay Hack+",
-      Montlyprice: 19.99,
-      Yearlyprice: 179,
-      period: "per month",
-      description: "Best for serious scholarship applicants",
-      features: [
-        "10 essays per month",
-        "Unlimited revisions",
-        "Advanced reminders",
-        "Essay performance insights",
-        "Scholarship suggestions",
-        "Priority email support",
-      ],
-      buttonText: "Get Essay Hack+",
-      highlight: true, // cause this card has a yellow border
-    },
+    if (isUserAuthenticated) {
+      try {
+        const response = await apiGet(`/payment/checkout/${planName}`);
 
-    {
-      name: "Essay Hack Pro",
-      Montlyprice: 29.99,
-      Yearlyprice: 269,
-      period: "per month",
-      description: "Designed for students applying year-round",
-      features: [
-        "Unlimited essays",
-        "Priority AI generation",
-        "Advanced analytics",
-        "Multiple profile versions",
-        "24-hour priority support",
-        "Early access to new features",
-      ],
-      buttonText: "Go Pro Today",
-    },
-  ];
+        // Try different response structures as API might return data wrapped or direct
+        const checkoutUrl = response?.url || response?.data?.url || response?.checkoutUrl || response?.data?.checkoutUrl;
+
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+        } else {
+          toast.error("Failed to initialize checkout. Please try again.");
+        }
+      } catch (err) {
+        console.error("Checkout error:", err);
+        // If 401, they might have been logged out, so redirect to signin
+        if (err?.status === 401) {
+          router.push("/signin");
+        } else {
+          toast.error("Something went wrong. Please try again.");
+        }
+      }
+    } else {
+      // Sync localStorage if cookies were manually cleared
+      if (typeof window !== "undefined") {
+        localStorage.setItem("selectedPlan", planName);
+      }
+      router.push("/signin");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <section className="w-full py-20 bg-white">
+        <Container>
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FFCA42]"></div>
+            <p className="mt-4 text-gray-600">Loading plans...</p>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="w-full py-20 bg-white">
+        <Container>
+          <div className="text-center text-red-500">
+            <p>Error loading pricing plans. Please try again later.</p>
+          </div>
+        </Container>
+      </section>
+    );
+  }
+
+  const pricingPlans = plansResponse?.data || [];
 
   return (
     <section
       className={`w-full ${!plans
-          ? "bg-[url('/backgroundImage.png')] bg-cover bg-center text-white"
-          : "bg-white text-black"
+        ? "bg-[url('/backgroundImage.png')] bg-cover bg-center text-white"
+        : "bg-white text-black"
         }`}
     >
       <Container>
@@ -98,24 +101,25 @@ export default function PricingSection() {
             <SwitchBtn plans={plans} setPlans={setPlans} />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {pricingPlans.map((plan, idx) => (
               <div
                 key={idx}
-                className={`border ${plan.highlight ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
+                className={`border ${plan.name === "essay_hack_plus" ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
                   } px-4 py-6 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
               >
                 <div className="flex flex-col h-full">
-                  <h2 className="text-3xl font-semibold">{plan.name}</h2>
+                  <h2 className="text-3xl font-semibold">{plan.name === "essay_hack" ? "Essay Hack" : plan.name === "essay_hack_plus" ? "Essay Hack Plus" : plan.name === "essay_hack_pro" ? "Essay Hack Pro" : plan.name}</h2>
                   <p className="text-base pt-5 pb-10 opacity-80">
                     {plan.description}
                   </p>
                   <div className="flex items-end">
-                    <h4 className="text-4xl font-semibold">${!plans ? plan.Montlyprice : plan.Yearlyprice}</h4>
+                    <h4 className="text-4xl font-semibold">${!plans ? plan.monthlyPrice : plan.yearlyPrice}</h4>
                     <p className="text-base opacity-70">/{!plans ? "per Month" : "per Year"}</p>
                   </div>
                   <div className={`flex-1 space-y-5 px-4 py-5 ${plans ? "bg-[#5858580a] border border-[#52525214]" : "bg-[#FFFFFF0A] border border-[#FFFFFF14]"} rounded-lg my-4`}>
-                    {plan.features.map((feature, index) => (
+                    {/* Assuming features are returned as an array or JSON string */}
+                    {(Array.isArray(plan.features) ? plan.features : []).map((feature, index) => (
                       <div key={index} className="flex gap-4">
                         <Icon
                           className="text-green-500"
@@ -128,8 +132,9 @@ export default function PricingSection() {
                     ))}
                   </div>
                   <PrimaryBtn
+                    hendleClick={() => handlePlanClick(plan.name)}
                     style="w-full rounded-full"
-                    title={plan.buttonText}
+                    title={plan.buttonText || "Get Started"}
                   />
                 </div>
               </div>

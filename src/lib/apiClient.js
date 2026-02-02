@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAccessToken, clearAuthData } from "./auth";
+import { getAccessToken, clearStorage } from "./auth-storage";
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -35,7 +35,8 @@ apiClient.interceptors.response.use(
       // Handle 401 Unauthorized - Clear auth and redirect to login
       if (error.response.status === 401) {
         if (typeof window !== "undefined") {
-          clearAuthData();
+          clearStorage();
+          setAuthToken(null);
           // Only redirect if not already on auth pages
           if (!window.location.pathname.startsWith("/signin") &&
             !window.location.pathname.startsWith("/register")) {

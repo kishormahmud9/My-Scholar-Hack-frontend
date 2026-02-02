@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import { apiPost } from "@/lib/api";
 import toast from "react-hot-toast";
+import { storeAuthData, getDashboardRoute } from "@/lib/auth";
 
 export default function OTPPage() {
     const router = useRouter();
@@ -105,10 +106,50 @@ export default function OTPPage() {
 
                 toast.success("Email verified successfully!");
 
-                // Redirect to signin page ONLY on valid OTP
-                setTimeout(() => {
-                    router.push("/signin");
-                }, 500);
+                // Handle Auto-Login and Plan Logic
+                const selectedPlan = typeof window !== 'undefined' ? localStorage.getItem('selectedPlan') : null;
+
+                const { accessToken, refreshToken, data: userData, isPlan } = response;
+
+                // Always try to auto-login if tokens are present
+                if (accessToken && refreshToken && userData) {
+                    storeAuthData(accessToken, refreshToken, userData, isPlan);
+                }
+
+                if (!selectedPlan) {
+                    // Scenario: No plan selected
+                    setTimeout(() => {
+                        if (isPlan) {
+                            router.push(getDashboardRoute());
+                        } else {
+                            router.push("/pricing");
+                        }
+                    }, 500);
+                } else {
+                    // Scenario: Plan selected before registration
+                    try {
+                        const checkoutResponse = await apiPost(`/payment/checkout/${selectedPlan}`, {
+                            email: email
+                        });
+
+                        if (checkoutResponse?.url) {
+                            // Redirect to payment gateway
+                            window.location.href = checkoutResponse.url;
+                        } else {
+                            // Fallback to dashboard
+                            router.push(getDashboardRoute());
+                        }
+                    } catch (checkoutError) {
+                        console.error("Checkout initialization failed:", checkoutError);
+                        toast.error("Preparing checkout failed. Please login to continue.");
+                        router.push("/signin");
+                    }
+                }
+
+                // Clear selected plan from storage after use
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('selectedPlan');
+                }
             } else {
 
 

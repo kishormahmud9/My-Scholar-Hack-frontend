@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { apiGet, apiPost } from "@/lib/api";
+import { logout } from "@/lib/auth";
 import toast from "react-hot-toast";
 import defaultProfileImage from "../../../public/user1.png";
 
@@ -71,9 +72,13 @@ export default function Topbar({ onMenuClick }) {
   }, []);
 
   const handleLogout = () => {
-    apiPost("/auth/logout");
-    // toast.success("Logged out successfully");
-    router.push("/signin");
+    try {
+      apiPost("/auth/logout");
+      logout(router);
+      toast.success("Logged out successfully");
+    } catch (error) {
+      logout(router);
+    }
   };
 
   return (
