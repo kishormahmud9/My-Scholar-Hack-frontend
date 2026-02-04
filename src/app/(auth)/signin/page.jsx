@@ -43,7 +43,7 @@ export default function SignInPage() {
         const dashboardRoute = getDashboardRoute();
 
         toast.success("Login successful");
-        router.push(dashboardRoute);
+        // router.push(dashboardRoute);
       } else {
         // Handle unexpected response structure
         setSubmitError("Invalid response from server. Please try again.");
