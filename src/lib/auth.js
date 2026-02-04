@@ -22,19 +22,20 @@ import {
  * @param {string} accessToken - Access token
  * @param {string} refreshToken - Refresh token
  * @param {Object} userData - User data object
- * @param {boolean} isPlan - Plan status
+ * @param {boolean} userData.isPlan - Plan status
  */
-export const storeAuthData = (accessToken, refreshToken, userData, isPlan = false) => {
+export const storeAuthData = (accessToken, refreshToken, userData) => {
+    // console.log("userData", userData);
     // Store in localStorage (primary storage)
     setLocalStorage(ACCESS_TOKEN_KEY, accessToken);
     setLocalStorage(REFRESH_TOKEN_KEY, refreshToken);
     setLocalStorage(USER_DATA_KEY, userData);
-    setLocalStorage(ACTIVE_PLAN_KEY, isPlan);
+    setLocalStorage(ACTIVE_PLAN_KEY, userData.isPlan);
 
     // Also store in cookies (for SSR compatibility if needed)
     setCookie(ACCESS_TOKEN_KEY, accessToken, 7); // 7 days
     setCookie(REFRESH_TOKEN_KEY, refreshToken, 30); // 30 days for refresh token
-    setCookie(ACTIVE_PLAN_KEY, isPlan, 7);
+    setCookie(ACTIVE_PLAN_KEY, userData.isPlan, 7);
     if (userData?.role) {
         setCookie(USER_ROLE_KEY, userData.role, 7);
     }
