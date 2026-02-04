@@ -1,107 +1,93 @@
 "use client";
 import React, { useState } from "react";
 import SectionHead from "../SectionHead";
+import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
+
+const CATEGORY_API_TO_UI = {
+  "PRICING": "Pricing",
+  "GETTING_STARTED": "Getting Started",
+  "HOW_IT_WORKS": "How It Works",
+  "PRIVACY": "Privacy",
+  "SCHOLARSHIPS": "Scholarships",
+  "TECHNICAL": "Technical Questions",
+  "SUPPORT": "Support",
+  "ACADEMIC_INTEGRITY": "Academic Integrity"
+};
 
 const FaqTabs = () => {
     const [activeTab, setActiveTab] = useState("Pricing");
     const [openIndex, setOpenIndex] = useState(0);
 
-    const categories = [
-        "Pricing",
-        "Getting Started",
-        "How It Works",
-        "Privacy",
-        "Scholarships",
-        "Technical Questions",
-        "Support",
-        "Academic Integrity",
-    ];
+    const { data: faqsResponse } = useQuery({
+        queryKey: ["faqs"],
+        queryFn: async () => {
+            try {
+                // Using the same API endpoint as requested
+                // Pass _skipAuthRedirect to prevent redirecting to login on 401
+                const response = await apiGet("/admin/faqs", {}, { _skipAuthRedirect: true });
+                return response;
+            } catch (error) {
+                console.error("Failed to fetch FAQs:", error);
+                return [];
+            }
+        },
+    });
 
-    const faqData = {
-        Pricing: [
-            {
-                question: "What's included in the free trial?",
-                answer:
-                    "A: You can write 1 complete essay with up to 3 iterations (refinements). This lets you experience our voice matching and essay generation before committing to a paid plan.",
-            },
-            {
-                question: "What happens after my free trial?",
-                answer:
-                    "After your free trial, you can choose a subscription plan that best fits your needs. Your data will be saved.",
-            },
-            {
-                question: "Can I cancel anytime?",
-                answer:
-                    "Yes, you can cancel your subscription at any time. There are no long-term contracts or cancellation fees.",
-            },
-            {
-                question: "What if I need more essays than my plan allows?",
-                answer:
-                    "You can upgrade your plan or purchase additional essay credits as needed.",
-            },
-            {
-                question: "Do unused essays roll over?",
-                answer:
-                    "Unused essays typically do not roll over to the next billing cycle, but please check your specific plan details.",
-            },
-            {
-                question: "Is there a discount for paying annually?",
-                answer:
-                    "Yes, we offer a significant discount for annual subscriptions compared to monthly billing.",
-            },
-            {
-                question: "Do you offer student discounts?",
-                answer:
-                    "Our pricing is designed to be affordable for students. We also run special promotions periodically.",
-            },
-        ],
-        "Getting Started": [
-            {
-                question: "How do I sign up?",
-                answer: "Click the 'Get Started' button on the homepage and follow the instructions.",
-            },
-            {
-                question: "Is my data secure?",
-                answer: "Yes, we prioritize data security and use encryption to protect your information.",
-            },
-        ],
-        "How It Works": [
-            {
-                question: "How does the essay generation work?",
-                answer: "Our AI analyzes your inputs and generates a unique essay tailored to your requirements.",
-            },
-        ],
-        Privacy: [
-            {
-                question: "Do you share my data?",
-                answer: "No, we do not share your personal data with third parties without your consent."
+    const { faqData, categories } = React.useMemo(() => {
+        if (!faqsResponse) return { faqData: {}, categories: [] };
+
+        let faqsList = [];
+        if (Array.isArray(faqsResponse)) {
+            faqsList = faqsResponse;
+        } else if (faqsResponse?.data) {
+            if (Array.isArray(faqsResponse.data)) {
+                faqsList = faqsResponse.data;
+            } else if (faqsResponse.data.faqs && Array.isArray(faqsResponse.data.faqs)) {
+                faqsList = faqsResponse.data.faqs;
             }
-        ],
-        Scholarships: [
-            {
-                question: "How do I find scholarships?",
-                answer: "Our platform provides a curated list of scholarships matched to your profile."
+        }
+
+        // Normalize categories and group by category
+        const groupedData = {};
+        
+        // Initialize with predefined categories to maintain order
+        const PREDEFINED_CATEGORIES = [
+            "Pricing",
+            "Getting Started",
+            "How It Works",
+            "Privacy",
+            "Scholarships",
+            "Technical Questions",
+            "Support",
+            "Academic Integrity",
+        ];
+
+        PREDEFINED_CATEGORIES.forEach(cat => groupedData[cat] = []);
+
+        faqsList.forEach(faq => {
+            const normalizedCategory = CATEGORY_API_TO_UI[faq.category] || faq.category;
+            if (!groupedData[normalizedCategory]) {
+                groupedData[normalizedCategory] = [];
             }
-        ],
-        "Technical Questions": [
-            {
-                question: "What browsers are supported?",
-                answer: "We support all modern browsers including Chrome, Firefox, Safari, and Edge."
-            }
-        ],
-        Support: [
-            {
-                question: "How can I contact support?",
-                answer: "You can reach our support team via the contact form or email."
-            }
-        ],
-        "Academic Integrity": [
-            {
-                question: "Is using this tool cheating?",
-                answer: "Our tool is designed to assist you in writing and brainstorming. We encourage you to review and edit all generated content to ensure it reflects your own work and adheres to your institution's academic integrity policies."
-            }
-        ]
-    };
+            groupedData[normalizedCategory].push(faq);
+        });
+
+        // Filter out empty categories if needed, or keep them to verify against predefined
+        const activeCategories = PREDEFINED_CATEGORIES.filter(cat => groupedData[cat]?.length > 0);
+
+        return {
+            faqData: groupedData,
+            categories: PREDEFINED_CATEGORIES // Or activeCategories if you only want to show populated ones
+        };
+    }, [faqsResponse]);
+
+    // Effect to set active tab if not set
+    React.useEffect(() => {
+        if (categories.length > 0 && !categories.includes(activeTab)) {
+            setActiveTab(categories[0]);
+        }
+    }, [categories, activeTab]);
 
     const toggleFaq = (index) => {
         setOpenIndex(openIndex === index ? -1 : index);

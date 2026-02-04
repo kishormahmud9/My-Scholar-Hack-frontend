@@ -1,37 +1,44 @@
 "use client";
 import React, { useState } from "react";
 import StatusBtn from "../statusBtn";
+import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
 
 const FaqSection = () => {
     const [openIndex, setOpenIndex] = useState(0);
 
-    const faqs = [
-        {
-            question: "Can I change plans anytime?",
-            answer:
-                "Yes! Upgrade, downgrade, or cancel anytime. No long-term commitment",
+    const { data: faqsResponse } = useQuery({
+        queryKey: ["faqs"],
+        queryFn: async () => {
+            try {
+                const response = await apiGet("/admin/faqs", {}, { _skipAuthRedirect: true });
+                return response;
+            } catch (error) {
+                console.error("Failed to fetch FAQs:", error);
+                return [];
+            }
         },
-        {
-            question: "What if I need more essays than my plan allows?",
-            answer:
-                "You can purchase additional essay reviews as add-ons at any time.",
-        },
-        {
-            question: "Do unused essays roll over?",
-            answer:
-                "Unused essays do not roll over to the next month. We encourage you to use them within the billing cycle.",
-        },
-        {
-            question: "Is there a student discount?",
-            answer:
-                "Our pricing is already optimized for students. However, we occasionally offer seasonal promotions.",
-        },
-        {
-            question: "What if I don't win any scholarships?",
-            answer:
-                "While we cannot guarantee wins, our tools significantly increase your chances. We offer a satisfaction guarantee on our essay reviews.",
-        },
-    ];
+    });
+
+    const faqs = React.useMemo(() => {
+        if (!faqsResponse) return [];
+
+        let faqsList = [];
+        if (Array.isArray(faqsResponse)) {
+            faqsList = faqsResponse;
+        } else if (faqsResponse?.data) {
+            if (Array.isArray(faqsResponse.data)) {
+                faqsList = faqsResponse.data;
+            } else if (faqsResponse.data.faqs && Array.isArray(faqsResponse.data.faqs)) {
+                faqsList = faqsResponse.data.faqs;
+            }
+        }
+
+        // Filter for Pricing category (handle both UPPERCASE and Title Case for compatibility)
+        return faqsList.filter(faq => 
+            faq.category === "PRICING" || faq.category === "Pricing"
+        );
+    }, [faqsResponse]);
 
     const toggleFaq = (index) => {
         setOpenIndex(openIndex === index ? -1 : index);

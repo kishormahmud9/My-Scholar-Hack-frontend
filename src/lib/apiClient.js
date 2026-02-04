@@ -37,9 +37,10 @@ apiClient.interceptors.response.use(
         if (typeof window !== "undefined") {
           clearStorage();
           setAuthToken(null);
-          // Only redirect if not already on auth pages
+          // Only redirect if not already on auth pages AND not explicitly skipped
           if (!window.location.pathname.startsWith("/signin") &&
-            !window.location.pathname.startsWith("/register")) {
+            !window.location.pathname.startsWith("/register") && 
+            !error.config?._skipAuthRedirect) {
             window.location.href = "/signin";
           }
         }
