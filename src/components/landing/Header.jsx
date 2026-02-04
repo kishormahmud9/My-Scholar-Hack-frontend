@@ -2,7 +2,7 @@
 import HeaderBG from "./HeaderBG";
 import Container from "./Container";
 import Navbar from "./Navbar";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import Title from "./Title";
 import PrimaryBtn from "./PrimaryBtn";
 import SecoundryBtn from "./SecoundryBtn";
@@ -12,11 +12,11 @@ export default function Header() {
   const Pathname = usePathname();
 
   if (
-    !Pathname.startsWith("/signin")&&
-    !Pathname.startsWith("/forgot-password")&&
-    !Pathname.startsWith("/forgot-password-otp")&&
-    !Pathname.startsWith("/reset-password")&&
-    !Pathname.startsWith("/register")&&
+    !Pathname.startsWith("/signin") &&
+    !Pathname.startsWith("/forgot-password") &&
+    !Pathname.startsWith("/forgot-password-otp") &&
+    !Pathname.startsWith("/reset-password") &&
+    !Pathname.startsWith("/register") &&
     !Pathname.startsWith("/verify-email") &&
     !Pathname.startsWith("/otp") &&
     !Pathname.startsWith("/dashboard")
@@ -44,11 +44,13 @@ export default function Header() {
                   </p>
                   <div className="pt-10 px-10 lg:px-0 flex flex-col md:flex-row gap-4 justify-center w-full">
                     <PrimaryBtn
+                      hendleClick={() => redirect("/pricing")}
                       title={"Start Free Trial"}
                       icon={"line-md:arrow-right"}
                       style={"rounded-full"}
                     />
                     <SecoundryBtn
+                      hendleClick={() => redirect("/how-to-work")}
                       title={"How to Work"}
                       icon={"line-md:arrow-right"}
                       style={"rounded-full"}

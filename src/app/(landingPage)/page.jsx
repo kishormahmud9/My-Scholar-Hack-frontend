@@ -10,6 +10,8 @@ import ReviewScroll from "@/components/landing/ReviewScroll";
 import PricingSection from "@/components/landing/pricings/PricingSection";
 import SecurityCard from "@/components/landing/securityCard";
 import HeroCTA from "@/components/landing/HeroCTA";
+import { redirect } from "next/navigation";
+
 
 export default function Home() {
   return (
@@ -97,6 +99,7 @@ export default function Home() {
           />
 
           <PrimaryBtn
+            hendleClick={() => redirect("/signin")}
             icon={"ri:arrow-right-line"}
             title={"Start Writing Authentic Essays Today"}
             style={"rounded-full"}
