@@ -2,8 +2,11 @@
 import Image from "next/image";
 import { Icon } from "@iconify/react";
 import PrimaryBtn from "./PrimaryBtn";
+import { redirect } from "next/navigation";
 
 export default function HeroCTA() {
+
+  
   return (
     <section className="w-full flex justify-center px-0 py-10">
       <div
@@ -75,7 +78,7 @@ export default function HeroCTA() {
         </p>
 
         <div className="flex items-center justify-center mt-8">
-            <PrimaryBtn icon={"mdi:arrow-right"} title={"Start Your Free Trial"} style={"rounded-full"} />
+            <PrimaryBtn hendleClick={() => redirect("/pricing")} icon={"mdi:arrow-right"} title={"Start Your Free Trial"} style={"rounded-full"} />
         </div>
 
         

@@ -8,15 +8,14 @@ export default function Footer() {
   const Pathname = usePathname();
 
   const products = [
-    { Title: "How It Works", path: "/" },
-    { Title: "Features", path: "/" },
-    { Title: "Pricing", path: "/" },
-    { Title: "Start Free Trial", path: "/" },
+    { Title: "How It Works", path: "/how-to-work" },
+    { Title: "Features", path: "/feature" },
+    { Title: "Pricing", path: "/pricing" },
+    { Title: "Start Free Trial", path: "/pricing" },
   ];
   const company = [
-    { Title: "About Us", path: "/" },
-    { Title: "Our Mission", path: "/" },
-    { Title: "FAQ", path: "/" },
+    { Title: "About Us", path: "/about" },
+    { Title: "FAQ", path: "/faq" },
   ];
   const contacts = [
     "01358-854545",
