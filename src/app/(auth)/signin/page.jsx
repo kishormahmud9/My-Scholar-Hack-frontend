@@ -33,6 +33,7 @@ export default function SignInPage() {
 
       // Check if response has the expected structure
       if (response?.success) {
+        // console.log("response", response, "response.data", response.data);
         const { accessToken, refreshToken, user } = response.data;
 
         // Store authentication data (tokens and user info)
