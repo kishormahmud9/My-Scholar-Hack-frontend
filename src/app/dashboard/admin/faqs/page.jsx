@@ -7,6 +7,28 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 import toast from "react-hot-toast";
 
+const CATEGORY_UI_TO_API = {
+  "Pricing": "PRICING",
+  "Getting Started": "GETTING_STARTED",
+  "How It Works": "HOW_IT_WORKS",
+  "Privacy": "PRIVACY",
+  "Scholarships": "SCHOLARSHIPS",
+  "Technical Questions": "TECHNICAL",
+  "Support": "SUPPORT",
+  "Academic Integrity": "ACADEMIC_INTEGRITY"
+};
+
+const CATEGORY_API_TO_UI = {
+  "PRICING": "Pricing",
+  "GETTING_STARTED": "Getting Started",
+  "HOW_IT_WORKS": "How It Works",
+  "PRIVACY": "Privacy",
+  "SCHOLARSHIPS": "Scholarships",
+  "TECHNICAL": "Technical Questions",
+  "SUPPORT": "Support",
+  "ACADEMIC_INTEGRITY": "Academic Integrity"
+};
+
 export default function FAQs() {
   const queryClient = useQueryClient();
   const [openIndex, setOpenIndex] = useState(-1);
@@ -42,12 +64,27 @@ export default function FAQs() {
       }
     }
 
-    // Extract unique categories
-    const uniqueCategories = [...new Set(faqsList.map(faq => faq.category).filter(Boolean))];
+    // Normalize FAQs categories from API format to UI format
+    const normalizedFaqs = faqsList.map(faq => ({
+      ...faq,
+      category: CATEGORY_API_TO_UI[faq.category] || faq.category
+    }));
+
+    // Predefined categories as requested
+    const PREDEFINED_CATEGORIES = [
+      "Pricing",
+      "Getting Started",
+      "How It Works",
+      "Privacy",
+      "Scholarships",
+      "Technical Questions",
+      "Support",
+      "Academic Integrity"
+    ];
 
     return {
-      faqs: faqsList,
-      categories: uniqueCategories.length > 0 ? uniqueCategories : ["General"]
+      faqs: normalizedFaqs,
+      categories: PREDEFINED_CATEGORIES
     };
   }, [faqsResponse]);
 
@@ -145,7 +182,9 @@ export default function FAQs() {
       const payload = {
         question: editingFaq.question.trim(),
         answer: editingFaq.answer.trim(),
-        ...(editingFaq.category && { category: editingFaq.category }),
+        ...(editingFaq.category && { 
+            category: CATEGORY_UI_TO_API[editingFaq.category] || editingFaq.category 
+        }),
       };
 
       await updateMutation.mutateAsync({ id: editingFaq.id || editingFaq._id, payload });
@@ -196,7 +235,7 @@ export default function FAQs() {
       const payload = {
         question: newFaq.question.trim(),
         answer: newFaq.answer.trim(),
-        category: newFaq.category || "General",
+        category: CATEGORY_UI_TO_API[newFaq.category] || newFaq.category || "GENERAL",
       };
 
       
