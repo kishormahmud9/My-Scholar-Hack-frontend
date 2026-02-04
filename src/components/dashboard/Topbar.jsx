@@ -9,9 +9,11 @@ import { apiGet, apiPost } from "@/lib/api";
 import { logout } from "@/lib/auth";
 import toast from "react-hot-toast";
 import defaultProfileImage from "../../../public/user1.png";
+import NotificationDropdown from "./NotificationDropdown";
 
 export default function Topbar({ onMenuClick }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [profileImage, setProfileImage] = useState("/user1.png");
   const [userName, setUserName] = useState("User");
   const router = useRouter();
@@ -24,11 +26,17 @@ export default function Topbar({ onMenuClick }) {
 
   // Fetch profile data
   const { data: profileResponse } = useQuery({
-    queryKey: ['userProfile'],
+    queryKey: ['userProfile', isAdmin], // Include isAdmin in queryKey to trigger refetch on role change
     queryFn: async () => {
       try {
-        const response = await apiGet('/profile/me');
-        return response;
+        // Use different endpoints based on role
+        if (isAdmin) {
+             const response = await apiGet('/admin/settings');
+             return response;
+        } else {
+             const response = await apiGet('/profile/me');
+             return response;
+        }
       } catch (error) {
         throw error;
       }
@@ -40,25 +48,27 @@ export default function Topbar({ onMenuClick }) {
     if (profileResponse?.data) {
       const profileData = profileResponse.data;
 
-      // Set user name
+      // Set user name (handle both fullName and name fields)
       if (profileData.fullName) {
         setUserName(profileData.fullName);
+      } else if (profileData.name) {
+        setUserName(profileData.name);
       }
 
-      // Set profile picture
-      if (profileData.filePath) {
-        // Construct full image URL
-        const baseURL = process.env.NEXT_PUBLIC_API_MAIN_URL || '';
-        const imageUrl = `${baseURL}/${profileData.filePath}`;
-        setProfileImage(imageUrl);
-      } else if (profileData.profilePicture) {
-        // Fallback to profilePicture field if filePath is not available
-        const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-        const imageUrl = `${baseURL}/uploads/profile/${profileData.profilePicture}`;
-        setProfileImage(imageUrl);
+      // Set profile picture ONLY for students (not admin) || or if you want to support distinct logic
+      if (!isAdmin) {
+          if (profileData.filePath) {
+            const baseURL = process.env.NEXT_PUBLIC_API_MAIN_URL || '';
+            const imageUrl = `${baseURL}/${profileData.filePath}`;
+            setProfileImage(imageUrl);
+          } else if (profileData.profilePicture) {
+            const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+            const imageUrl = `${baseURL}/uploads/profile/${profileData.profilePicture}`;
+            setProfileImage(imageUrl);
+          }
       }
     }
-  }, [profileResponse]);
+  }, [profileResponse, isAdmin]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -92,29 +102,41 @@ export default function Topbar({ onMenuClick }) {
       </button>
 
       <div className="flex items-center gap-3 sm:gap-6">
-        <Icon
-          icon={"mingcute:notification-line"}
-          width={28}
-          height={28}
-          className="text-gray-700 cursor-pointer hover:text-gray-900 transition-colors"
-        />
+        <div className="relative">
+          <Icon
+            icon={"mingcute:notification-line"}
+            width={28}
+            height={28}
+            onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+            className="text-gray-700 cursor-pointer hover:text-gray-900 transition-colors"
+          />
+          {isNotificationOpen && (
+            <NotificationDropdown 
+              isAdmin={isAdmin} 
+              onClose={() => setIsNotificationOpen(false)} 
+            />
+          )}
+        </div>
 
         <div className="relative" ref={dropdownRef}>
           <div
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="pl-3 sm:pl-6 border-l-2 border-gray-300 flex gap-2 sm:gap-3 items-center cursor-pointer hover:bg-gray-50 p-2 transition-colors"
           >
-            <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-              <Image
-                src={profileImage || defaultProfileImage}
-                fill
-                alt="Dashboard user"
-                className="object-cover"
-                onError={() => {
-                  // Fallback to default image if API image fails to load
-                  setProfileImage("/user1.png");
-                }}
-              />
+            <div className={`relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ${isAdmin ? 'bg-indigo-100 flex items-center justify-center' : ''}`}>
+              {isAdmin ? (
+                 <Icon icon="solar:user-bold" className="text-indigo-600 w-8 h-8" />
+              ) : (
+                <Image
+                  src={profileImage || defaultProfileImage}
+                  fill
+                  alt="Dashboard user"
+                  className="object-cover"
+                  onError={() => {
+                    setProfileImage("/user1.png");
+                  }}
+                />
+              )}
             </div>
             <div className="hidden sm:block">
               <h4 className="text-base font-semibold text-gray-900">
