@@ -25,6 +25,7 @@ import {
  * @param {boolean} userData.isPlan - Plan status
  */
 export const storeAuthData = (accessToken, refreshToken, userData) => {
+    console.log("userData", userData);
     // Store in localStorage (primary storage)
     setLocalStorage(ACCESS_TOKEN_KEY, accessToken);
     setLocalStorage(REFRESH_TOKEN_KEY, refreshToken);
