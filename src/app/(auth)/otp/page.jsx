@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import { apiPost } from "@/lib/api";
@@ -15,6 +15,18 @@ export default function OTPPage() {
     const [isVerifying, setIsVerifying] = useState(false);
     const [isResending, setIsResending] = useState(false);
     const [error, setError] = useState("");
+    const [timer, setTimer] = useState(0);
+    const [resendCount, setResendCount] = useState(0);
+
+    useEffect(() => {
+        let interval;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [timer]);
 
     const handleChange = (e, index) => {
         const value = e.target.value;
@@ -23,7 +35,7 @@ export default function OTPPage() {
         const newOtp = [...otp];
         newOtp[index] = value.substring(value.length - 1);
         setOtp(newOtp);
-        setError(""); // Clear error when user types
+        setError(""); 
 
         if (value && index < 5 && inputRefs.current[index + 1]) {
             inputRefs.current[index + 1].focus();
@@ -33,6 +45,30 @@ export default function OTPPage() {
     const handleKeyDown = (e, index) => {
         if (e.key === 'Backspace' && !otp[index] && index > 0 && inputRefs.current[index - 1]) {
             inputRefs.current[index - 1].focus();
+        }
+    };
+
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text');
+        
+        
+        const numbers = pastedData.replace(/\D/g, '').slice(0, 6).split('');
+        
+        if (numbers.length === 0) return;
+
+        const newOtp = [...otp];
+        numbers.forEach((num, i) => {
+             newOtp[i] = num;
+        });
+
+        setOtp(newOtp);
+        setError("");
+        
+    
+        const focusIndex = Math.min(numbers.length, 5);
+        if (inputRefs.current[focusIndex]) {
+             inputRefs.current[focusIndex].focus();
         }
     };
 
@@ -60,7 +96,7 @@ export default function OTPPage() {
                 return;
             }
 
-            // Prevent redirects by checking if we're on OTP page before API call
+            
             const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
             const isOnOTPPage = currentPath.includes('/otp') || currentPath.includes('/verify-email');
 
@@ -69,10 +105,7 @@ export default function OTPPage() {
                 response = await apiPost("/otp/verify", { email: email, otp: otpCode });
             } catch (apiError) {
 
-
-                // If we're on OTP page and got an error, prevent redirect
                 if (isOnOTPPage && typeof window !== 'undefined') {
-                    // Override any redirect attempts
                     const errorMessage =
                         apiError?.data?.message ||
                         apiError?.data?.error ||
@@ -83,17 +116,14 @@ export default function OTPPage() {
                     setError(errorMessage);
                     toast.error(errorMessage);
 
-                    // Reset OTP inputs
                     setOtp(['', '', '', '', '', '']);
                     if (inputRefs.current[0]) {
                         inputRefs.current[0].focus();
                     }
 
                     setIsVerifying(false);
-                    return; // Exit early, don't let error propagate
+                    return; 
                 }
-
-                // Re-throw if not on OTP page
                 throw apiError;
             }
 
@@ -106,22 +136,18 @@ export default function OTPPage() {
 
                 toast.success("Email verified successfully!");
 
-                // Handle Auto-Login and Plan Logic
+                
                 const selectedPlan = typeof window !== 'undefined' ? localStorage.getItem('selectedPlan') : null;
 
-                const { accessToken, refreshToken, data: userData, isPlan } = response;
-
-                // Always try to auto-login if tokens are present
-                if (accessToken && refreshToken && userData) {
-                    storeAuthData(accessToken, refreshToken, userData, isPlan);
-                }
 
                 if (!selectedPlan) {
-                    // Scenario: No plan selected
                     setTimeout(() => {
                         if (isPlan) {
                             router.push(getDashboardRoute());
                         } else {
+                            if (userData?.role === "STUDENT") {
+                                toast.error("please buy a plan to get access to go to the essage genaration page");
+                            }
                             router.push("/pricing");
                         }
                     }, 500);
@@ -214,6 +240,8 @@ export default function OTPPage() {
     };
 
     const handleResendOTP = async () => {
+        if (resendCount >= 3) return;
+
         setIsResending(true);
         setError("");
 
@@ -237,6 +265,15 @@ export default function OTPPage() {
                 setOtp(['', '', '', '', '', '']);
                 if (inputRefs.current[0]) {
                     inputRefs.current[0].focus();
+                }
+
+                const newCount = resendCount + 1;
+                setResendCount(newCount);
+
+                if (newCount === 1) {
+                    setTimer(30);
+                } else if (newCount === 2) {
+                    setTimer(60);
                 }
             } else {
                 const errorMsg = response?.message || "Failed to resend code";
@@ -281,6 +318,7 @@ export default function OTPPage() {
                                     value={data}
                                     onChange={e => handleChange(e, index)}
                                     onKeyDown={e => handleKeyDown(e, index)}
+                                    onPaste={handlePaste}
                                     disabled={isVerifying}
                                 />
                             ))}
@@ -309,10 +347,16 @@ export default function OTPPage() {
                             Didn't receive the code?{' '}
                             <button
                                 onClick={handleResendOTP}
-                                disabled={isResending}
+                                disabled={isResending || timer > 0 || resendCount >= 3}
                                 className="text-[#FFCA42] hover:text-[#eeb526] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
-                                {isResending ? "Resending..." : "Resend Code"}
+                                {isResending 
+                                    ? "Resending..." 
+                                    : timer > 0 
+                                        ? `Resend in ${timer}s` 
+                                        : resendCount >= 3 
+                                            ? "Max attempts reached" 
+                                            : "Resend Code"}
                             </button>
                         </p>
                         <Link href="/signin" className="text-gray-500 hover:text-gray-700 flex items-center justify-center gap-2 group transition-colors">

@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import { apiPost } from "@/lib/api";
@@ -14,6 +14,18 @@ export default function ForgotPasswordOTPPage() {
     const [isVerifying, setIsVerifying] = useState(false);
     const [isResending, setIsResending] = useState(false);
     const [error, setError] = useState("");
+    const [timer, setTimer] = useState(0);
+    const [resendCount, setResendCount] = useState(0);
+
+    useEffect(() => {
+        let interval;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [timer]);
 
     const handleChange = (e, index) => {
         const value = e.target.value;
@@ -32,6 +44,30 @@ export default function ForgotPasswordOTPPage() {
     const handleKeyDown = (e, index) => {
         if (e.key === 'Backspace' && !otp[index] && index > 0 && inputRefs.current[index - 1]) {
             inputRefs.current[index - 1].focus();
+        }
+    };
+
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text');
+        
+        // Extract numbers only
+        const numbers = pastedData.replace(/\D/g, '').slice(0, 6).split('');
+        
+        if (numbers.length === 0) return;
+
+        const newOtp = [...otp];
+        numbers.forEach((num, i) => {
+             newOtp[i] = num;
+        });
+
+        setOtp(newOtp);
+        setError("");
+        
+        // Focus the next empty input or the last one
+        const focusIndex = Math.min(numbers.length, 5);
+        if (inputRefs.current[focusIndex]) {
+             inputRefs.current[focusIndex].focus();
         }
     };
 
@@ -127,6 +163,8 @@ export default function ForgotPasswordOTPPage() {
     };
 
     const handleResendOTP = async () => {
+        if (resendCount >= 3) return;
+
         setIsResending(true);
         setError("");
 
@@ -142,7 +180,7 @@ export default function ForgotPasswordOTPPage() {
         }
 
         try {
-            const response = await apiPost("/otp/send", { email });
+            const response = await apiPost("/auth/forgot-password", { email });
 
             if (response?.success) {
                 toast.success("Verification code resent successfully!");
@@ -150,6 +188,15 @@ export default function ForgotPasswordOTPPage() {
                 setOtp(['', '', '', '', '', '']);
                 if (inputRefs.current[0]) {
                     inputRefs.current[0].focus();
+                }
+
+                const newCount = resendCount + 1;
+                setResendCount(newCount);
+
+                if (newCount === 1) {
+                    setTimer(30);
+                } else if (newCount === 2) {
+                    setTimer(60);
                 }
             } else {
                 const errorMsg = response?.message || "Failed to resend code";
@@ -194,6 +241,7 @@ export default function ForgotPasswordOTPPage() {
                                     value={data}
                                     onChange={e => handleChange(e, index)}
                                     onKeyDown={e => handleKeyDown(e, index)}
+                                    onPaste={handlePaste}
                                     disabled={isVerifying}
                                 />
                             ))}
@@ -222,10 +270,16 @@ export default function ForgotPasswordOTPPage() {
                             Didn't receive the code?{' '}
                             <button
                                 onClick={handleResendOTP}
-                                disabled={isResending}
+                                disabled={isResending || timer > 0 || resendCount >= 3}
                                 className="text-[#FFCA42] hover:text-[#eeb526] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
-                                {isResending ? "Resending..." : "Resend Code"}
+                                {isResending 
+                                    ? "Resending..." 
+                                    : timer > 0 
+                                        ? `Resend in ${timer}s` 
+                                        : resendCount >= 3 
+                                            ? "Max attempts reached" 
+                                            : "Resend Code"}
                             </button>
                         </p>
                         <Link href="/signin" className="text-gray-500 hover:text-gray-700 flex items-center justify-center gap-2 group transition-colors">

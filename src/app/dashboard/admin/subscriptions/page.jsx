@@ -315,9 +315,7 @@ export default function Subscriptions() {
                                     <button onClick={() => openEditModal(plan)} className="p-2 text-gray-400 hover:text-[#FFCA42] hover:bg-yellow-50 rounded-full transition-colors cursor-pointer">
                                         <Icon icon="lucide:edit-2" width="18" height="18" />
                                     </button>
-                                    <button onClick={() => openDeleteConfirm(plan)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors cursor-pointer">
-                                        <Icon icon="line-md:trash" width="18" height="18" />
-                                    </button>
+
                                 </div>
                             </div>
 
@@ -344,9 +342,7 @@ export default function Subscriptions() {
                                 )}
                             </div>
 
-                            <button className="w-full py-3 rounded-full border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 transition-colors text-sm cursor-pointer">
-                                {plan.buttonText || "Get Started"}
-                            </button>
+
                         </div>
                     ))
                 )}

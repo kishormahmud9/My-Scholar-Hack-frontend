@@ -18,14 +18,13 @@ export default function ForgotPasswordPage() {
 
         if (isSubmitting) return;
 
-        // Validation
+ 
         if (!email || !email.trim()) {
             setError("Please enter your email address");
             toast.error("Please enter your email address");
             return;
         }
 
-        // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email.trim())) {
             setError("Please enter a valid email address");
@@ -44,7 +43,7 @@ export default function ForgotPasswordPage() {
             if (response?.success) {
                 setSuccess(true);
                 toast.success("Password reset OTP sent to your email!");
-                setEmail(""); // Clear email field
+                setEmail(""); 
                 router.push("/forgot-password-otp");
             } else {
                 const errorMsg = response?.message || "Failed to send reset link. Please try again.";
@@ -61,8 +60,14 @@ export default function ForgotPasswordPage() {
                 err?.response?.message ||
                 "Failed to send reset link. Please try again.";
 
-            setError(errorMessage);
-            toast.error(errorMessage);
+            if (errorMessage.includes("records that were required but not found") || 
+                errorMessage.includes("An operation failed because it depends on one or more records")) {
+                setError("The is no account with this email");
+                toast.error("The is no account with this email");
+            } else {
+                setError(errorMessage);
+                toast.error(errorMessage);
+            }
         } finally {
             setIsSubmitting(false);
         }

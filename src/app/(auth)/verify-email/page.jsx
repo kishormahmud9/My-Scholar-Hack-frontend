@@ -13,7 +13,7 @@ export default function VerifyEmailPage() {
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState("");
 
-    // Check if email exists in sessionStorage (from registration)
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const storedEmail = sessionStorage.getItem('pendingVerificationEmail');
@@ -26,14 +26,12 @@ export default function VerifyEmailPage() {
     const handleVerifyEmail = async (e) => {
         e.preventDefault();
 
-        // Validation
         if (!email || !email.trim()) {
             setError("Please enter your email address");
             toast.error("Please enter your email address");
             return;
         }
 
-        // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email.trim())) {
             setError("Please enter a valid email address");
@@ -48,12 +46,12 @@ export default function VerifyEmailPage() {
             const response = await apiPost("/otp/send", { email: email.trim() });
 
             if (response?.success) {
-                // Store email in sessionStorage for OTP page
+
                 if (typeof window !== 'undefined') {
                     sessionStorage.setItem('pendingVerificationEmail', email.trim());
                 }
                 toast.success("Verification code sent to your email!");
-                // Redirect to OTP page
+
                 router.push("/otp");
             } else {
                 const errorMsg = response?.message || "Failed to send verification code";

@@ -43,6 +43,10 @@ export default function SignInPage() {
         // Redirect to appropriate dashboard based on user role
         const dashboardRoute = getDashboardRoute();
 
+        if (!user.isPlan && user.role === "STUDENT") {
+          toast.error("please buy a plan to get access to go to the essage genaration page");
+        }
+
         toast.success("Login successful");
         router.push(dashboardRoute);
       } else {

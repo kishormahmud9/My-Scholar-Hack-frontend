@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleRegistration = async (e) => {
     e.preventDefault();
@@ -136,11 +137,11 @@ export default function RegisterPage() {
               </label>
               <div className="relative group">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   required
                   className={cn(
-                    "w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl",
+                    "w-full pl-10 pr-12 py-3 bg-white border border-gray-200 rounded-xl",
                     "focus:ring-2 focus:ring-[#FFCA42]/20 focus:border-[#FFCA42] outline-none transition-all",
                     "placeholder:text-gray-400 text-gray-900",
                     "group-hover:border-gray-300"
@@ -151,6 +152,16 @@ export default function RegisterPage() {
                   icon="solar:lock-password-linear"
                   className="absolute left-3.5 top-3.5 text-gray-400 text-lg transition-colors group-hover:text-gray-500"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                >
+                  <Icon 
+                    icon={showPassword ? "solar:eye-bold" : "solar:eye-closed-bold"} 
+                    className="text-lg" 
+                  />
+                </button>
               </div>
             </div>
 
