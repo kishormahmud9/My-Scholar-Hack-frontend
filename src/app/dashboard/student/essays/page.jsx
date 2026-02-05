@@ -7,6 +7,7 @@ import FileUploadList from "@/components/dashboard/Student/FileUploadList";
 import RecordingIndicator from "@/components/dashboard/Student/RecordingIndicator";
 import AudioPlayer from "@/components/dashboard/Student/AudioPlayer";
 import { useRouter } from "next/navigation";
+import { apiPost, apiGet } from "@/lib/api";
 
 export default function Essays() {
     const [essayPrompt, setEssayPrompt] = useState("");
@@ -148,49 +149,97 @@ export default function Essays() {
     };
 
     const handleGenerateEssay = async () => {
+        if (!essayPrompt.trim() && uploadedFiles.length === 0) {
+            alert("Please provide a prompt or upload files.");
+            return;
+        }
+
         // Show loading modal and start progress animation
         setShowLoadingModal(true);
         setLoadingProgress(0);
 
-        // Simulate essay generation with progress
+        // Progress simulation (0-90%)
         progressIntervalRef.current = setInterval(() => {
             setLoadingProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(progressIntervalRef.current);
-                    return 100;
-                }
-                // Increase progress by random increments
-                return Math.min(prev + Math.random() * 15, 100);
+                const next = prev + Math.random() * 5;
+                return next > 90 ? 90 : next;
             });
-        }, 300);
+        }, 500);
 
-        // Simulate API call (replace with actual API call)
-        setTimeout(() => {
+        try {
+            // 1. Fetch User Profile Data
+            let userProfileData = null;
+            try {
+                const profileRes = await apiGet("/profile/me");
+                if (profileRes.success) {
+                    userProfileData = profileRes.data;
+                }
+            } catch (err) {
+                console.warn("Failed to fetch profile data for essay context:", err);
+                // We proceed even if profile fetch fails, or should we stop? 
+                // Usually better to proceed with partial data, but user said "niye nio" (take it).
+            }
+
+            const formData = new FormData();
+            formData.append("prompt", essayPrompt);
+            
+            // Append Profile Data if available
+            if (userProfileData) {
+                formData.append("userProfile", JSON.stringify(userProfileData));
+            }
+            
+            // 2. Files -> 'document'
+            uploadedFiles.forEach((file) => {
+                formData.append("document", file);
+            });
+
+            // 2. Audio -> 'audio'
+            if (audioURL) {
+                try {
+                    const audioBlob = await fetch(audioURL).then(r => r.blob());
+                    // Create a File object from the Blob
+                    const audioFile = new File([audioBlob], "voice_instruction.wav", { type: "audio/wav" });
+                    formData.append("audio", audioFile);
+                } catch (e) {
+                    console.error("Failed to append audio:", e);
+                }
+            }
+
+            // 3. Title & Subject -> 'title', 'subject'
+            // Use active scholarship context data if available, otherwise defaults
+            const title = activeScholarship?.title || "Generated Essay";
+            const subject = activeScholarship?.subject || "General";
+            
+            formData.append("title", title);
+            formData.append("subject", subject);
+
+            // API Call
+            const response = await apiPost("/generate-essay/generate", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+                timeout: 60000 // Increase timeout to 60s for AI generation
+            });
+
+            // Complete progress
             clearInterval(progressIntervalRef.current);
             setLoadingProgress(100);
 
-            // Wait a bit to show 100% before opening result modal
+            // Wait a bit to show 100%
             setTimeout(() => {
-                // Generate demo essay content
-                const demoEssay = `# The Importance of Environmental Conservation
-
-In today's rapidly changing world, environmental conservation has become more crucial than ever. Climate change, deforestation, and pollution pose significant threats to our planet's future.
-
-## Key Points
-
-1. **Climate Action**: Reducing carbon emissions is essential for a sustainable future.
-2. **Biodiversity**: Protecting ecosystems ensures the survival of countless species.
-3. **Sustainable Practices**: Implementing eco-friendly solutions in daily life makes a difference.
-
-## Conclusion
-
-We must act now to preserve our environment for future generations. Every small action contributes to a larger impact on our planet's health and sustainability.`;
-
-                setGeneratedEssay(demoEssay);
+                // Ensure we handle response structure correctly
+                const essayContent = response?.data?.essay || response?.essay || response?.data || "No content generated.";
+                
+                setGeneratedEssay(essayContent);
                 setShowLoadingModal(false);
                 setShowEssayModal(true);
             }, 500);
-        }, 5000); // 5 seconds total generation time
+
+        } catch (error) {
+            console.error("Essay generation failed:", error);
+            clearInterval(progressIntervalRef.current);
+            setShowLoadingModal(false);
+            const errorMsg = error?.response?.data?.message || error?.message || "Failed to generate essay.";
+            alert(`Error: ${errorMsg}`);
+        }
     };
 
     const closeLoadingModal = () => {

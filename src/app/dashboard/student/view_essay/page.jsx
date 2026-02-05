@@ -6,68 +6,10 @@ import { useState, useEffect, Suspense } from "react";
 import ViewEssayModal from "@/components/dashboard/Student/ViewEssayModal";
 import Loader from "@/components/Loader";
 import CompareSelectionModal from "@/components/dashboard/Student/CompareSelectionModal";
-import { apiPost } from "@/lib/api";
+import { apiPost, apiGet } from "@/lib/api";
 
-// Moved outside to be reusable or just statically defined here for now
-const ESSAY_DATA = [
-  {
-    id: "01",
-    title: "The Impact of Artificial Intelligence on Modern Society",
-    subject: "Computer Science & IT",
-    date: "2023-10-15",
-    content: "Artificial Intelligence (AI) is transforming every aspect of our lives... (Full essay content would go here)"
-  },
-  {
-    id: "02",
-    title: "Sustainable Urban Planning in the 21st Century",
-    subject: "Urban Studies",
-    date: "2023-11-02",
-    content: "As urbanization accelerates, the need for sustainable planning becomes critical..."
-  },
-  {
-    id: "03",
-    title: "Analysis of Shakespeare's Macbeth",
-    subject: "English Literature",
-    date: "2023-11-20",
-    content: "Macbeth is a tragedy that explores the damaging effects of political ambition..."
-  },
-  {
-    id: "04",
-    title: "The Role of Microorganisms in Ecosystems",
-    subject: "Biology",
-    date: "2023-12-05",
-    content: "Microorganisms play a vital role in nutrient cycling and decomposition..."
-  },
-  {
-    id: "05",
-    title: "Economic Implications of Global Warming",
-    subject: "Economics",
-    date: "2023-12-10",
-    content: "Global warming introduces significant risks to the global economy..."
-  },
-  {
-    id: "06",
-    title: "Modern Art Movements: 1900-1950",
-    subject: "Art History",
-    date: "2023-12-15",
-    content: "The early 20th century saw an explosion of new artistic styles..."
-  },
-  {
-    id: "07",
-    title: "Introduction to Quantum Mechanics",
-    subject: "Physics",
-    date: "2023-12-18",
-    content: "Quantum mechanics describes the behavior of matter and light on the atomic scale..."
-  },
-  // Adding a duplicate subject for testing comparison
-  {
-    id: "08",
-    title: "Machine Learning Algorithms",
-    subject: "Computer Science",
-    date: "2023-10-20",
-    content: "Machine learning, a subset of AI, focuses on building systems that learn from data..."
-  }
-];
+// Static data removed
+const ESSAY_DATA = [];
 
 function ViewEssayContent() {
   const router = useRouter();
@@ -78,11 +20,24 @@ function ViewEssayContent() {
   const [selectedSubject, setSelectedSubject] = useState("All Subjects");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [essays, setEssays] = useState([]);
+
+  const fetchEssays = async () => {
+     setLoading(true);
+     try {
+         const response = await apiGet("/generate-essay");
+         if (response.success) {
+            setEssays(response.data || []);
+         }
+     } catch (error) {
+         console.error("Failed to fetch essays:", error);
+     } finally {
+         setLoading(false);
+     }
+  };
 
   useEffect(() => {
-     // Simulate loading delay for better UX consistency
-     const timer = setTimeout(() => setLoading(false), 500);
-     return () => clearTimeout(timer);
+     fetchEssays();
   }, []);
 
   // Initialize filter from URL
@@ -95,15 +50,35 @@ function ViewEssayContent() {
     }
   }, [searchParams]);
 
-  const uniqueSubjects = ["All Subjects", ...new Set(ESSAY_DATA.map(item => item.subject))];
+  const uniqueSubjects = ["All Subjects", ...new Set(essays.map(item => item.subject))];
 
   const filteredEssays = selectedSubject === "All Subjects"
-    ? ESSAY_DATA
-    : ESSAY_DATA.filter(essay => essay.subject === selectedSubject);
+    ? essays
+    : essays.filter(essay => essay.subject === selectedSubject);
 
-  const handleViewClick = (row) => {
-    setSelectedEssay(row);
-    setIsViewModalOpen(true);
+  const handleViewClick = async (row) => {
+    // Ideally show a loader for the specific row or global
+    // But since we are opening a modal, we can maybe set selectedEssay to a loading state?
+    // Or just fetch then open.
+    try {
+        setLoading(true); // Using global loader for simplicity as it covers the screen usually or we can check. 
+        // Actually global loader replaces the table. That might be annoying.
+        // Let's rely on the fact that it's fast or just show the table loader.
+        
+        const response = await apiGet(`/generate-essay/${row.id}`);
+        if (response.success) {
+             setSelectedEssay(response.data);
+             setIsViewModalOpen(true);
+        } else {
+             // Fallback to row data if fetch fails? Or alert.
+             alert("Failed to fetch essay details.");
+        }
+    } catch (error) {
+        console.error("Error fetching essay details:", error);
+        alert("Failed to load essay.");
+    } finally {
+        setLoading(false);
+    }
   };
 
   const handleCompareClick = () => {
@@ -242,7 +217,7 @@ function ViewEssayContent() {
         isOpen={isCompareModalOpen}
         onClose={() => setIsCompareModalOpen(false)}
         originalEssay={selectedEssay}
-        allEssays={ESSAY_DATA}
+        allEssays={essays}
         onConfirmSelection={handleConfirmCompare}
       />
     </div>
