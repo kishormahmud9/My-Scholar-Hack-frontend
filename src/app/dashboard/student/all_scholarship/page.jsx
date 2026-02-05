@@ -3,25 +3,122 @@ import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ScholershipCard from "@/components/dashboard/Student/ScholershipCard";
+import Loader from "@/components/Loader";
+import { apiPost, apiGet } from "@/lib/api";
 
 export default function AllScholarship() {
-  const [scholership, setScholership] = useState([]);
+  const [recommendedScholarships, setRecommendedScholarships] = useState([]);
+  const [allScholarships, setAllScholarships] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState("All Subjects");
   const [selectedScholarship, setSelectedScholarship] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const itemsPerPage = 12;
+
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/scholership.json")
-      .then((res) => res.json())
-      .then((data) => setScholership(data));
-  }, []);
+    let isMounted = true;
+    
+    // Function to load data
+    const loadData = async (page) => {
+        setLoading(true);
+        try {
+            // Parallel fetch: Recommended (Page 1 only) & All Scholarships (Paginated)
+            const promises = [
+                apiGet(`/essay-recommendation/scholarships?page=${page}&limit=${itemsPerPage}`)
+            ];
 
-  const Recomended = scholership.filter((recom) => recom.recommended === true);
-  const subjects = [...new Set(scholership.map((item) => item.subject))];
+            let recomPromise = null;
+            if (page === 1) {
+                // Fetch recommendations specifically
+                recomPromise = apiGet("/essay-recommendation");
+                promises.push(recomPromise);
+            }
+
+            const results = await Promise.all(promises);
+            const apiRes = results[0];
+            const recomRes = page === 1 ? results[1] : null;
+
+            if (isMounted) {
+                // 1. All Scholarships
+                if (apiRes && apiRes.success) {
+                    let data = apiRes.data || [];
+                    
+                    // Sort: Items with amount come first
+                    data = data.sort((a, b) => {
+                        const getVal = (val) => {
+                             if (!val) return 0;
+                             const num = Number(String(val).replace(/[^0-9.-]+/g,""));
+                             return isNaN(num) ? 0 : num;
+                        };
+                        const amountA = getVal(a.amount);
+                        const amountB = getVal(b.amount);
+                        
+                        if (amountA > 0 && amountB === 0) return -1;
+                        if (amountA === 0 && amountB > 0) return 1;
+                        if (amountA > 0 && amountB > 0) return amountB - amountA; // Descending
+                        return 0;
+                    });
+    
+                    setAllScholarships(data);
+                    
+                    if (apiRes.meta) {
+                        setTotalPages(apiRes.meta.totalPage);
+                    }
+                }
+
+                // 2. Recommended Scholarships (Logic from Dashboard)
+                if (recomRes && recomRes.success) {
+                    const rawRecom = recomRes.data || [];
+                    // Apply filtering logic: Amount > 0 && Description exists
+                    const filteredRecom = rawRecom.filter(item => {
+                         const scholarship = item.scholarship || item;
+                         const hasAmount = scholarship.amount && Number(String(scholarship.amount).replace(/[^0-9.-]+/g,"")) > 0;
+                         const hasDescription = scholarship.description && scholarship.description.trim().length > 0;
+                         return hasAmount && hasDescription;
+                    }).slice(0, 4).map(item => item.scholarship || item);
+
+                    setRecommendedScholarships(filteredRecom);
+                }
+            }
+        } catch (err) {
+            console.error("Failed to load scholarships", err);
+        } finally {
+            if (isMounted) setLoading(false);
+        }
+    };
+
+    // Initial load & Page Change
+    loadData(currentPage);
+
+    // Background Sync Logic (Only on mount)
+    if (currentPage === 1) {
+        const syncResult = async () => {
+            try {
+                await apiPost("/essay-recommendation/sync-scholarships");
+                // Reload data after sync
+                if (isMounted) loadData(1);
+            } catch (error) {
+                console.error("Background sync failed:", error);
+            }
+        };
+        syncResult();
+    }
+
+    return () => { isMounted = false; };
+  }, [currentPage]);
+
+  if (loading) return <Loader fullScreen={false} />;
+
+  const Recomended = recommendedScholarships;
+  const subjects = [...new Set(allScholarships.map((item) => item.subject))];
 
   const handleApplyClick = (scholarship) => {
     setSelectedScholarship(scholarship);
@@ -127,7 +224,7 @@ export default function AllScholarship() {
                   'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
               }`}>
               {Recomended.map((item, idx) => (
-                <ScholershipCard key={idx} Details={item} onApply={handleApplyClick} />
+                <ScholershipCard key={idx} Details={item} onApply={handleApplyClick} isRecommended={true} />
               ))}
             </div>
           </div>
@@ -138,10 +235,41 @@ export default function AllScholarship() {
             All Available Scholarships
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {scholership.map((item, idx) => (
+            {allScholarships.map((item, idx) => (
               <ScholershipCard key={idx} Details={item} onApply={handleApplyClick} />
             ))}
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center mt-8 gap-2">
+              <button
+                onClick={() => {
+                  setCurrentPage(prev => Math.max(prev - 1, 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-lg border ${currentPage === 1 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+              >
+                <Icon icon="lucide:chevron-left" width={20} height={20} />
+              </button>
+              
+              <span className="text-sm text-gray-600 font-medium px-2">
+                 Page {currentPage} of {totalPages}
+              </span>
+
+              <button
+                onClick={() => {
+                   setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                   window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-lg border ${currentPage === totalPages ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+              >
+                <Icon icon="lucide:chevron-right" width={20} height={20} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

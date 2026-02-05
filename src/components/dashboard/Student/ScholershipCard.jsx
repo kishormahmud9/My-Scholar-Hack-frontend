@@ -1,8 +1,21 @@
 import Image from "next/image";
 import { Icon } from "@iconify/react";
 
-export default function ScholershipCard({ Details, onApply }) {
+export default function ScholershipCard({ Details, onApply, isRecommended }) {
   const { title, deadline, provider, subject, amount } = Details;
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (e) {
+      return dateString;
+    }
+  };
 
   return (
     <div className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-[#FFCA42] transition-all duration-300 flex flex-col h-full">
@@ -13,13 +26,34 @@ export default function ScholershipCard({ Details, onApply }) {
           height={200}
           width={400}
           alt={title}
-          className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-300"
+          className={`w-full h-full object-cover object-center transition-transform duration-300 blur-sm scale-110`}
         />
-        {/* Deadline Badge */}
-        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+        
+        {/* Overlay Logic - Standard for all cards */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/10 z-10">
+             {subject ? (
+                 <h3 className="text-xl font-bold text-green-600 bg-white/90 px-4 py-1 rounded-full shadow-sm mb-2">
+                     {subject}
+                 </h3>
+             ) : (
+                 <div className="bg-white/90 p-2 rounded-full shadow-sm mb-2">
+                    <Image src="/logo.png" width={40} height={40} alt="Logo" />
+                 </div>
+             )}
+             
+             {/* Recommended Badge - Only if isRecommended is true */}
+             {isRecommended && (
+                 <span className="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
+                     Recommended for you
+                 </span>
+             )}
+        </div>
+
+        {/* Deadline Badge - Hide if overlaid by recommended content or keep it? Keeping it for now but maybe adjust z-index if needed. */}
+        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 z-20">
           <Icon icon="mdi:clock-outline" width={16} height={16} className="text-orange-500" />
           <span className="text-xs font-semibold text-orange-600">
-            {deadline}
+            {formatDate(deadline)}
           </span>
         </div>
       </div>

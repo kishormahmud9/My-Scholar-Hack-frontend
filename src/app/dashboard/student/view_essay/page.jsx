@@ -4,7 +4,9 @@ import { Icon } from "@iconify/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import ViewEssayModal from "@/components/dashboard/Student/ViewEssayModal";
+import Loader from "@/components/Loader";
 import CompareSelectionModal from "@/components/dashboard/Student/CompareSelectionModal";
+import { apiPost } from "@/lib/api";
 
 // Moved outside to be reusable or just statically defined here for now
 const ESSAY_DATA = [
@@ -75,6 +77,13 @@ function ViewEssayContent() {
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState("All Subjects");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+     // Simulate loading delay for better UX consistency
+     const timer = setTimeout(() => setLoading(false), 500);
+     return () => clearTimeout(timer);
+  }, []);
 
   // Initialize filter from URL
   useEffect(() => {
@@ -107,7 +116,7 @@ function ViewEssayContent() {
     router.push(`/dashboard/student/view_essay/compare_essay?original=${selectedEssay.id}&target=${targetEssay.id}`);
   };
 
-  const handleSelectEssay = (essay) => {
+  const handleSelectEssay = async (essay) => {
     // Update Application Tracker if active
     const activeId = localStorage.getItem("current_active_scholarship");
     if (activeId) {
@@ -115,6 +124,17 @@ function ViewEssayContent() {
       const appIndex = currentData.findIndex(item => item.id === activeId);
 
       if (appIndex >= 0) {
+        // Sync to backend
+        try {
+            await apiPost("/application/save", {
+                scholarshipId: activeId,
+                essayId: essay.id
+            });
+        } catch (error) {
+            console.error("Failed to save application to backend:", error);
+            // Optionally show toast error, but proceeding with local save for now
+        }
+
         currentData[appIndex] = {
           ...currentData[appIndex],
           status: "Done",
@@ -161,6 +181,8 @@ function ViewEssayContent() {
       )
     },
   ];
+
+  if (loading) return <Loader fullScreen={false} />;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -229,7 +251,7 @@ function ViewEssayContent() {
 
 export default function ViewEssay() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Loader fullScreen={false} />}>
       <ViewEssayContent />
     </Suspense>
   );

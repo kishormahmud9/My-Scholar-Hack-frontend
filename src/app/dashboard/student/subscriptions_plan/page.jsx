@@ -2,14 +2,18 @@
 import { Icon } from "@iconify/react";
 import Table from "@/components/dashboard/Table";
 import InvoiceModal from "@/components/dashboard/Student/InvoiceModal";
+import CancelSubscriptionModal from "@/components/dashboard/Student/CancelSubscriptionModal";
 import { useState, useEffect } from "react";
-import { getStudentSubscriptions } from "@/lib/api";
+import { getStudentSubscriptions, apiPost } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function SubscriptionsPlan() {
     const [subscriptions, setSubscriptions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
 
     // Filter to get the current active/trail subscription for the "Your Plan" section
     const currentSubscription = subscriptions.find(s =>
@@ -76,6 +80,31 @@ export default function SubscriptionsPlan() {
             month: 'short',
             day: 'numeric'
         });
+    };
+
+    const handleCancelClick = () => {
+        setIsCancelModalOpen(true);
+    };
+
+    const handleConfirmCancel = async () => {
+        if (!currentSubscription?.id) return;
+        
+        setIsCancelling(true);
+        try {
+            await apiPost(`/subscription-student/cancel/${currentSubscription.id}`);
+            toast.success("Subscription cancelled successfully");
+            setIsCancelModalOpen(false);
+            
+            // Refresh subscriptions
+            const response = await getStudentSubscriptions();
+            if (response.success) {
+                setSubscriptions(response.data || []);
+            }
+        } catch (error) {
+            toast.error(error?.message || "Failed to cancel subscription");
+        } finally {
+            setIsCancelling(false);
+        }
     };
 
     const TableHeads = [
@@ -204,7 +233,10 @@ export default function SubscriptionsPlan() {
                         {currentSubscription ? 'Upgrade Plan' : 'Subscribe Now'}
                     </button>
                     {currentSubscription && (
-                        <button className="px-6 py-3 bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 font-semibold rounded-lg transition-colors">
+                        <button 
+                            onClick={handleCancelClick}
+                            className="px-6 py-3 bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 font-semibold rounded-lg transition-colors cursor-pointer"
+                        >
                             Cancel Plan
                         </button>
                     )}
@@ -231,6 +263,13 @@ export default function SubscriptionsPlan() {
                         isOpen={!!selectedInvoice}
                         onClose={() => setSelectedInvoice(null)}
                         data={selectedInvoice}
+                    />
+
+                    <CancelSubscriptionModal 
+                        isOpen={isCancelModalOpen}
+                        onClose={() => setIsCancelModalOpen(false)}
+                        onConfirm={handleConfirmCancel}
+                        isProcessing={isCancelling}
                     />
                 </div>
             </div>

@@ -4,8 +4,9 @@ import { Icon } from "@iconify/react";
 import AdminStatsCard from "@/components/dashboard/Admin/AdminStatsCard";
 import ScholershipCard from "@/components/dashboard/Student/ScholershipCard";
 import Table from "@/components/dashboard/Table";
+import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
-import { getDashboardStats } from "@/lib/api";
+import { getDashboardStats, apiPost } from "@/lib/api";
 import { getUserData } from "@/lib/auth";
 
 export default function StudentDashboard() {
@@ -42,6 +43,21 @@ export default function StudentDashboard() {
     };
 
     fetchDashboardStats();
+    
+    // Background Sync Logic
+    const syncResult = async () => {
+        try {
+            // Trigger sync (user sees existing data meanwhile)
+            await apiPost("/essay-recommendation/sync-scholarships");
+            
+            // Once synced, refetch the dashboard data to update UI
+            if (isMounted) fetchDashboardStats();
+        } catch (error) {
+            console.error("Background sync failed:", error);
+        }
+    };
+    
+    syncResult();
 
     return () => {
       isMounted = false;
@@ -115,6 +131,46 @@ export default function StudentDashboard() {
       bgIconColor: "bg-[#FFF0ED]",
     },
   ];
+  
+  if (isLoading) return <Loader fullScreen={false} />;
+
+  // Filter recommendations
+  const filteredRecommendations = dashboardData?.recommendations?.filter(item => {
+     const scholarship = item.scholarship || {};
+     const hasAmount = scholarship.amount && Number(scholarship.amount) > 0;
+     const hasDescription = scholarship.description && scholarship.description.trim().length > 0;
+     return hasAmount && hasDescription;
+  }).slice(0, 4) || [];
+
+  const handleApply = (scholarship) => {
+     // Save full scholarship details to local storage for the Essay page to consume
+     localStorage.setItem("selected_scholarship_for_application", JSON.stringify(scholarship));
+
+     // Also update Application Tracker as "Processing"
+     const currentData = JSON.parse(localStorage.getItem("application_tracker_data") || "[]");
+     const existingIndex = currentData.findIndex(item => item.id === scholarship.id);
+     
+     if (existingIndex === -1) {
+         currentData.push({
+             id: scholarship.id,
+             title: scholarship.title,
+             provider: scholarship.provider,
+             subject: scholarship.subject,
+             description: scholarship.description, // Saving description as requested
+             essayTitle: "Pending Selection...",
+             essayContent: "",
+             amount: scholarship.amount,
+             deadline: scholarship.deadline,
+             status: "Processing"
+         });
+         localStorage.setItem("application_tracker_data", JSON.stringify(currentData));
+     }
+     
+     // Set active for the session
+     localStorage.setItem("current_active_scholarship", scholarship.id);
+
+     router.push("/dashboard/student/essays");
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -173,15 +229,18 @@ export default function StudentDashboard() {
               <div className="col-span-2 text-red-500 text-center py-10 bg-white rounded-2xl border border-gray-100">
                 {error}
               </div>
-            ) : dashboardData?.recommendations?.length > 0 ? (
-              dashboardData.recommendations.map((item, idx) => (
+            ) : error ? (
+              <div className="col-span-2 text-red-500 text-center py-10 bg-white rounded-2xl border border-gray-100">
+                {error}
+              </div>
+            ) : filteredRecommendations.length > 0 ? (
+              filteredRecommendations.map((item, idx) => (
                 <ScholershipCard
                   key={idx}
                   Details={item.scholarship}
-                  onApply={() =>
-                    router.push("/dashboard/student/all_scholarship")
-                  }
+                  onApply={() => handleApply(item.scholarship)}
                   compact={true}
+                  isRecommended={true}
                 />
               ))
             ) : (

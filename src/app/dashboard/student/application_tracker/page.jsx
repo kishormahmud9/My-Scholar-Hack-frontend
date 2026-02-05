@@ -1,5 +1,6 @@
 "use client";
 import Table from "@/components/dashboard/Table";
+import Loader from "@/components/Loader";
 import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
 
@@ -45,13 +46,18 @@ export default function ApplicationTracker() {
     const [applications, setApplications] = useState([]);
     const [selectedEssay, setSelectedEssay] = useState(null); // { title, content }
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // Load data from localStorage
+        // Simulating a small delay to prevent fetch flicker if it was real async, 
+        // but for localStorage it's instant. However, to be consistent with "loading", 
+        // we can just set it false after setting state.
         const savedData = localStorage.getItem("application_tracker_data");
         if (savedData) {
             setApplications(JSON.parse(savedData));
         }
+        setLoading(false);
     }, []);
 
     const handleEssayClick = (app) => {
@@ -103,7 +109,7 @@ export default function ApplicationTracker() {
 
                 return (
                     <span className={`font-medium ${colorClass}`}>
-                        {row.deadline}
+                        {deadlineDate.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
                     </span>
                 );
             }
@@ -124,6 +130,8 @@ export default function ApplicationTracker() {
             ),
         },
     ];
+
+    if (loading) return <Loader fullScreen={false} />;
 
     return (
         <div className="p-4 sm:p-6 lg:p-8">

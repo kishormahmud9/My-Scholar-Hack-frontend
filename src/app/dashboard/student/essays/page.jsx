@@ -19,6 +19,7 @@ export default function Essays() {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [showEssayModal, setShowEssayModal] = useState(false);
     const [generatedEssay, setGeneratedEssay] = useState("");
+    const [activeScholarship, setActiveScholarship] = useState(null);
     const navigation = useRouter()
 
     const fileInputRef = useRef(null);
@@ -40,6 +41,22 @@ export default function Essays() {
                 streamRef.current.getTracks().forEach(track => track.stop());
             }
         };
+    }, []);
+
+    // Check for active scholarship from Apply Now
+    useEffect(() => {
+        const storedScholarship = localStorage.getItem("selected_scholarship_for_application");
+        if (storedScholarship) {
+             const scholarship = JSON.parse(storedScholarship);
+             setActiveScholarship(scholarship);
+             
+             // Optionally pre-fill prompt if empty
+             setEssayPrompt(prev => prev || `Write an essay for the "${scholarship.title}" provided by ${scholarship.provider}. Description: ${scholarship.description || "N/A"}`);
+             
+             // Clear it so it doesn't persist forever? 
+             // Maybe keep it until "Save" or explicitly cleared.
+             // For now, we keep it to show context during this session.
+        }
     }, []);
 
     const handleFileUpload = (event) => {
@@ -239,6 +256,31 @@ We must act now to preserve our environment for future generations. Every small 
                 </div>
 
                 <div className="bg-white rounded-[20px] border border-[#E2E8F0] p-8 mb-6 min-h-[200px] relative">
+                    {/* Active Scholarship Context */}
+                    {activeScholarship && (
+                        <div className="mb-4 bg-amber-50 p-4 rounded-lg border border-amber-200">
+                             <div className="flex justify-between items-start mb-1">
+                                <h3 className="font-semibold text-gray-800 text-sm">Applying for: {activeScholarship.title}</h3>
+                                <button 
+                                   onClick={() => {
+                                      setActiveScholarship(null);
+                                      localStorage.removeItem("selected_scholarship_for_application");
+                                      setEssayPrompt("");
+                                   }}
+                                   className="text-gray-400 hover:text-red-500"
+                                >
+                                   <Icon icon="mdi:close" width={16} height={16} />
+                                </button>
+                             </div>
+                             {activeScholarship.subject && <p className="text-xs text-gray-500 mb-1">Subject: {activeScholarship.subject}</p>}
+                             {activeScholarship.description && (
+                                <p className="text-xs text-gray-600 line-clamp-2 italic">
+                                   "{activeScholarship.description}"
+                                </p>
+                             )}
+                        </div>
+                    )}
+
                     <textarea
                         value={essayPrompt}
                         onChange={(e) => setEssayPrompt(e.target.value)}
