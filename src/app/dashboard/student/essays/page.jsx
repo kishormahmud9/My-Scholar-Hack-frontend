@@ -20,6 +20,7 @@ export default function Essays() {
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [showEssayModal, setShowEssayModal] = useState(false);
     const [generatedEssay, setGeneratedEssay] = useState("");
+    const [generatedEssayId, setGeneratedEssayId] = useState(null);
     const [activeScholarship, setActiveScholarship] = useState(null);
     const navigation = useRouter()
 
@@ -227,8 +228,11 @@ export default function Essays() {
             setTimeout(() => {
                 // Ensure we handle response structure correctly
                 const essayContent = response?.data?.essay || response?.essay || response?.data || "No content generated.";
-                
+                const essayId = response?.data?.id || response?.id; // Capture ID
+
                 setGeneratedEssay(essayContent);
+                if (essayId) setGeneratedEssayId(essayId);
+
                 setShowLoadingModal(false);
                 setShowEssayModal(true);
             }, 500);
@@ -251,8 +255,24 @@ export default function Essays() {
         setShowEssayModal(false);
     };
 
-    const handleSaveEssay = () => {
-        // Update Application Tracker if active
+    const handleSaveEssay = async () => {
+        // Check if we have an active scholarship linkage
+        if (activeScholarship?.id && generatedEssayId) {
+            try {
+                await apiPost("/application/save", {
+                    scholarshipId: activeScholarship.id,
+                    essayId: generatedEssayId
+                });
+                // Optionally clear active context after successful save
+                localStorage.removeItem("selected_scholarship_for_application");
+                localStorage.removeItem("current_active_scholarship"); 
+            } catch (error) {
+                console.error("Failed to save application linkage:", error);
+                alert("Essay saved locally, but failed to link to application.");
+            }
+        }
+
+        // Update Application Tracker locally (Legacy/Fallback or for instant UI update)
         const activeId = localStorage.getItem("current_active_scholarship");
         if (activeId) {
             const currentData = JSON.parse(localStorage.getItem("application_tracker_data") || "[]");
@@ -270,8 +290,6 @@ export default function Essays() {
                     essayContent: generatedEssay
                 };
                 localStorage.setItem("application_tracker_data", JSON.stringify(currentData));
-                // Optional: clear active scholarship or keep it
-                localStorage.removeItem("current_active_scholarship");
             }
         }
 

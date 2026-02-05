@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import ViewEssayModal from "@/components/dashboard/Student/ViewEssayModal";
+import EditEssayModal from "@/components/dashboard/Student/EditEssayModal";
 import Loader from "@/components/Loader";
 import CompareSelectionModal from "@/components/dashboard/Student/CompareSelectionModal";
 import { apiPost, apiGet } from "@/lib/api";
@@ -16,6 +17,7 @@ function ViewEssayContent() {
   const searchParams = useSearchParams();
   const [selectedEssay, setSelectedEssay] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState("All Subjects");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -86,6 +88,20 @@ function ViewEssayContent() {
     setIsCompareModalOpen(true);
   };
 
+  const handleEditClick = (row) => {
+    setSelectedEssay(row);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateSuccess = (updatedEssay) => {
+      // Update the essay in the local list
+      setEssays(prev => prev.map(e => e.id === updatedEssay.id ? updatedEssay : e));
+      // Also update selected if needed
+      if (selectedEssay && selectedEssay.id === updatedEssay.id) {
+          setSelectedEssay(updatedEssay);
+      }
+  };
+
   const handleConfirmCompare = (targetEssay) => {
     setIsCompareModalOpen(false);
     router.push(`/dashboard/student/view_essay/compare_essay?original=${selectedEssay.id}&target=${targetEssay.id}`);
@@ -135,7 +151,7 @@ function ViewEssayContent() {
       width: "10%",
       render: (row) => (
         <button
-          onClick={() => router.push('/dashboard/student/essays/edit_essay')}
+          onClick={() => handleEditClick(row)}
           className="text-[#FFCA42] hover:bg-[#F8F9FA] p-2 rounded-full transition-colors"
         >
           <Icon icon="lucide:edit-3" width="20" height="20" />
@@ -211,6 +227,13 @@ function ViewEssayContent() {
         essay={selectedEssay}
         onCompare={handleCompareClick}
         onSelect={handleSelectEssay}
+      />
+
+      <EditEssayModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        essay={selectedEssay}
+        onUpdate={handleUpdateSuccess}
       />
 
       <CompareSelectionModal
