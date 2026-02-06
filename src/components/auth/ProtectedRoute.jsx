@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { isAuthenticated, getUserRole, getDashboardRoute, hasActivePlan } from "@/lib/auth";
+import { isAuthenticated, getUserRole, hasActivePlan } from "@/lib/auth";
 
 export default function ProtectedRoute({ children, allowedRole = null }) {
     const router = useRouter();

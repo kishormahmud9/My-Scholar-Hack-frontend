@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import { navLink_Student, navLink_Admin } from "./navigationConfig";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
@@ -15,14 +15,14 @@ export default function Sidebar({ onClose }) {
     <aside className="w-[270px] min-h-screen bg-white p-6 border-r border-gray-200 flex flex-col">
       {/* Header with Close Button for Mobile */}
       <div className="mb-8 flex items-center gap-3 justify-between">
-        <div className="flex items-center gap-3">
-          <Image
-            src={"/logo.png"}
-            width={48}
-            height={48}
-            alt="MyScholar logo"
-            className="shrink-0"
-          />
+        <div onClick={()=> redirect("/")} className="flex items-center gap-3 hover:cursor-pointer">
+            <Image
+              src="/logo.png"
+              alt="MyScholar Logo"
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
           <h3 className="text-2xl font-bold text-gray-900">MyScholar</h3>
         </div>
         {/* Close button for mobile */}

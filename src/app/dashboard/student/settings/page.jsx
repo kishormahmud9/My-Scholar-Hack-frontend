@@ -1,14 +1,21 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getStudentSettings, updateStudentSettings } from "@/lib/api";
-import { getUserData } from "@/lib/auth";
+import { getStudentSettings, updateStudentSettings, apiGet } from "@/lib/api";
 import { toast } from "react-hot-toast";
 
 export default function Settings() {
     const queryClient = useQueryClient();
-    const user = getUserData();
 
+    // Fetch user profile for email
+    const { data: profileResponse } = useQuery({
+        queryKey: ["userProfileSettings"],
+        queryFn: async () => {
+             return await apiGet("/profile/me");
+        }
+    });
+    
+    const userEmail = profileResponse?.data?.email;
 
     const { data: response, isLoading, isError, error } = useQuery({
         queryKey: ["studentSettings"],
@@ -37,7 +44,8 @@ export default function Settings() {
 
 
     useEffect(() => {
-        if (settings) {
+        if (response?.success && settings) {
+            console.log("Fetched Settings:", settings);
             setFormData({
                 fullName: settings.fullName || "",
                 emailNotifications: settings.emailNotifications ?? false,
@@ -45,7 +53,7 @@ export default function Settings() {
                 applicationReminders: settings.applicationReminders ?? false,
             });
         }
-    }, [settings]);
+    }, [settings, response]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -109,7 +117,7 @@ export default function Settings() {
                                 type="email"
                                 readOnly
                                 disabled
-                                value={user?.email || "Loading email..."}
+                                value={userEmail || "Loading email..."}
                                 className="w-full px-4 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-lg cursor-not-allowed outline-none"
                             />
                             <p className="text-xs text-gray-400 mt-1">Email cannot be changed.</p>

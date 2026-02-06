@@ -43,12 +43,16 @@ export default function SignInPage() {
         // Redirect to appropriate dashboard based on user role
         const dashboardRoute = getDashboardRoute();
 
+        // Redirect logic based on plan status
         if (!user.isPlan && user.role === "STUDENT") {
-          toast.error("please buy a plan to get access to go to the essage genaration page");
+           // No plan -> Redirect to Home
+           router.push("/");
+        } else {
+           // Has plan (or Admin) -> Redirect to Dashboard
+           router.push(dashboardRoute);
         }
-
+        
         toast.success("Login successful");
-        router.push(dashboardRoute);
       } else {
         // Handle unexpected response structure
         setSubmitError("Invalid response from server. Please try again.");

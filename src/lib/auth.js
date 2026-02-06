@@ -11,10 +11,9 @@ import {
     removeLocalStorage,
     getAccessToken,
     getRefreshToken,
-    getUserData,
     clearStorage,
-    USER_ROLE_KEY,
-    ACTIVE_PLAN_KEY
+    ACTIVE_PLAN_KEY,
+    USER_ROLE_KEY
 } from "./auth-storage";
 
 /**
@@ -25,50 +24,65 @@ import {
  * @param {boolean} userData.isPlan - Plan status
  */
 export const storeAuthData = (accessToken, refreshToken, userData) => {
-    // console.log("userData", userData);
-    // Store in localStorage (primary storage)
+    // Store tokens in localStorage (primary storage)
     setLocalStorage(ACCESS_TOKEN_KEY, accessToken);
     setLocalStorage(REFRESH_TOKEN_KEY, refreshToken);
-    setLocalStorage(USER_DATA_KEY, userData);
-    setLocalStorage(ACTIVE_PLAN_KEY, userData.isPlan);
+    
+    // Store user data in cookies (JSON stringified)
+    if (userData) {
+        setCookie(USER_DATA_KEY, JSON.stringify(userData), 7);
+        if (userData.role) {
+             setCookie(USER_ROLE_KEY, userData.role, 7);
+        }
+        // Handle plan status
+        // Ensure strictly boolean or string representation
+        const isPlan = userData.isPlan === true || userData.isPlan === "true";
+        setCookie(ACTIVE_PLAN_KEY, isPlan, 7);
+    }
 
-    // Also store in cookies (for SSR compatibility if needed)
+    // Also store tokens in cookies (for SSR compatibility if needed)
     setCookie(ACCESS_TOKEN_KEY, accessToken, 7); // 7 days
     setCookie(REFRESH_TOKEN_KEY, refreshToken, 30); // 30 days for refresh token
-    setCookie(ACTIVE_PLAN_KEY, userData.isPlan, 7);
-    if (userData?.role) {
-        setCookie(USER_ROLE_KEY, userData.role, 7);
-    }
 
     // Set token in axios headers
     setAuthToken(accessToken);
 };
 
 // Re-export getters for convenience
-export { getAccessToken, getRefreshToken, getUserData };
+export { getAccessToken, getRefreshToken };
+
+/**
+ * Get user data from cookies
+ * @returns {Object|null} User data object or null if not found
+ */
+export const getUserData = () => {
+    const data = getCookie(USER_DATA_KEY);
+    if (!data) return null;
+    try {
+        return JSON.parse(data);
+    } catch (e) {
+        return null;
+    }
+};
 
 /**
  * Check if user is authenticated
- * Strictly requires the presence of an access token cookie.
+ * Strictly requires the presence of an access token.
  * @returns {boolean} True if authenticated
  */
 export const isAuthenticated = () => {
     if (typeof window === "undefined") return false;
-
-    const token = getCookie(ACCESS_TOKEN_KEY);
-    const user = getUserData();
-    const role = getCookie(USER_ROLE_KEY);
-
-    // If cookie token is missing, the session is functionally dead even if localStorage has data
-    return !!(token && (user || role));
+    const token = getAccessToken();
+    return !!token;
 };
 
 /**
  * Check if user has an active plan
- * @returns {boolean} True if plan is active
+ * Reads from cookie
+ * @returns {boolean} 
  */
 export const hasActivePlan = () => {
-    const isPlan = getLocalStorage(ACTIVE_PLAN_KEY) || getCookie(ACTIVE_PLAN_KEY);
+    const isPlan = getCookie(ACTIVE_PLAN_KEY);
     // Handle both boolean and string "true"/"false" from cookies
     return isPlan === true || isPlan === "true";
 };
@@ -78,6 +92,11 @@ export const hasActivePlan = () => {
  */
 export const clearAuthData = () => {
     clearStorage();
+    // Specifically clear user data cookies
+    deleteCookie(USER_DATA_KEY);
+    deleteCookie(USER_ROLE_KEY);
+    deleteCookie(ACTIVE_PLAN_KEY);
+    
     // Clear axios headers
     setAuthToken(null);
 };
@@ -94,20 +113,16 @@ export const initializeAuth = () => {
 };
 
 /**
- * Get user role
- * @returns {string|null} User role (ADMIN, STUDENT, etc.) or null
+ * Get user role from cookie
+ * @returns {string|null} 
  */
 export const getUserRole = () => {
-    const user = getUserData();
-    if (user?.role) return user.role;
-
-    // Fallback to cookie if userData in localStorage is missing
     return getCookie(USER_ROLE_KEY);
 };
 
 /**
  * Check if user is admin
- * @returns {boolean} True if user is admin
+ * @returns {boolean} 
  */
 export const isAdmin = () => {
     return getUserRole() === "ADMIN";
@@ -115,24 +130,25 @@ export const isAdmin = () => {
 
 /**
  * Check if user is student
- * @returns {boolean} True if user is student
+ * @returns {boolean} 
  */
 export const isStudent = () => {
     return getUserRole() === "STUDENT";
 };
 
 /**
- * Get dashboard route based on user role
+ * Get dashboard route based on user role - needs role passed in or will default
  * @returns {string} Dashboard route
  */
-export const getDashboardRoute = () => {
-    const role = getUserRole();
-    if (role === "ADMIN") {
+export const getDashboardRoute = (role = null) => {
+    const userRole = role || getUserRole();
+    if (userRole === "ADMIN") {
         return "/dashboard/admin";
-    } else if (role === "STUDENT") {
+    } else if (userRole === "STUDENT") {
         return "/dashboard/student";
     }
-    return "/dashboard";
+    // Default fallback
+    return "/dashboard/student"; 
 };
 
 /**

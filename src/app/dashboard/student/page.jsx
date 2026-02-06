@@ -6,19 +6,30 @@ import ScholershipCard from "@/components/dashboard/Student/ScholershipCard";
 import Table from "@/components/dashboard/Table";
 import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
-import { getDashboardStats, apiPost } from "@/lib/api";
-import { getUserData } from "@/lib/auth";
+import { getDashboardStats, apiPost, apiGet } from "@/lib/api";
+import { useQuery } from '@tanstack/react-query';
 
 export default function StudentDashboard() {
   const router = useRouter();
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [user, setUser] = useState(null);
+  const { data: profileResponse } = useQuery({
+    queryKey: ['userProfileDashboard'],
+    queryFn: async () => {
+       try {
+          const response = await apiGet('/profile/me');
+          return response;
+       } catch (error) {
+          return null; // Handle error silently or as needed
+       }
+    },
+    staleTime: 5 * 60 * 1000, 
+  });
+
+  const userData = profileResponse?.data;
 
   useEffect(() => {
-    setUser(getUserData());
-
     let isMounted = true;
 
     const fetchDashboardStats = async () => {
@@ -177,7 +188,7 @@ export default function StudentDashboard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
-          Welcome back, {user?.name || "Student"}
+          Welcome back, {userData?.fullName || userData?.name || "Student"}
         </h1>
         <p className="text-gray-500 mt-1">Here’s your progress this week.</p>
       </div>

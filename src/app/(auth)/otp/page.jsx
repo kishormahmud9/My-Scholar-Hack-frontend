@@ -142,7 +142,7 @@ export default function OTPPage() {
 
                 if (!selectedPlan) {
                     setTimeout(() => {
-                        if (isPlan) {
+                        if (isPlan === true) {
                             router.push(getDashboardRoute());
                         } else {
                             if (userData?.role === "STUDENT") {
