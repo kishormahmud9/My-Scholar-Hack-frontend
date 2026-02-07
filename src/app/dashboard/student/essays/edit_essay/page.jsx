@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { apiPatch } from "@/lib/api";
 import ConfirmationModal from "@/components/dashboard/Student/ConfirmationModal";
@@ -130,22 +130,6 @@ export default function EditEssay() {
             <div className="max-w-4xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold text-[#2D3748]">Edit Essay</h1>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={() => router.back()}
-                            className="px-6 py-2.5 rounded-full border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleSave}
-                            disabled={loading}
-                            className="px-8 py-2.5 rounded-full bg-[#F6C844] text-[#2D3748] font-semibold hover:bg-[#EDB91C] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                            {loading && <Icon icon="mdi:loading" className="animate-spin" />}
-                            Save Changes
-                        </button>
-                    </div>
                 </div>
 
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -197,7 +181,7 @@ export default function EditEssay() {
             <ConfirmationModal
                 isOpen={modalConfig.isOpen}
                 onClose={closeModal}
-                onConfirm={closeModal}
+                onConfirm={()=> redirect("/dashboard/student/view_essay")} // Redirect to essays list after confirmation
                 title={modalConfig.title}
                 message={modalConfig.message}
                 confirmText="OK"
@@ -206,6 +190,7 @@ export default function EditEssay() {
                 iconColor={modalConfig.iconColor}
                 bgIconColor={modalConfig.bgIconColor}
                 confirmButtonClass={modalConfig.confirmButtonClass}
+                
             />
         </div>
     );
