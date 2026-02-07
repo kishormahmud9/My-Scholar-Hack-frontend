@@ -26,6 +26,7 @@ export default function ScholershipCard({ Details, onApply, isRecommended }) {
           height={200}
           width={400}
           alt={title}
+          priority={true}
           className={`w-full h-full object-cover object-center transition-transform duration-300 blur-sm scale-110`}
         />
         

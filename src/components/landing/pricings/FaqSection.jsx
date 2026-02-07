@@ -11,7 +11,7 @@ const FaqSection = () => {
         queryKey: ["faqs"],
         queryFn: async () => {
             try {
-                const response = await apiGet("/admin/faqs", {}, { _skipAuthRedirect: true });
+                const response = await apiGet("/admin/faqs/public", {}, { _skipAuthRedirect: true });
                 return response;
             } catch (error) {
                 console.error("Failed to fetch FAQs:", error);

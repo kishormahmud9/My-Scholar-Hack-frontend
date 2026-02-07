@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import { useState, useRef, useEffect } from "react";
 import LoadingModal from "@/components/dashboard/Student/LoadingModal";
 import EssayResultModal from "@/components/dashboard/Student/EssayResultModal";
+import ConfirmationModal from "@/components/dashboard/Student/ConfirmationModal";
 import FileUploadList from "@/components/dashboard/Student/FileUploadList";
 import RecordingIndicator from "@/components/dashboard/Student/RecordingIndicator";
 import AudioPlayer from "@/components/dashboard/Student/AudioPlayer";
@@ -19,7 +20,9 @@ export default function Essays() {
     const [showLoadingModal, setShowLoadingModal] = useState(false);
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [showEssayModal, setShowEssayModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [generatedEssay, setGeneratedEssay] = useState("");
+    const [generatedSubject, setGeneratedSubject] = useState("");
     const [generatedEssayId, setGeneratedEssayId] = useState(null);
     const [activeScholarship, setActiveScholarship] = useState(null);
     const navigation = useRouter()
@@ -54,10 +57,22 @@ export default function Essays() {
              
              // Optionally pre-fill prompt if empty
              setEssayPrompt(prev => prev || `Write an essay for the "${scholarship.title}" provided by ${scholarship.provider}. Description: ${scholarship.description || "N/A"}`);
-             
-             // Clear it so it doesn't persist forever? 
-             // Maybe keep it until "Save" or explicitly cleared.
-             // For now, we keep it to show context during this session.
+        }
+
+        // Check for returning from Edit Essay page
+        const isEdited = localStorage.getItem("essay_edited");
+        if (isEdited) {
+            const editedEssayData = localStorage.getItem("essay_to_edit");
+            if (editedEssayData) {
+                const { essay, subject, id } = JSON.parse(editedEssayData);
+                setGeneratedEssay(essay);
+                setGeneratedSubject(subject);
+                if (id) setGeneratedEssayId(id);
+                // Re-open the modal with updated data
+                setShowEssayModal(true); 
+            }
+            // Clear flag
+            localStorage.removeItem("essay_edited");
         }
     }, []);
 
@@ -217,7 +232,6 @@ export default function Essays() {
             // API Call
             const response = await apiPost("/generate-essay/generate", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
-                timeout: 60000 // Increase timeout to 60s for AI generation
             });
 
             // Complete progress
@@ -227,10 +241,50 @@ export default function Essays() {
             // Wait a bit to show 100%
             setTimeout(() => {
                 // Ensure we handle response structure correctly
-                const essayContent = response?.data?.essay || response?.essay || response?.data || "No content generated.";
-                const essayId = response?.data?.id || response?.id; // Capture ID
+                // Priority: contentFinal (new format), then essay (legacy/fallback)
+                // Check both root level (if flattened) and data level (if nested)
+                let essayContent = "No content generated.";
+                const responseData = response?.data || response;
+
+                if (typeof response === 'string') {
+                    essayContent = response;
+                } else if (responseData?.contentFinal) {
+                    essayContent = responseData.contentFinal;
+                } else if (responseData?.essay) {
+                    essayContent = responseData.essay;
+                } else if (response?.essay) {
+                    essayContent = response.essay;
+                } else if (response?.contentFinal) {
+                    essayContent = response.contentFinal;
+                } else if (responseData && typeof responseData === 'string') {
+                    essayContent = responseData;
+                } else if (response?.message) {
+                    // Sometimes message contains the text if it's a simple return
+                    essayContent = response.message; 
+                }
+
+                // Capture ID - prioritize the one associated with the content
+                const essayId = responseData?.id || response?.id;
+                
+                // Capture Subject
+                const essaySubject = responseData?.subject || response?.subject || activeScholarship?.subject || "General";
+
+                // Handle case where content is "Existing essay:<br/>..."
+                if (essayContent && typeof essayContent === 'string' && essayContent.startsWith("Existing essay:<br/>")) {
+                    essayContent = essayContent.replace("Existing essay:<br/>", "");
+                }
+
+                // Reset form inputs as requested
+                setEssayPrompt("");
+                setUploadedFiles([]);
+                if (audioURL) {
+                    URL.revokeObjectURL(audioURL);
+                }
+                setAudioURL(null);
+                setRecordingTime(0);
 
                 setGeneratedEssay(essayContent);
+                setGeneratedSubject(essaySubject);
                 if (essayId) setGeneratedEssayId(essayId);
 
                 setShowLoadingModal(false);
@@ -298,16 +352,28 @@ export default function Essays() {
     };
 
     const handleEditEssay = () => {
+        // Save generate essay to local storage for editing
+        localStorage.setItem("essay_to_edit", JSON.stringify({
+            essay: generatedEssay,
+            subject: generatedSubject,
+            id: generatedEssayId
+        }));
         navigation.push('/dashboard/student/essays/edit_essay')
     };
 
     const handleRemoveEssay = () => {
-        // Implement remove functionality
-        if (confirm("Are you sure you want to remove this essay?")) {
-            setGeneratedEssay("");
-            closeEssayModal();
-            alert("Essay removed successfully!");
-        }
+        // Open confirmation modal
+        setShowDeleteModal(true);
+    };
+
+    const confirmRemoveEssay = () => {
+        setGeneratedEssay("");
+        closeEssayModal();
+        setShowDeleteModal(false);
+        // Using toast instead of alert would be better, but sticking to alert for simplicity per user pattern or upgrade later
+        // alert("Essay removed successfully!"); 
+        // Actually, let's just close silently or use a toast if available. The user used alert before.
+        // We'll skip the alert to make it smoother since the modal is confirming the action.
     };
 
     return (
@@ -419,10 +485,22 @@ export default function Essays() {
             <EssayResultModal
                 isOpen={showEssayModal}
                 essay={generatedEssay}
+                subject={generatedSubject}
                 onClose={closeEssayModal}
                 onSave={handleSaveEssay}
                 onEdit={handleEditEssay}
                 onRemove={handleRemoveEssay}
+            />
+
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmRemoveEssay}
+                title="Remove Essay?"
+                message="Are you sure you want to remove this generated essay? This action cannot be undone."
+                confirmText="Remove"
+                confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
+                icon="mdi:delete-forever"
             />
         </div>
     );

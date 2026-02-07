@@ -30,22 +30,32 @@ export default function SignInPage() {
     setNotVerified(false);
 
     try {
+      console.log("Attempting login...");
       const response = await apiPost("/auth/login", { email, password });
+      console.log("Login API Response:", response);
 
       // Check if response has the expected structure
       if (response?.success) {
         // console.log("response", response, "response.data", response.data);
         const { accessToken, refreshToken, user } = response.data;
+        console.log("User data:", user);
 
         // Store authentication data (tokens and user info)
-        storeAuthData(accessToken, refreshToken, user);
+        try {
+            storeAuthData(accessToken, refreshToken, user);
+            console.log("Auth data stored successfully");
+        } catch (storageError) {
+            console.error("Storage error:", storageError);
+        }
 
         // Redirect to appropriate dashboard based on user role
         const dashboardRoute = getDashboardRoute();
+        console.log("Redirecting to:", dashboardRoute);
 
         // Redirect logic based on plan status
         if (!user.isPlan && user.role === "STUDENT") {
            // No plan -> Redirect to Home
+           console.log("No plan, redirecting to home");
            router.push("/");
         } else {
            // Has plan (or Admin) -> Redirect to Dashboard
@@ -54,10 +64,12 @@ export default function SignInPage() {
         
         toast.success("Login successful");
       } else {
+        console.warn("Login failed: Success flag false", response);
         // Handle unexpected response structure
         setSubmitError("Invalid response from server. Please try again.");
       }
     } catch (err) {
+      console.error("Login catch block:", err);
       // Check if error is related to unverified email
       const errorMessage =
         err?.data?.message ||

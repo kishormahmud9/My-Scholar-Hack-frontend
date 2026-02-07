@@ -32,8 +32,8 @@ export default function StudentDashboard() {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchDashboardStats = async () => {
-      setIsLoading(true);
+    const fetchDashboardStats = async (silent = false) => {
+      if (!silent) setIsLoading(true);
       setError("");
 
       try {
@@ -62,16 +62,20 @@ export default function StudentDashboard() {
             await apiPost("/essay-recommendation/sync-scholarships");
             
             // Once synced, refetch the dashboard data to update UI
-            if (isMounted) fetchDashboardStats();
+            if (isMounted) fetchDashboardStats(true);
         } catch (error) {
             console.error("Background sync failed:", error);
         }
     };
     
-    syncResult();
+    // Delay sync to prioritize UI rendering
+    const timer = setTimeout(() => {
+        if (isMounted) syncResult();
+    }, 2000);
 
     return () => {
       isMounted = false;
+      clearTimeout(timer);
     };
   }, []);
 

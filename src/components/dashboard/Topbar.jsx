@@ -130,6 +130,7 @@ export default function Topbar({ onMenuClick }) {
                 <Image
                   src={profileImage || defaultProfileImage}
                   fill
+                  sizes="48px"
                   alt="Dashboard user"
                   className="object-cover"
                   onError={() => {

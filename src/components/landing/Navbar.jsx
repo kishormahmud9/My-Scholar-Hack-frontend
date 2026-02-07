@@ -173,6 +173,7 @@ export default function Navbar() {
                   src={getProfileImage()}
                   alt="Profile"
                   fill
+                  sizes="60px"
                   className="object-cover"
                   onError={(e) => {
                     e.currentTarget.src = "/ceoProfile.png";
@@ -278,6 +279,7 @@ export default function Navbar() {
                     src={getProfileImage()}
                     alt="Profile"
                     fill
+                    sizes="56px"
                     className="object-cover"
                     onError={(e) => {
                       e.currentTarget.src = "/ceoProfile.png";
@@ -332,12 +334,11 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <button onClick={handleDashboardClick} className="w-full block">
-                    <PrimaryBtn
+                  <PrimaryBtn
                       style={"w-full justify-center rounded-lg"}
                       title={"Dashboard"}
-                    />
-                  </button>
+                      hendleClick={handleDashboardClick}
+                  />
                   <button
                     onClick={() => {
                       handleLogout();

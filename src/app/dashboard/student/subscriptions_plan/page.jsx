@@ -6,9 +6,10 @@ import CancelSubscriptionModal from "@/components/dashboard/Student/CancelSubscr
 import { useState, useEffect } from "react";
 import { getStudentSubscriptions, apiPost } from "@/lib/api";
 import toast from "react-hot-toast";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function SubscriptionsPlan() {
+    const router = useRouter();
     const [subscriptions, setSubscriptions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
@@ -230,7 +231,10 @@ export default function SubscriptionsPlan() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                    <button onClick={()=> redirect('/pricing')} className="px-6 py-3 bg-[#F6C844] hover:bg-[#EDB91C] text-gray-900 font-semibold rounded-lg transition-colors">
+                    <button 
+                        onClick={() => router.push('/pricing')} 
+                        className="px-6 py-3 bg-[#F6C844] hover:bg-[#EDB91C] text-gray-900 font-semibold rounded-lg transition-colors"
+                    >
                         {currentSubscription && 'Upgrade Plan'}
                     </button>
                     {currentSubscription && (
