@@ -359,6 +359,9 @@ export default function AllScholarship() {
 
                   localStorage.setItem("application_tracker_data", JSON.stringify(currentData));
                   localStorage.setItem("current_active_scholarship", selectedScholarship.id);
+                  
+                  // Save for Essay Page pre-filling
+                  localStorage.setItem("selected_scholarship_for_application", JSON.stringify(selectedScholarship));
 
                   router.push('/dashboard/student/essays');
                 }}
