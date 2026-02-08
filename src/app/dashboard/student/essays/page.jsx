@@ -486,6 +486,7 @@ export default function Essays() {
                 isOpen={showEssayModal}
                 essay={generatedEssay}
                 subject={generatedSubject}
+                essayId={generatedEssayId}
                 onClose={closeEssayModal}
                 onSave={handleSaveEssay}
                 onEdit={handleEditEssay}

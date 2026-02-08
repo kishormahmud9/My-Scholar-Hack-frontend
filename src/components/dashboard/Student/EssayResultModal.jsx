@@ -1,16 +1,97 @@
 "use client";
 import { Icon } from "@iconify/react";
+import { useState } from "react";
+import { apiPatch, apiDelete } from "@/lib/api";
+import toast from "react-hot-toast";
+import ConfirmationModal from "./ConfirmationModal";
 
 export default function EssayResultModal({
     isOpen,
     essay,
     subject,
+    essayId,
     onClose,
     onSave,
     onEdit,
     onRemove
 }) {
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     if (!isOpen) return null;
+
+    const handleSave = async () => {
+        if (!essayId) {
+            toast.error("Essay ID is missing");
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const response = await apiPatch(`/generate-essay/save/${essayId}`, {
+                status: "SAVED"
+            });
+
+            if (response?.success) {
+                toast.success("Essay saved successfully");
+                if (onSave) {
+                    onSave();
+                }
+            } else {
+                toast.error(response?.message || "Failed to save essay");
+            }
+        } catch (error) {
+            const errorMessage = error?.data?.message || 
+                               error?.response?.data?.message || 
+                               error?.message || 
+                               "Failed to save essay";
+            toast.error(errorMessage);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleDeleteClick = () => {
+        setShowDeleteConfirm(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!essayId) {
+            toast.error("Essay ID is missing");
+            setShowDeleteConfirm(false);
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const response = await apiDelete(`/generate-essay/delete/${essayId}`);
+
+            if (response?.success) {
+                toast.success("Essay deleted successfully");
+                // Close confirmation modal first
+                setShowDeleteConfirm(false);
+                setIsDeleting(false);
+                // Delay to ensure confirmation modal closes completely before closing parent modal
+                setTimeout(() => {
+                    if (onRemove) {
+                        onRemove();
+                    }
+                    onClose();
+                }, 300);
+            } else {
+                toast.error(response?.message || "Failed to delete essay");
+                setIsDeleting(false);
+            }
+        } catch (error) {
+            const errorMessage = error?.data?.message || 
+                               error?.response?.data?.message || 
+                               error?.message || 
+                               "Failed to delete essay";
+            toast.error(errorMessage);
+            setIsDeleting(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -78,11 +159,21 @@ export default function EssayResultModal({
                 <div className="bg-white border-t border-gray-200 px-8 py-5 shrink-0">
                     <div className="flex gap-4 justify-center">
                         <button
-                            onClick={onSave}
-                            className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-[#F6C844] to-[#EDB91C] text-[#2D3748] font-semibold rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                            onClick={handleSave}
+                            disabled={isSaving}
+                            className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-[#F6C844] to-[#EDB91C] text-[#2D3748] font-semibold rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >
-                            <Icon icon="mdi:content-save" width={20} height={20} />
-                            Save
+                            {isSaving ? (
+                                <>
+                                    <Icon icon="svg-spinners:3-dots-fade" width={20} height={20} />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Icon icon="mdi:content-save" width={20} height={20} />
+                                    Save
+                                </>
+                            )}
                         </button>
                         <button
                             onClick={onEdit}
@@ -92,8 +183,9 @@ export default function EssayResultModal({
                             Edit
                         </button>
                         <button
-                            onClick={onRemove}
-                            className="flex items-center gap-2 px-8 py-3 bg-white text-red-600 font-semibold rounded-full border-2 border-red-500 hover:bg-red-50 transform hover:scale-105 transition-all duration-200"
+                            onClick={handleDeleteClick}
+                            disabled={isDeleting}
+                            className="flex items-center gap-2 px-8 py-3 bg-white text-red-600 font-semibold rounded-full border-2 border-red-500 hover:bg-red-50 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >
                             <Icon icon="mdi:delete" width={20} height={20} />
                             Remove
@@ -101,6 +193,22 @@ export default function EssayResultModal({
                     </div>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Essay?"
+                message="Are you sure you want to delete this essay? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                isProcessing={isDeleting}
+                icon="mdi:delete-forever"
+                iconColor="text-red-600"
+                bgIconColor="bg-red-100"
+                confirmButtonClass="bg-red-600 hover:bg-red-700 text-white"
+            />
         </div>
     );
 }

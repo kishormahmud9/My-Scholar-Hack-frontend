@@ -117,7 +117,9 @@ export default function Table({
                     className="border border-[#F0F0F2] py-[22px] text-center px-3 text-black"
                   >
                     {/* If render function exists, use it — otherwise show plain data */}
-                    {head.render ? head.render(row, rowIdx) : row[head.key]}
+                    {
+                      head.render ? head.render(row, rowIdx + 1) : row[head.key]
+                    }
                   </td>
                 ))}
               </tr>
