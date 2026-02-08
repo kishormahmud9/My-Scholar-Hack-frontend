@@ -87,7 +87,12 @@ export default function ScholershipCard({ Details, onApply, isRecommended }) {
 
           {/* Apply Button */}
           <button
-            onClick={() => onApply && onApply(Details)}
+            onClick={() => {
+              if (onApply) {
+                // Pass Details with explicit subject included
+                onApply({ ...Details, subject });
+              }
+            }}
             className="w-full bg-gradient-to-r from-[#FFCA42] to-[#FFB834] hover:from-[#FFB834] hover:to-[#FFCA42] text-gray-900 font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
           >
             <span>Apply Now</span>

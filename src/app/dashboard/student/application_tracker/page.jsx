@@ -2,51 +2,16 @@
 import Table from "@/components/dashboard/Table";
 import Loader from "@/components/Loader";
 import { Icon } from "@iconify/react";
-import { useState, useEffect } from "react";
-
-// Simple modal for viewing essay content
-function EssayPreviewModal({ isOpen, onClose, title, content }) {
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl">
-                <div className="flex items-center justify-between p-4 border-b border-[#E2E4E9]">
-                    <h3 className="text-xl font-bold text-[#0C0C0D]">{title}</h3>
-                    <button onClick={onClose} className="p-2 hover:bg-[#F8F9FA] rounded-full transition-colors">
-                        <Icon icon="mdi:close" width="24" height="24" className="text-[#6D6E73]" />
-                    </button>
-                </div>
-                <div className="p-6 overflow-y-auto">
-                    <div className="prose prose-sm max-w-none text-[#4A4B57]">
-                        {content ? (
-                            <div className="whitespace-pre-wrap">{content}</div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-10 text-[#6D6E73]">
-                                <Icon icon="mdi:file-document-outline" width="48" height="48" className="mb-2 opacity-50" />
-                                <p>No content available to preview.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <div className="p-4 border-t border-[#E2E4E9] flex justify-end">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 bg-[#F8F9FA] text-[#0C0C0D] font-medium rounded-lg hover:bg-[#E2E4E9] transition-colors"
-                    >
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
+import { useState, useEffect, useRef } from "react";
+import { apiPatch } from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function ApplicationTracker() {
     const [applications, setApplications] = useState([]);
-    const [selectedEssay, setSelectedEssay] = useState(null); // { title, content }
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [openDropdownId, setOpenDropdownId] = useState(null);
+    const [updatingStatusId, setUpdatingStatusId] = useState(null);
+    const dropdownRefs = useRef({});
 
     useEffect(() => {
         // Load data from localStorage
@@ -60,31 +25,136 @@ export default function ApplicationTracker() {
         setLoading(false);
     }, []);
 
-    const handleEssayClick = (app) => {
-        if (app.essayTitle && app.essayTitle !== "—" && app.essayTitle !== "Pending Selection...") {
-            setSelectedEssay({ title: app.essayTitle, content: app.essayContent });
-            setIsModalOpen(true);
+
+    // Map old status values to new enum values
+    const normalizeStatus = (status) => {
+        const statusMap = {
+            "Done": "COMPLETED",
+            "DONE": "COMPLETED",
+            "Processing": "PROCESSING",
+            "PROCESSING": "PROCESSING",
+            "Draft": "DRAFT",
+            "DRAFT": "DRAFT",
+            "Failed": "FAILED",
+            "FAILED": "FAILED",
+            "Rejected": "REJECTED",
+            "REJECTED": "REJECTED"
+        };
+        return statusMap[status] || status || "DRAFT";
+    };
+
+    // Get status color classes
+    const getStatusStyles = (status) => {
+        const normalizedStatus = normalizeStatus(status);
+        const styles = {
+            DRAFT: "bg-gray-100 text-gray-700",
+            PROCESSING: "bg-[#FEF0C7] text-[#E46A11]",
+            COMPLETED: "bg-[#D1FADF] text-[#0D894F]",
+            FAILED: "bg-red-100 text-red-700",
+            REJECTED: "bg-red-50 text-red-600"
+        };
+        return styles[normalizedStatus] || styles.DRAFT;
+    };
+
+    const handleStatusChange = async (applicationId, newStatus) => {
+        console.log("handleStatusChange called:", { applicationId, newStatus });
+        
+        if (!applicationId) {
+            toast.error("Application ID is missing");
+            console.error("Application ID is missing");
+            return;
+        }
+
+        setUpdatingStatusId(applicationId);
+        setOpenDropdownId(null);
+
+        // Update local state immediately for better UX
+        const updateLocalState = () => {
+            setApplications(prev => {
+                console.log("Updating local state:", { prev, applicationId, newStatus });
+                const updated = prev.map(app => {
+                    if (app.id === applicationId) {
+                        console.log("Found matching app, updating status:", { oldStatus: app.status, newStatus });
+                        return { ...app, status: newStatus };
+                    }
+                    return app;
+                });
+                console.log("Updated applications:", updated);
+                // Update localStorage with the new state
+                localStorage.setItem("application_tracker_data", JSON.stringify(updated));
+                return updated;
+            });
+        };
+
+        // Update locally first for immediate feedback
+        updateLocalState();
+        toast.success("Status updated successfully");
+
+        // Try to sync with API in the background (silently fail if not available)
+        // Applications might only exist locally, which is fine
+        try {
+            const response = await apiPatch(`/application/status/${applicationId}`, {
+                status: newStatus
+            });
+
+            if (response?.success) {
+                // Successfully synced with backend
+                console.log("Status synced with backend");
+            }
+        } catch (error) {
+            // Silently handle API errors - local update is what matters
+            // The error "Application not found" is expected for local-only applications
+            console.log("API sync skipped (application may be local-only):", error?.message);
+        } finally {
+            setUpdatingStatusId(null);
         }
     };
 
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Check if click is outside all dropdowns
+            let clickedOutside = true;
+            Object.values(dropdownRefs.current).forEach(ref => {
+                if (ref && ref.contains(event.target)) {
+                    clickedOutside = false;
+                }
+            });
+            
+            if (clickedOutside) {
+                setOpenDropdownId(null);
+            }
+        };
+
+        if (openDropdownId !== null) {
+            // Use a small delay to ensure click events on dropdown items fire first
+            setTimeout(() => {
+                document.addEventListener("mousedown", handleClickOutside);
+            }, 0);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [openDropdownId]);
+
+    const statusOptions = ["DRAFT", "PROCESSING", "COMPLETED", "FAILED", "REJECTED"];
+
     const TableHeads = [
         { Title: "No", key: "no", width: "5%", render: (_, idx) => idx + 1 },
-        { Title: "Scholarship Title", key: "title", width: "25%" },
-        {
-            Title: "Essay",
-            key: "essayTitle",
-            width: "25%",
-            render: (row) => (
-                <button
-                    onClick={() => handleEssayClick(row)}
-                    disabled={!row.essayContent}
-                    className={`text-left font-medium truncate max-w-[200px] ${row.essayContent ? 'text-[#5069E5] hover:underline cursor-pointer' : 'text-[#6D6E73] cursor-default'}`}
-                >
-                    {row.essayTitle || "Pending Selection..."}
-                </button>
-            )
+        { Title: "Scholarship Title", key: "title", width: "35%" },
+        { 
+            Title: "Amount", 
+            key: "amount", 
+            width: "15%",
+            render: (row) => {
+                const amount = row.amount;
+                if (!amount || amount === 0 || amount === "0") {
+                    return <span className="text-green-600 font-semibold">Free</span>;
+                }
+                return <span>${amount}</span>;
+            }
         },
-        { Title: "Amount", key: "amount", width: "15%" },
         {
             Title: "Deadline",
             key: "deadline",
@@ -118,16 +188,66 @@ export default function ApplicationTracker() {
             Title: "Status",
             key: "status",
             width: "15%",
-            render: (row) => (
-                <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${row.status === "Done"
-                        ? "bg-[#D1FADF] text-[#0D894F]" // Green for Done
-                        : "bg-[#FEF0C7] text-[#E46A11]" // Orange for Processing
-                        }`}
-                >
-                    {row.status}
-                </span>
-            ),
+            render: (row) => {
+                const currentStatus = normalizeStatus(row.status);
+                const isOpen = openDropdownId === row.id;
+                const isUpdating = updatingStatusId === row.id;
+
+                return (
+                    <div className="relative flex justify-center" ref={el => dropdownRefs.current[row.id] = el}>
+                        <button
+                            onClick={() => setOpenDropdownId(isOpen ? null : row.id)}
+                            disabled={isUpdating}
+                            className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 transition-all ${getStatusStyles(currentStatus)} ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80 cursor-pointer'}`}
+                        >
+                            {isUpdating ? (
+                                <>
+                                    <Icon icon="svg-spinners:3-dots-fade" width={12} height={12} />
+                                    <span>Updating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>{currentStatus}</span>
+                                    <Icon 
+                                        icon={isOpen ? "mdi:chevron-up" : "mdi:chevron-down"} 
+                                        width={16} 
+                                        height={16} 
+                                    />
+                                </>
+                            )}
+                        </button>
+
+                        {isOpen && !isUpdating && (
+                            <div 
+                                className="absolute top-full mt-1 right-0 z-50 bg-white rounded-lg shadow-xl border border-gray-200 min-w-[160px] overflow-hidden"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {statusOptions.map((status) => (
+                                    <button
+                                        key={status}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            console.log("Changing status:", { applicationId: row.id, newStatus: status });
+                                            handleStatusChange(row.id, status);
+                                        }}
+                                        className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-2 ${
+                                            currentStatus === status
+                                                ? `${getStatusStyles(status)} font-bold`
+                                                : 'text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        {currentStatus === status && (
+                                            <Icon icon="mdi:check" width={16} height={16} />
+                                        )}
+                                        <span>{status}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                );
+            },
         },
     ];
 
@@ -151,14 +271,6 @@ export default function ApplicationTracker() {
                     </p>
                 </div>
             )}
-
-            {/* Essay Preview Modal */}
-            <EssayPreviewModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title={selectedEssay?.title}
-                content={selectedEssay?.content}
-            />
         </div>
     );
 }

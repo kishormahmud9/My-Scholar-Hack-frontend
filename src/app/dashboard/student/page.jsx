@@ -12,7 +12,9 @@ import { useQuery } from '@tanstack/react-query';
 export default function StudentDashboard() {
   const router = useRouter();
   const [dashboardData, setDashboardData] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [error, setError] = useState("");
   const { data: profileResponse } = useQuery({
     queryKey: ['userProfileDashboard'],
@@ -55,22 +57,48 @@ export default function StudentDashboard() {
 
     fetchDashboardStats();
     
-    // Background Sync Logic
-    const syncResult = async () => {
+    // Fetch Recommendations: POST first, then GET
+    const fetchRecommendations = async () => {
+      if (!isMounted) return;
+      setIsLoadingRecommendations(true);
+      
+      try {
+        // Step 1: POST to trigger recommendation generation
         try {
-            // Trigger sync (user sees existing data meanwhile)
-            await apiPost("/essay-recommendation/sync-scholarships");
-            
-            // Once synced, refetch the dashboard data to update UI
-            if (isMounted) fetchDashboardStats(true);
-        } catch (error) {
-            // console.error("Background sync failed:", error);
+          await apiPost("/essay-recommendation/generate");
+        } catch (postError) {
+          // Continue even if POST fails - recommendations might already exist
+          console.warn("POST to /essay-recommendation failed (may already exist):", postError);
         }
+        
+        // Step 2: GET to fetch the latest recommendations
+        const response = await apiGet("/essay-recommendation");
+
+        if (isMounted && response?.success) {
+          // Handle paginated response structure
+          const rawRecommendations = Array.isArray(response.data) 
+            ? response.data 
+            : (response.data?.data || []);
+          
+          // Just take the first 4 recommendations without filtering
+          const recommendationsList = rawRecommendations.slice(0, 4);
+          
+          setRecommendations(recommendationsList);
+        } else {
+          console.warn("Recommendations response not successful:", response);
+          setRecommendations([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch recommendations:", error);
+        setRecommendations([]);
+      } finally {
+        if (isMounted) setIsLoadingRecommendations(false);
+      }
     };
     
-    // Delay sync to prioritize UI rendering
+    // Delay recommendation fetch to prioritize UI rendering
     const timer = setTimeout(() => {
-        if (isMounted) syncResult();
+        if (isMounted) fetchRecommendations();
     }, 2000);
 
     return () => {
@@ -149,13 +177,8 @@ export default function StudentDashboard() {
   
   if (isLoading) return <Loader fullScreen={false} />;
 
-  // Filter recommendations
-  const filteredRecommendations = dashboardData?.recommendations?.filter(item => {
-     const scholarship = item.scholarship || {};
-     const hasAmount = scholarship.amount && Number(scholarship.amount) > 0;
-     const hasDescription = scholarship.description && scholarship.description.trim().length > 0;
-     return hasAmount && hasDescription;
-  }).slice(0, 4) || [];
+  // Use the fetched recommendations state
+  const filteredRecommendations = recommendations;
 
   const handleApply = (scholarship) => {
      // Save full scholarship details to local storage for the Essay page to consume
@@ -236,28 +259,45 @@ export default function StudentDashboard() {
             Recommended Scholarships
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {isLoading ? (
-              <div className="col-span-2 text-gray-500 text-center py-10 bg-white rounded-2xl border border-gray-100">
-                Loading recommendations...
-              </div>
-            ) : error ? (
-              <div className="col-span-2 text-red-500 text-center py-10 bg-white rounded-2xl border border-gray-100">
-                {error}
-              </div>
-            ) : error ? (
-              <div className="col-span-2 text-red-500 text-center py-10 bg-white rounded-2xl border border-gray-100">
-                {error}
+            {isLoadingRecommendations ? (
+              <div className="col-span-2 flex flex-col items-center justify-center py-16 bg-gradient-to-br from-[#FFF9E5] to-[#FFFAEC] rounded-2xl border-2 border-[#FFCA42]/20 shadow-lg">
+                <div className="relative">
+                  {/* Animated Spinner */}
+                  <div className="w-16 h-16 border-4 border-[#FFCA42]/20 border-t-[#FFCA42] rounded-full animate-spin mb-4"></div>
+                  {/* Pulsing Icon */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Icon 
+                      icon="mdi:school-outline" 
+                      className="text-[#FFCA42] animate-pulse" 
+                      width={32} 
+                      height={32} 
+                    />
+                  </div>
+                </div>
+                <div className="text-center space-y-2">
+                  <h3 className="text-lg font-bold text-gray-800 animate-pulse">
+                    Finding Perfect Scholarships
+                  </h3>
+                  <p className="text-sm text-gray-600 flex items-center gap-2 justify-center">
+                    <span className="inline-block w-2 h-2 bg-[#FFCA42] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="inline-block w-2 h-2 bg-[#FFCA42] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="inline-block w-2 h-2 bg-[#FFCA42] rounded-full animate-bounce"></span>
+                  </p>
+                </div>
               </div>
             ) : filteredRecommendations.length > 0 ? (
-              filteredRecommendations.map((item, idx) => (
-                <ScholershipCard
-                  key={idx}
-                  Details={item.scholarship}
-                  onApply={() => handleApply(item.scholarship)}
-                  compact={true}
-                  isRecommended={true}
-                />
-              ))
+              filteredRecommendations.map((item, idx) => {
+                const scholarship = item.scholarship || item;
+                return (
+                  <ScholershipCard
+                    key={idx}
+                    Details={scholarship}
+                    onApply={() => handleApply(scholarship)}
+                    compact={true}
+                    isRecommended={true}
+                  />
+                );
+              })
             ) : (
               <div className="col-span-2 text-gray-500 text-center py-10 bg-white rounded-2xl border border-gray-100">
                 No recommendations available.
