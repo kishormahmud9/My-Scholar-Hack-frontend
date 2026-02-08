@@ -79,7 +79,7 @@ export default function PricingSection() {
     );
   }
 
-  const pricingPlans = plansResponse?.data || [];
+  const pricingPlans = (plansResponse?.data || []).filter(plan => plan.isActive === true);
 
   return (
     <section
@@ -101,12 +101,12 @@ export default function PricingSection() {
             <SwitchBtn plans={plans} setPlans={setPlans} />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-10 lg:gap-14">
             {pricingPlans.map((plan, idx) => (
               <div
                 key={idx}
                 className={`border ${plan.name === "essay_hack_plus" ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
-                  } px-4 py-6 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
+                  } px-8 py-8 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
               >
                 <div className="flex flex-col h-full">
                   <h2 className="text-3xl font-semibold">{plan.name === "essay_hack" ? "Essay Hack" : plan.name === "essay_hack_plus" ? "Essay Hack Plus" : plan.name === "essay_hack_pro" ? "Essay Hack Pro" : plan.name}</h2>

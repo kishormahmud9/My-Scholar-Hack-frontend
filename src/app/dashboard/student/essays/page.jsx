@@ -52,11 +52,11 @@ export default function Essays() {
     useEffect(() => {
         const storedScholarship = localStorage.getItem("selected_scholarship_for_application");
         if (storedScholarship) {
-             const scholarship = JSON.parse(storedScholarship);
-             setActiveScholarship(scholarship);
-             
-             // Optionally pre-fill prompt if empty
-             setEssayPrompt(prev => prev || `Write an essay for the "${scholarship.title}" provided by ${scholarship.provider}. Description: ${scholarship.description || "N/A"}`);
+            const scholarship = JSON.parse(storedScholarship);
+            setActiveScholarship(scholarship);
+
+            // Optionally pre-fill prompt if empty
+            setEssayPrompt(prev => prev || `Write an essay for the "${scholarship.title}" provided by ${scholarship.provider}. Description: ${scholarship.description || "N/A"}`);
         }
 
         // Check for returning from Edit Essay page
@@ -69,7 +69,7 @@ export default function Essays() {
                 setGeneratedSubject(subject);
                 if (id) setGeneratedEssayId(id);
                 // Re-open the modal with updated data
-                setShowEssayModal(true); 
+                setShowEssayModal(true);
             }
             // Clear flag
             localStorage.removeItem("essay_edited");
@@ -122,7 +122,7 @@ export default function Essays() {
                 setRecordingTime(prev => prev + 1);
             }, 1000);
         } catch (error) {
-            
+
             alert('Could not access microphone. Please grant permission.');
         }
     };
@@ -165,9 +165,44 @@ export default function Essays() {
     };
 
     const handleGenerateEssay = async () => {
-        if (!essayPrompt.trim() && uploadedFiles.length === 0) {
-            alert("Please provide a prompt or upload files.");
+        // Check if user has provided any input
+        const hasPrompt = essayPrompt.trim().length > 0;
+        const hasFiles = uploadedFiles.length > 0;
+        const hasAudio = audioURL !== null || (isRecording && audioChunksRef.current.length > 0);
+
+        if (!hasPrompt && !hasFiles && !hasAudio) {
+            alert("Please provide a prompt, upload files, or record audio.");
             return;
+        }
+
+        // If recording is active (paused or not), stop it first to create audioURL
+        let audioBlobToUse = null;
+        if (isRecording && mediaRecorderRef.current) {
+            // Stop the media recorder
+            mediaRecorderRef.current.stop();
+
+            // Stop the recording interval
+            if (recordingIntervalRef.current) {
+                clearInterval(recordingIntervalRef.current);
+            }
+
+            // Stop the media stream tracks
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+            }
+
+            setIsRecording(false);
+            setIsPaused(false);
+
+            // Create blob directly from chunks if we have them
+            if (audioChunksRef.current.length > 0) {
+                audioBlobToUse = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                const url = URL.createObjectURL(audioBlobToUse);
+                setAudioURL(url);
+            }
+
+            // Wait a bit for the onstop event handler to complete (if it hasn't already)
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
 
         // Show loading modal and start progress animation
@@ -198,19 +233,28 @@ export default function Essays() {
 
             const formData = new FormData();
             formData.append("prompt", essayPrompt);
-            
+
             // Append Profile Data if available
             if (userProfileData) {
                 formData.append("userProfile", JSON.stringify(userProfileData));
             }
-            
+
             // 2. Files -> 'document'
             uploadedFiles.forEach((file) => {
                 formData.append("document", file);
             });
 
             // 2. Audio -> 'audio'
-            if (audioURL) {
+            if (audioBlobToUse) {
+                // Use the blob we just created from active recording
+                try {
+                    const audioFile = new File([audioBlobToUse], "voice_instruction.wav", { type: "audio/wav" });
+                    formData.append("audio", audioFile);
+                } catch (e) {
+                    console.error("Failed to append audio:", e);
+                }
+            } else if (audioURL) {
+                // Use existing audioURL (from previously stopped recording)
                 try {
                     const audioBlob = await fetch(audioURL).then(r => r.blob());
                     // Create a File object from the Blob
@@ -225,7 +269,7 @@ export default function Essays() {
             // Use active scholarship context data if available, otherwise defaults
             const title = activeScholarship?.title || "Generated Essay";
             const subject = activeScholarship?.subject || "General";
-            
+
             formData.append("title", title);
             formData.append("subject", subject);
 
@@ -260,12 +304,12 @@ export default function Essays() {
                     essayContent = responseData;
                 } else if (response?.message) {
                     // Sometimes message contains the text if it's a simple return
-                    essayContent = response.message; 
+                    essayContent = response.message;
                 }
 
                 // Capture ID - prioritize the one associated with the content
                 const essayId = responseData?.id || response?.id;
-                
+
                 // Capture Subject
                 const essaySubject = responseData?.subject || response?.subject || activeScholarship?.subject || "General";
 
@@ -319,7 +363,7 @@ export default function Essays() {
                 });
                 // Optionally clear active context after successful save
                 localStorage.removeItem("selected_scholarship_for_application");
-                localStorage.removeItem("current_active_scholarship"); 
+                localStorage.removeItem("current_active_scholarship");
             } catch (error) {
                 console.error("Failed to save application linkage:", error);
                 alert("Essay saved locally, but failed to link to application.");
@@ -392,25 +436,25 @@ export default function Essays() {
                     {/* Active Scholarship Context */}
                     {activeScholarship && (
                         <div className="mb-4 bg-amber-50 p-4 rounded-lg border border-amber-200">
-                             <div className="flex justify-between items-start mb-1">
+                            <div className="flex justify-between items-start mb-1">
                                 <h3 className="font-semibold text-gray-800 text-sm">Applying for: {activeScholarship.title}</h3>
-                                <button 
-                                   onClick={() => {
-                                      setActiveScholarship(null);
-                                      localStorage.removeItem("selected_scholarship_for_application");
-                                      setEssayPrompt("");
-                                   }}
-                                   className="text-gray-400 hover:text-red-500"
+                                <button
+                                    onClick={() => {
+                                        setActiveScholarship(null);
+                                        localStorage.removeItem("selected_scholarship_for_application");
+                                        setEssayPrompt("");
+                                    }}
+                                    className="text-gray-400 hover:text-red-500"
                                 >
-                                   <Icon icon="mdi:close" width={16} height={16} />
+                                    <Icon icon="mdi:close" width={16} height={16} />
                                 </button>
-                             </div>
-                             {activeScholarship.subject && <p className="text-xs text-gray-500 mb-1">Subject: {activeScholarship.subject}</p>}
-                             {activeScholarship.description && (
+                            </div>
+                            {activeScholarship.subject && <p className="text-xs text-gray-500 mb-1">Subject: {activeScholarship.subject}</p>}
+                            {activeScholarship.description && (
                                 <p className="text-xs text-gray-600 line-clamp-2 italic">
-                                   "{activeScholarship.description}"
+                                    "{activeScholarship.description}"
                                 </p>
-                             )}
+                            )}
                         </div>
                     )}
 

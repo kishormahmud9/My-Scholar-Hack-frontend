@@ -56,16 +56,11 @@ export default function EditEssay() {
     const handleSave = async () => {
         setLoading(true);
         try {
-            // Update local storage so the essay page can reload it if needed
-            // Also update API if ID exists
-            
+          
             if (essayData.id) {
                  const response = await apiPatch(`/generate-essay/update/${essayData.id}`, {
                     essay: essayData.essay,
                     subject: essayData.subject
-                    // API might expect 'content' instead of 'essay', but previous context suggested 'essay' or 'contentFinal'
-                    // verification needed on endpoint payload structure if known. 
-                    // Assuming 'essay' based on previous context.
                 });
                 
                 if (!response.success && response.message) {
