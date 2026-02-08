@@ -278,7 +278,7 @@ export default function Subscriptions() {
                     </div>
 
                     {/* Create Plan Button */}
-                    <PrimaryBtn title={"Create Plan"} style={"rounded-full"} hendleClick={openCreateModal} />
+                    {/* <PrimaryBtn title={"Create Plan"} style={"rounded-full"} hendleClick={openCreateModal} /> */}
                 </div>
             </div>
 

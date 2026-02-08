@@ -1,4 +1,4 @@
-"use client";
+    "use client";
 import AdminStatsCard from "@/components/dashboard/Admin/AdminStatsCard";
 import SalesTrackGraph from "@/components/dashboard/Admin/SalesTrackGraph";
 import SubscriptionPieChart from "@/components/dashboard/Admin/SubscriptionPieChart";
@@ -57,7 +57,7 @@ export default function AdminDashboard() {
         {
             icon: "solar:dollar-linear",
             label: "Monthly Rev",
-            value: "$ " + summary?.monthlyRevenue,
+            value: "$ " + (summary?.monthlyRevenue ? Number(summary.monthlyRevenue).toFixed(2) : "0.00"),
             trend: "down",
             trendValue: 5,
             iconColor: "text-orange-500",
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
         {
             icon: "hugeicons:note-02",
             label: "Total Essays",
-            value: summary?.totalEssays,
+            value: summary?.totalEssays,    
             trend: "up",
             trendValue: 10,
             iconColor: "text-yellow-600",

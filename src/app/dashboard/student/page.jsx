@@ -64,7 +64,7 @@ export default function StudentDashboard() {
             // Once synced, refetch the dashboard data to update UI
             if (isMounted) fetchDashboardStats(true);
         } catch (error) {
-            console.error("Background sync failed:", error);
+            // console.error("Background sync failed:", error);
         }
     };
     

@@ -1,4 +1,4 @@
-import { Toaster } from "react-hot-toast";
+
 import ClientProvider from "@/components/ClientProvider/ClientProvider";
 
 export default function AuthLayout({ children }) {
@@ -6,7 +6,6 @@ export default function AuthLayout({ children }) {
         <>
             <ClientProvider>
                 {children}
-                <Toaster />
             </ClientProvider>
         </>
     );
