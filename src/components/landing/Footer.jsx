@@ -18,8 +18,14 @@ export default function Footer() {
     { Title: "FAQ", path: "/faq" },
   ];
   const contacts = [
+<<<<<<< HEAD
     "+1 682-259-8741",
     "504 Wildseed Way, Mansfield, TX 76063",
+=======
+    "682-2598741",
+    "504 Wildseed Way Mansfield",
+    "TX 76063",
+>>>>>>> c9c2cd112e9f8a83ee7911ab4d7e95c3841d753d
   ];
 
   if (

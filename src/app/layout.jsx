@@ -1,8 +1,7 @@
 
 import { Urbanist } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/landing/Header";
-import Footer from "@/components/landing/Footer";
+import SiteChrome from "@/components/layout/SiteChrome";
 import { Toaster } from "react-hot-toast";
 import ClientProvider from "@/components/ClientProvider/ClientProvider";
 
@@ -22,11 +21,10 @@ export default function RootLayout({ children }) {
     <html lang="en" data-theme="light">
       <body className={`${urbanist.className} antialiased`}>
         <ClientProvider>
-          <Header />
-
-          {children}
-          <Footer />
+          <SiteChrome>{children}</SiteChrome>
         </ClientProvider>
+
+        <Toaster />
       </body>
     </html>
   );

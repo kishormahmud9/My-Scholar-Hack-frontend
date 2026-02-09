@@ -2,6 +2,7 @@
 import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
 import { apiPatch } from "@/lib/api"; // Ensure apiPatch matches your apiService export
+import toast from "react-hot-toast";
 
 export default function EditEssayModal({
     isOpen,
@@ -14,11 +15,19 @@ export default function EditEssayModal({
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (essay) {
+        if (essay && isOpen) {
             setTitle(essay.title || "");
-            setContent(essay.content || essay.essay || ""); // Handle varied response keys
+            // Handle all possible content field names from API
+            const essayContent = essay.contentFinal || essay.content || essay.essay || "";
+            setContent(essayContent);
+            // Debug log to see what we're receiving
+            
+        } else if (!isOpen) {
+            // Reset when modal closes
+            setTitle("");
+            setContent("");
         }
-    }, [essay]);
+    }, [essay, isOpen]);
 
     if (!isOpen) return null;
 
@@ -27,18 +36,19 @@ export default function EditEssayModal({
         try {
             const response = await apiPatch(`/generate-essay/update/${essay.id}`, {
                 title,
-                essay: content // Payload usually expects 'essay' or 'content', checking context
+                contentFinal: content, // Payload usually expects 'essay' or 'content', checking context
             });
             
             if (response.success) {
-                onUpdate(response.data); // specific update logic
-                onClose();
+               toast.success("Essay updated successfully");
+               onClose();
+               
             } else {
-                alert(response.message || "Failed to update essay");
+                toast.error(response.message || "Failed to update essay");
             }
         } catch (error) {
             console.error("Update failed:", error);
-            alert("Failed to update essay. " + (error.message || ""));
+            toast.error("Failed to update essay. " + (error.message || ""));
         } finally {
             setLoading(false);
         }

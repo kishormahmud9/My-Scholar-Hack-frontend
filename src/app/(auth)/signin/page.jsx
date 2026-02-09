@@ -52,6 +52,9 @@ export default function SignInPage() {
         const dashboardRoute = getDashboardRoute();
         console.log("Redirecting to:", dashboardRoute);
 
+        // Show success toast before navigation
+        toast.success("Login successful");
+        
         // Redirect logic based on plan status
         if (!user.isPlan && user.role === "STUDENT") {
            // No plan -> Redirect to Home
@@ -61,8 +64,6 @@ export default function SignInPage() {
            // Has plan (or Admin) -> Redirect to Dashboard
            router.push(dashboardRoute);
         }
-        
-        toast.success("Login successful");
       } else {
         console.warn("Login failed: Success flag false", response);
         // Handle unexpected response structure

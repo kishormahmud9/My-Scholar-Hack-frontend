@@ -88,9 +88,40 @@ function ViewEssayContent() {
     setIsCompareModalOpen(true);
   };
 
-  const handleEditClick = (row) => {
-    setSelectedEssay(row);
-    setIsEditModalOpen(true);
+  const handleEditClick = async (row) => {
+    try {
+      setLoading(true);
+      // Fetch full essay details to ensure we have the content
+      const response = await apiGet(`/generate-essay/${row.id}`);
+      console.log("Edit click - API response:", response);
+      if (response.success) {
+        console.log("Edit click - Essay data:", response.data);
+        console.log("Edit click - Content fields:", {
+          contentFinal: response.data?.contentFinal,
+          content: response.data?.content,
+          essay: response.data?.essay
+        });
+        setSelectedEssay(response.data);
+        // Small delay to ensure state is set before opening modal
+        setTimeout(() => {
+          setIsEditModalOpen(true);
+        }, 100);
+      } else {
+        // Fallback to row data if fetch fails
+        console.warn("Edit click - API response not successful, using row data");
+        setSelectedEssay(row);
+        setIsEditModalOpen(true);
+        alert("Failed to fetch essay details. Some content may be missing.");
+      }
+    } catch (error) {
+      console.error("Error fetching essay details:", error);
+      // Fallback to row data if fetch fails
+      setSelectedEssay(row);
+      setIsEditModalOpen(true);
+      alert("Failed to load essay content. Some content may be missing.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUpdateSuccess = (updatedEssay) => {
@@ -142,8 +173,41 @@ function ViewEssayContent() {
   };
 
   const TableHeads = [
-    { Title: "ID", key: "id", width: "10%" },
-    { Title: "Essay Title", key: "title", width: "40%" },
+    { 
+      Title: "ID", 
+      key: "idx", 
+      width: "10%",
+      render: (row, index) => {
+        // Calculate global sequential number based on filtered essays
+        const globalIndex = filteredEssays.findIndex(e => e.id === row.id);
+        return globalIndex + 1;
+      }
+    },
+    { 
+      Title: "Essay Title", 
+      key: "title", 
+      width: "40%",
+      render: (row) => {
+        const title = row.title || "";
+        return (
+          <div 
+            className="text-left px-2 cursor-help"
+            title={title}
+            style={{
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              wordBreak: "break-word"
+            }}
+          >
+            {title}
+          </div>
+        );
+      }
+    },
     { Title: "Subject", key: "subject", width: "30%" },
     {
       Title: "Edit",
