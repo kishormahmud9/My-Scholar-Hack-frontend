@@ -58,7 +58,6 @@ export default function StudentDashboard() {
     };
 
     fetchDashboardStats();
-<<<<<<< HEAD
 
     // Background Sync Logic
     const syncResult = async () => {
@@ -76,51 +75,6 @@ export default function StudentDashboard() {
     // Delay sync to prioritize UI rendering
     const timer = setTimeout(() => {
       if (isMounted) syncResult();
-=======
-    
-    // Fetch Recommendations: POST first, then GET
-    const fetchRecommendations = async () => {
-      if (!isMounted) return;
-      setIsLoadingRecommendations(true);
-      
-      try {
-        // Step 1: POST to trigger recommendation generation
-        try {
-          await apiPost("/essay-recommendation/generate");
-        } catch (postError) {
-          // Continue even if POST fails - recommendations might already exist
-          console.warn("POST to /essay-recommendation failed (may already exist):", postError);
-        }
-        
-        // Step 2: GET to fetch the latest recommendations
-        const response = await apiGet("/essay-recommendation");
-
-        if (isMounted && response?.success) {
-          // Handle paginated response structure
-          const rawRecommendations = Array.isArray(response.data) 
-            ? response.data 
-            : (response.data?.data || []);
-          
-          // Just take the first 4 recommendations without filtering
-          const recommendationsList = rawRecommendations.slice(0, 4);
-          
-          setRecommendations(recommendationsList);
-        } else {
-          console.warn("Recommendations response not successful:", response);
-          setRecommendations([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch recommendations:", error);
-        setRecommendations([]);
-      } finally {
-        if (isMounted) setIsLoadingRecommendations(false);
-      }
-    };
-    
-    // Delay recommendation fetch to prioritize UI rendering
-    const timer = setTimeout(() => {
-        if (isMounted) fetchRecommendations();
->>>>>>> c9c2cd112e9f8a83ee7911ab4d7e95c3841d753d
     }, 2000);
 
     return () => {
@@ -209,7 +163,6 @@ export default function StudentDashboard() {
 
   if (isLoading) return <Loader fullScreen={false} />;
 
-<<<<<<< HEAD
   // Filter recommendations
   const filteredRecommendations =
     dashboardData?.recommendations
@@ -221,10 +174,6 @@ export default function StudentDashboard() {
         return hasAmount && hasDescription;
       })
       .slice(0, 4) || [];
-=======
-  // Use the fetched recommendations state
-  const filteredRecommendations = recommendations;
->>>>>>> c9c2cd112e9f8a83ee7911ab4d7e95c3841d753d
 
   const handleApply = (scholarship) => {
     // Save full scholarship details to local storage for the Essay page to consume
