@@ -7,7 +7,7 @@ import Table from "@/components/dashboard/Table";
 import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
 import { getDashboardStats, apiPost, apiGet } from "@/lib/api";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -15,16 +15,16 @@ export default function StudentDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const { data: profileResponse } = useQuery({
-    queryKey: ['userProfileDashboard'],
+    queryKey: ["userProfileDashboard"],
     queryFn: async () => {
-       try {
-          const response = await apiGet('/profile/me');
-          return response;
-       } catch (error) {
-          return null; // Handle error silently or as needed
-       }
+      try {
+        const response = await apiGet("/profile/me");
+        return response;
+      } catch (error) {
+        return null; // Handle error silently or as needed
+      }
     },
-    staleTime: 5 * 60 * 1000, 
+    staleTime: 5 * 60 * 1000,
   });
 
   const userData = profileResponse?.data;
@@ -47,30 +47,32 @@ export default function StudentDashboard() {
         }
       } catch (err) {
         if (!isMounted) return;
-        setError(err?.message || "Failed to load dashboard data. Try again later.");
+        setError(
+          err?.message || "Failed to load dashboard data. Try again later.",
+        );
       } finally {
         if (isMounted) setIsLoading(false);
       }
     };
 
     fetchDashboardStats();
-    
+
     // Background Sync Logic
     const syncResult = async () => {
-        try {
-            // Trigger sync (user sees existing data meanwhile)
-            await apiPost("/essay-recommendation/sync-scholarships");
-            
-            // Once synced, refetch the dashboard data to update UI
-            if (isMounted) fetchDashboardStats(true);
-        } catch (error) {
-            console.error("Background sync failed:", error);
-        }
+      try {
+        // Trigger sync (user sees existing data meanwhile)
+        await apiPost("/essay-recommendation/sync-scholarships");
+
+        // Once synced, refetch the dashboard data to update UI
+        if (isMounted) fetchDashboardStats(true);
+      } catch (error) {
+        console.error("Background sync failed:", error);
+      }
     };
-    
+
     // Delay sync to prioritize UI rendering
     const timer = setTimeout(() => {
-        if (isMounted) syncResult();
+      if (isMounted) syncResult();
     }, 2000);
 
     return () => {
@@ -97,10 +99,15 @@ export default function StudentDashboard() {
       width: "20%",
       render: (row) => (
         <div className="flex justify-center">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "SAVED" ? "bg-green-100 text-green-700" :
-            row.status === "EDITED" ? "bg-blue-100 text-blue-700" :
-              "bg-gray-100 text-gray-700"
-            }`}>
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${
+              row.status === "SAVED"
+                ? "bg-green-100 text-green-700"
+                : row.status === "EDITED"
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-gray-100 text-gray-700"
+            }`}
+          >
             {row.status}
           </span>
         </div>
@@ -113,7 +120,9 @@ export default function StudentDashboard() {
       render: (row) => (
         <div className="flex justify-center">
           <button
-            onClick={() => router.push(`/dashboard/student/view_essay?id=${row.id}`)}
+            onClick={() =>
+              router.push(`/dashboard/student/view_essay?id=${row.id}`)
+            }
             className="w-10 h-10 rounded-lg border border-[#FFCA42] text-[#FFCA42] flex items-center justify-center hover:bg-[#FFF9E5] transition-colors"
           >
             <Icon icon="lucide:eye" width={20} height={20} />
@@ -134,57 +143,74 @@ export default function StudentDashboard() {
     {
       icon: "mdi:school-outline",
       label: "Scholarship Added",
-      value: dashboardData?.scholarshipAdded?.toString().padStart(2, "0") || "00",
+      value:
+        dashboardData?.scholarshipAdded?.toString().padStart(2, "0") || "00",
       iconColor: "text-[#36B37E]",
       bgIconColor: "bg-[#EBF9F3]",
     },
     {
       icon: "mdi:clock-time-four-outline",
       label: "Upcoming Application Datelines",
-      value: dashboardData?.upcomingDeadlineCount?.toString().padStart(2, "0") || "00",
+      value:
+        dashboardData?.upcomingDeadlineCount?.toString().padStart(2, "0") ||
+        "00",
       iconColor: "text-[#FF5630]",
       bgIconColor: "bg-[#FFF0ED]",
     },
   ];
-  
+
   if (isLoading) return <Loader fullScreen={false} />;
 
   // Filter recommendations
-  const filteredRecommendations = dashboardData?.recommendations?.filter(item => {
-     const scholarship = item.scholarship || {};
-     const hasAmount = scholarship.amount && Number(scholarship.amount) > 0;
-     const hasDescription = scholarship.description && scholarship.description.trim().length > 0;
-     return hasAmount && hasDescription;
-  }).slice(0, 4) || [];
+  const filteredRecommendations =
+    dashboardData?.recommendations
+      ?.filter((item) => {
+        const scholarship = item.scholarship || {};
+        const hasAmount = scholarship.amount && Number(scholarship.amount) > 0;
+        const hasDescription =
+          scholarship.description && scholarship.description.trim().length > 0;
+        return hasAmount && hasDescription;
+      })
+      .slice(0, 4) || [];
 
   const handleApply = (scholarship) => {
-     // Save full scholarship details to local storage for the Essay page to consume
-     localStorage.setItem("selected_scholarship_for_application", JSON.stringify(scholarship));
+    // Save full scholarship details to local storage for the Essay page to consume
+    localStorage.setItem(
+      "selected_scholarship_for_application",
+      JSON.stringify(scholarship),
+    );
 
-     // Also update Application Tracker as "Processing"
-     const currentData = JSON.parse(localStorage.getItem("application_tracker_data") || "[]");
-     const existingIndex = currentData.findIndex(item => item.id === scholarship.id);
-     
-     if (existingIndex === -1) {
-         currentData.push({
-             id: scholarship.id,
-             title: scholarship.title,
-             provider: scholarship.provider,
-             subject: scholarship.subject,
-             description: scholarship.description, // Saving description as requested
-             essayTitle: "Pending Selection...",
-             essayContent: "",
-             amount: scholarship.amount,
-             deadline: scholarship.deadline,
-             status: "Processing"
-         });
-         localStorage.setItem("application_tracker_data", JSON.stringify(currentData));
-     }
-     
-     // Set active for the session
-     localStorage.setItem("current_active_scholarship", scholarship.id);
+    // Also update Application Tracker as "Processing"
+    const currentData = JSON.parse(
+      localStorage.getItem("application_tracker_data") || "[]",
+    );
+    const existingIndex = currentData.findIndex(
+      (item) => item.id === scholarship.id,
+    );
 
-     router.push("/dashboard/student/essays");
+    if (existingIndex === -1) {
+      currentData.push({
+        id: scholarship.id,
+        title: scholarship.title,
+        provider: scholarship.provider,
+        subject: scholarship.subject,
+        description: scholarship.description, // Saving description as requested
+        essayTitle: "Pending Selection...",
+        essayContent: "",
+        amount: scholarship.amount,
+        deadline: scholarship.deadline,
+        status: "Processing",
+      });
+      localStorage.setItem(
+        "application_tracker_data",
+        JSON.stringify(currentData),
+      );
+    }
+
+    // Set active for the session
+    localStorage.setItem("current_active_scholarship", scholarship.id);
+
+    router.push("/dashboard/student/essays");
   };
 
   return (
@@ -219,13 +245,17 @@ export default function StudentDashboard() {
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             {isLoading ? (
-              <div className="text-center py-20 text-gray-500">Loading essays...</div>
+              <div className="text-center py-20 text-gray-500">
+                Loading essays...
+              </div>
             ) : error ? (
               <div className="text-center py-20 text-red-500">{error}</div>
             ) : dashboardData?.essays?.length > 0 ? (
               <Table TableHeads={TableHeads} TableRows={dashboardData.essays} />
             ) : (
-              <div className="text-center py-20 text-gray-500">No essays found. Start writing!</div>
+              <div className="text-center py-20 text-gray-500">
+                No essays found. Start writing!
+              </div>
             )}
           </div>
         </div>
@@ -233,7 +263,7 @@ export default function StudentDashboard() {
         {/* Right Column: Recommended Scholarships */}
         <div className="w-full">
           <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Recommended Scholarships
+            Featured Scholarships
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {isLoading ? (

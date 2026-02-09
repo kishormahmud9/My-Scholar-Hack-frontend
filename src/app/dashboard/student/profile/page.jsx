@@ -19,7 +19,7 @@ const TABS = [
     { id: 'academic', label: 'Academic Interests', component: AcademicInterests },
     { id: 'extracurricular', label: 'Extra Curricular Activities', component: ExtraCurricular },
     { id: 'community', label: 'Community Service (Volunteer Work)', component: CommunityService },
-    { id: 'family', label: 'Community Service (Family Background)', component: FamilyBackground },
+    { id: 'family', label: 'Family Background', component: FamilyBackground },
     { id: 'experiences', label: 'Unique Experiences', component: UniqueExperiences },
     { id: 'identity', label: 'Diversity and Identity', component: DiversityIdentity },
     { id: 'scholarship', label: 'Scholarship Specific Info', component: ScholarshipInfo },

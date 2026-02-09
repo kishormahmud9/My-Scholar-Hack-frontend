@@ -18,9 +18,8 @@ export default function Footer() {
     { Title: "FAQ", path: "/faq" },
   ];
   const contacts = [
-    "01358-854545",
-    "support@myscholarhack.com.",
-    "2115 Ash Dr. San Jose,South Dakota 2584714",
+    "+1 682-259-8741",
+    "504 Wildseed Way, Mansfield, TX 76063",
   ];
 
   if (
@@ -96,7 +95,7 @@ export default function Footer() {
           </div>
           <div className="text-white border-t-2 border-[#D9D9D9] flex flex-col-reverse md:flex-row items-center justify-between mt-10 lg:mt-[72px] pt-4 gap-y-4">
             <p className="text-center md:text-left">
-              © 2025 MyScholarHack. All rights reserved.
+              © {new Date().getFullYear()} MyScholarHack. All rights reserved.
             </p>
             <p>Privacy and Policy</p>
           </div>

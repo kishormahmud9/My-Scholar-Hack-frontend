@@ -195,9 +195,6 @@ export default function SubscriptionsPlan() {
                             <h3 className="text-2xl font-bold text-gray-900 mb-3">
                                 {currentPlan.name}
                             </h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                {currentPlan.description}
-                            </p>
                         </div>
 
                         {/* Right Side - Pricing & Features */}

@@ -134,7 +134,7 @@ export default function AllScholarship() {
     <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-3">
-          All Scholarships
+          Scholarships
         </h1>
         <p className="text-sm sm:text-base font-medium text-gray-600 max-w-4xl leading-relaxed">
           We collect scholarship information from various reliable sources and
@@ -147,7 +147,7 @@ export default function AllScholarship() {
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-          Recommended Scholarships
+          Featured Scholarships
         </h2>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">

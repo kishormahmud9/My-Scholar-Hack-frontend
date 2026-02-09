@@ -381,7 +381,7 @@ export default function Essays() {
             <div className="w-full max-w-[600px]">
                 <div className="text-center mb-6">
                     <h1 className="text-[44px] font-bold text-[#2D3748] mb-2">
-                        Create a Essay
+                        Create an Essay
                     </h1>
                     <p className="text-[17px] text-[#718096]">
                         Here's your progress this week.

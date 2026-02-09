@@ -5,7 +5,7 @@ export const navLink_Student = [
     icon: "mage:dashboard",
   },
   {
-    title: "All Scholarship",
+    title: "Scholarships",
     path: "/dashboard/student/all_scholarship",
     icon: "fluent:hat-graduation-12-regular",
   },
