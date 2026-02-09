@@ -7,7 +7,7 @@ export default function AboutPage() {
       <Container>
         <div className="py-20">
           <div>
-            <h3 className="text-3xl font-semibold mb-2.5">Our Story</h3>
+            <h3 className="text-3xl font-semibold mb-2.5">About Us</h3>
             <p className="text-xl font-normal text-[#404040]">
               Applying for scholarships is one of the most overwhelming — and misunderstood — parts of the college process. Families are often left navigating vague prompts, tight deadlines, and high stakes with little guidance, while students struggle to translate who they are into clear, compelling writing — all while trying to stay authentic. We created this AI Scholarship Agent to change that experience.
               <br /> <br />
@@ -86,6 +86,12 @@ export default function AboutPage() {
               </p>
             </div>
           </div>
+
+          <p className="text-xl font-normal text-[#404040] mt-5">
+            Our goal isn’t just better essays — it’s a healthier, more
+            thoughtful scholarship process that helps students grow while
+            staying true to who they are.
+          </p>
         </div>
 
         <section className="pt-10 lg:pt-[90px] pb-10 lg:pb-[72px] flex flex-col items-center justify-center gap-y-10 lg:gap-y-[60px]">
@@ -141,7 +147,8 @@ export default function AboutPage() {
                   Co-Founder & CTO, MyScholarHack
                 </p>
                 <p className="text-base text-[#404040]">
-                  Built MyScholarHack after winning multiple merit scholarships; leads product vision and student outreach.
+                  Built MyScholarHack after winning multiple merit scholarships;
+                  leads product vision and student outreach.
                 </p>
               </div>
             </div>
