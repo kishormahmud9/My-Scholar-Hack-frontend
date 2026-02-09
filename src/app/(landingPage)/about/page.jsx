@@ -7,69 +7,75 @@ export default function AboutPage() {
       <Container>
         <div className="py-20">
           <div>
-            <h3 className="text-3xl font-semibold mb-2.5">Our Story</h3>
+            <h3 className="text-3xl font-semibold mb-2.5">About Us</h3>
             <p className="text-xl font-normal text-[#404040]">
-              College is expensive. Scholarships are the answer. But writing
-              dozens of unique, compelling essays? That's the problem. We
-              created MyScholarHack because we lived this struggle ourselves.
-              Staring at blank screens at 2 AM, trying to sound "impressive"
-              while meeting impossible deadlines. Copying and pasting the same
-              essay to different scholarships and hoping no one noticed.
-              Watching friends give up on essay scholarships entirely because
-              they "didn't have time." When AI essay tools emerged, we were
-              hopeful—until we tried them. They generated generic garbage that
-              sounded nothing like us. Worse, they made up achievements we
-              didn't have. Scholarship committees can tell if essays are AI
-              written, and so could detection software. We knew there had to be
-              a better way
+              Applying for scholarships is one of the most overwhelming — and
+              misunderstood — parts of the college process. Families are often
+              left navigating vague prompts, tight deadlines, and high stakes
+              with little guidance, while students struggle to translate who
+              they are into clear, compelling writing — all while trying to stay
+              authentic. We created this AI Scholarship Agent to change that
+              experience. Our work sits at the intersection of college planning,
+              student development, and responsible technology. We believe
+              students deserve tools that support their thinking, not replace it
+              — tools that help them clarify their ideas, organize their
+              experiences, and communicate in their own voice with confidence.
+              This platform was built for students who want to do their own work
+              — and for parents and educators who want ethical, transparent
+              support that respects student voice and institutional values. No
+              shortcuts. No guarantees. Just smart structure, clarity, and
+              guidance.
             </p>
           </div>
           <div className="my-9">
             <h3 className="text-3xl font-semibold mb-2.5">Our Misson</h3>
             <p className="text-xl font-normal text-[#404040]">
-              To help 100,000 students win scholarships by 2027. We're building
-              the tool we wish we'd had—one that respects your authenticity,
-              amplifies your voice, and makes applying for scholarships
-              something you can actually accomplish without sacrificing your
-              integrity or your sleep
+              Our mission is to help students express their real stories clearly
+              and confidently — while keeping the scholarship process ethical,
+              student-led, and aligned with how colleges and institutions expect
+              work to be done.
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row items-start gap-10 lg:gap-14">
+          <div className="grid lg:grid-cols-2 justify-between gap-10 lg:gap-14">
             <div>
-              <h3 className="text-3xl font-semibold mb-2.5">
-                What Makes Us Different
-              </h3>
+              <h3 className="text-3xl font-semibold mb-2.5">We believe:</h3>
               <p className="text-xl font-normal text-[#404040]">
-                We believe in authenticity. Your real story is compelling
-                enough. You don't need to fabricate experiences or sound like
-                someone you're not. You just need help articulating what makes
-                you special. We believe in your voice. AI should help you
-                communicate better, not replace your voice with a robot's.
-                That's why we built technology that learns how YOU write and
-                helps you tell your story your way. We believe scholarships
-                should be accessible. At $9.99-$29.99/month, MyScholarHack costs
-                less than one textbook—and can help you win thousands of dollars
-                in free money for school.
+                <li>Students should remain the authors of their own words</li>
+                <li>AI should act as a coach and guide, not a replacement</li>
+                <li>
+                  Scholarship writing should develop self-awareness, reflection,
+                  and communication skills
+                </li>
+                <li>
+                  Families deserve tools that reduce stress, not increase
+                  pressure
+                </li>
+                <li>
+                  Educators and counselors should feel confident recommending
+                  the resources students use
+                </li>
               </p>
             </div>
 
             <div>
               <h3 className="text-3xl font-semibold mb-2.5">
-                What Makes Us Different
+                That’s why this platform is designed to:
               </h3>
               <p className="text-xl font-normal text-[#404040]">
-                Authenticity First We never generate fake experiences. If it's
-                not true to you, it doesn't go in your essay Privacy Matters
-                Your documents, your data, your control. We encrypt everything
-                and never sell your information Students Win We succeed when you
-                win scholarships. That's it. That's the metric that matters.
-                Continuous Improvement We're always listening to student
-                feedback and making MyScholarHack better. Your suggestions shape
-                our roadmap
+                <li>Preserve each student’s unique voice</li>
+                <li>Encourage original thinking and reflection</li>
+                <li>Support planning, drafting, and revision responsibly</li>
+                <li>Help families manage opportunities without overwhelm</li>
               </p>
             </div>
           </div>
+
+          <p className="text-xl font-normal text-[#404040] mt-5">
+            Our goal isn’t just better essays — it’s a healthier, more
+            thoughtful scholarship process that helps students grow while
+            staying true to who they are.
+          </p>
         </div>
 
         <section className="pt-20 lg:pt-[120px] pb-10 lg:pb-[72px] flex flex-col items-center justify-center gap-y-10 lg:gap-y-[60px]">
@@ -125,7 +131,8 @@ export default function AboutPage() {
                   Co-Founder & CTO, MyScholarHack
                 </p>
                 <p className="text-base text-[#404040]">
-                  Built MyScholarHack after winning multiple merit scholarships; leads product vision and student outreach.
+                  Built MyScholarHack after winning multiple merit scholarships;
+                  leads product vision and student outreach.
                 </p>
               </div>
             </div>

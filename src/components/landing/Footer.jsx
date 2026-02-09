@@ -18,9 +18,9 @@ export default function Footer() {
     { Title: "FAQ", path: "/faq" },
   ];
   const contacts = [
-    "01358-854545",
+    "682-2598741",
     "support@myscholarhack.com.",
-    "2115 Ash Dr. San Jose,South Dakota 2584714",
+    "504 Wildseed Way Mansfield, TX 76063",
   ];
 
   if (

@@ -4,9 +4,9 @@ import "@smastrom/react-rating/style.css";
 
 export default function ReviewCard({message, username, address, star, profileImage}) {
   return (
-    <div className="w-auto border border-[#EDEDED] rounded-2xl px-6 py-8 ">
+    <div className="w-auto  border border-[#EDEDED] rounded-2xl px-6 py-8 ">
       <Rating style={{ maxWidth: 120 }} value={star} readOnly />
-      <p className="text-xl pt-6 pb-28">
+      <p className="text-xl pt-6 pb-28 h-60">
         {message}
       </p>
       <div className="flex items-center gap-4">
