@@ -4,7 +4,7 @@ import Table from "@/components/dashboard/Table";
 import InvoiceModal from "@/components/dashboard/Student/InvoiceModal";
 import CancelSubscriptionModal from "@/components/dashboard/Student/CancelSubscriptionModal";
 import { useState, useEffect } from "react";
-import { getStudentSubscriptions, apiPost } from "@/lib/api";
+import { getStudentSubscriptions, apiPost, apiPatch } from "@/lib/api";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -56,6 +56,7 @@ export default function SubscriptionsPlan() {
 
                 if (!isMounted) return;
                 if (response.success) {
+
                     setSubscriptions(response.data || []);
                 } else {
                     setError(response.message || "Failed to load subscriptions");
@@ -90,13 +91,12 @@ export default function SubscriptionsPlan() {
 
     const handleConfirmCancel = async () => {
         if (!currentSubscription?.id) return;
-        
         setIsCancelling(true);
         try {
-            await apiPost(`/subscription-student/cancel/${currentSubscription.id}`);
+            await apiPatch(`/subscription-student/cancel/${currentSubscription.id}`);
             toast.success("Subscription cancelled successfully");
             setIsCancelModalOpen(false);
-            
+
             // Refresh subscriptions
             const response = await getStudentSubscriptions();
             if (response.success) {
@@ -138,8 +138,8 @@ export default function SubscriptionsPlan() {
             width: "15%",
             render: (row) => (
                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${row.subscriptionStatus === 'ACTIVE' || row.subscriptionStatus === 'TRAIL'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
                     }`}>
                     {row.subscriptionStatus}
                 </span>
@@ -231,14 +231,14 @@ export default function SubscriptionsPlan() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                    <button 
-                        onClick={() => router.push('/pricing')} 
+                    <button
+                        onClick={() => router.push('/pricing')}
                         className="px-6 py-3 bg-[#F6C844] hover:bg-[#EDB91C] text-gray-900 font-semibold rounded-lg transition-colors"
                     >
                         {currentSubscription && 'Upgrade Plan'}
                     </button>
                     {currentSubscription && (
-                        <button 
+                        <button
                             onClick={handleCancelClick}
                             className="px-6 py-3 bg-white border-2 border-red-500 text-red-500 hover:bg-red-50 font-semibold rounded-lg transition-colors cursor-pointer"
                         >
@@ -270,7 +270,7 @@ export default function SubscriptionsPlan() {
                         data={selectedInvoice}
                     />
 
-                    <CancelSubscriptionModal 
+                    <CancelSubscriptionModal
                         isOpen={isCancelModalOpen}
                         onClose={() => setIsCancelModalOpen(false)}
                         onConfirm={handleConfirmCancel}
