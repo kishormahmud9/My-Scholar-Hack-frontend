@@ -12,7 +12,7 @@ export default function ReviewCard({message, username, address, star, profileIma
       <div className="flex items-center gap-4">
         <div className="w-[60px] h-[60px] rounded-2xl">
           <Image
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-2xl"
             src={profileImage}
             height={100}
             width={100}

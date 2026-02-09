@@ -32,7 +32,7 @@ export default function Home() {
               anim={"group-hover:animate-spin"}
               title={"The Struggle"}
               description={
-                "You're staring at a blank page. The deadline is  approaching. You know you have great stories to tell, but the words won't come.  Sound familiar?"
+                "You're staring at a blank page. The deadline is approaching. You know you have great stories to tell, but the words won't come. Sound familiar?"
               }
             />
             <ProblemPoint
@@ -40,7 +40,7 @@ export default function Home() {
               anim={"group-hover:animate-bounce"}
               title={"The Generic Solution"}
               description={
-                "Other AI tools just generate generic essays that  sound like everyone else's. Scholarship reviewers can spot them a mile away—and  so can AI detectors."
+                "Other AI tools just generate generic essays that sound like everyone else's. Scholarship reviewers can spot them a mile away—and so can AI detectors."
               }
             />
             <ProblemPoint
@@ -48,7 +48,7 @@ export default function Home() {
               anim={"group-hover:animate-bounce"}
               title={"The Time Crunch"}
               description={
-                "You want to apply to 20+ scholarships, but writing  unique essays for each one takes hours. Who has that kind of time?"
+                "You want to apply to 20+ scholarships, but writing unique essays for each one takes hours. Who has that kind of time?"
               }
             />
           </div>
@@ -59,9 +59,9 @@ export default function Home() {
           <SectionHead
             Status={"Solution"}
             statusStyle={"text-[#0D8E55] border-[#0D8E55] "}
-            title={" Your Stories. Your Voice. Your Success"}
+            title={"Your Stories. Your Voice. Your Success"}
             description={
-              "MyScholarHack is different. We help you tell your authentic story by  learning who you really are."
+              "MyScholarHack is different. We help you tell your authentic story by learning who you really are."
             }
           />
 
@@ -69,7 +69,7 @@ export default function Home() {
             icon={"uil:user"}
             title={"Build your Profile"}
             descrtion={
-              "Upload your resume, transcripts, recommendation  letters, and even a writing sample. We learn your voice, your achievements, and  your unique experiences."
+              "Upload your resume, transcripts, recommendation letters, and even a writing sample. We learn your voice, your achievements, and your unique experiences."
             }
             step={1}
           />
@@ -77,7 +77,7 @@ export default function Home() {
             icon={"gis:map-user"}
             title={"Find your Story"}
             descrtion={
-              " Our AI guides you through discovering which of your  experiences best match each scholarship prompt. No inventing stories—just  highlighting what makes you special."
+              "Our AI guides you through discovering which of your experiences best match each scholarship prompt. No inventing stories—just highlighting what makes you special."
             }
             step={2}
           />
@@ -85,7 +85,7 @@ export default function Home() {
             icon={"hugeicons:note-02"}
             title={"Generate Your Essay"}
             descrtion={
-              " Get a personalized first draft written in YOUR voice,  based on YOUR real achievements. Edit and refine until it's perfect. Or, if you  already have an idea but just need help to get it on paper, opt for “Coach Me” and  MyScholarHack will help you think through your first draft versus writing it for you"
+              "Get a personalized first draft written in YOUR voice, based on YOUR real achievements. Edit and refine until it's perfect. Or, if you already have an idea but just need help to get it on paper, opt for \"Coach Me\" and MyScholarHack will help you think through your first draft versus writing it for you"
             }
             step={3}
           />
@@ -93,7 +93,7 @@ export default function Home() {
             icon={"carbon:tropical-storm-tracks"}
             title={"Track Everything"}
             descrtion={
-              " Keep all your applications organized in one place. Never  miss a deadline. See what's working."
+              "Keep all your applications organized in one place. Never miss a deadline. See what's working."
             }
             step={4}
           />
@@ -113,7 +113,7 @@ export default function Home() {
             statusStyle={"text-[#0D8E55] border-[#0D8E55] "}
             title={"Your Stories. Your Voice. Your Success"}
             description={
-              "MyScholarHack is different. We help you tell your authentic story by  learning who you really are."
+              "MyScholarHack is different. We help you tell your authentic story by learning who you really are."
             }
           />
 
@@ -122,7 +122,7 @@ export default function Home() {
               icon={"fa6-solid:microphone-lines"}
               title={"Voice Matching Technology"}
               descritption={
-                "Upload a writing sample and we'll match your  unique voice and style. Your essays will sound like you wrote them—because the  ideas are all yours"
+                "Upload a writing sample and we'll match your unique voice and style. Your essays will sound like you wrote them—because the ideas are all yours"
               }
               style={"bg-[#B46DFF]"}
             />
@@ -130,7 +130,7 @@ export default function Home() {
               icon={"solar:user-id-outline"}
               title={"Smart Profile System"}
               descritption={
-                " Store your resume, transcripts, letters, and  achievements once. We'll pull the right details for each scholarship automatically."
+                "Store your resume, transcripts, letters, and achievements once. We'll pull the right details for each scholarship automatically."
               }
               style={"bg-[#1D9B86]"}
             />
@@ -138,7 +138,7 @@ export default function Home() {
               icon={"healthicons:i-note-action-outline"}
               title={"Story Discovery Engine"}
               descritption={
-                "Struggling to find the right angle? Our AI asks the  right questions to uncover your most compelling stories for each prompt."
+                "Struggling to find the right angle? Our AI asks the right questions to uncover your most compelling stories for each prompt."
               }
               style={"bg-[#FC9550]"}
             />
@@ -146,7 +146,7 @@ export default function Home() {
               icon={"healthicons:i-note-action-outline"}
               title={"Authentic Content Only"}
               descritption={
-                "Struggling to find the right angle? Our AI asks the  right questions to uncover your most compelling stories for each prompt."
+                "Struggling to find the right angle? Our AI asks the right questions to uncover your most compelling stories for each prompt."
               }
               style={"bg-[#3CA7E9]"}
             />
@@ -154,7 +154,7 @@ export default function Home() {
               icon={"healthicons:i-note-action-outline"}
               title={"Application Tracking"}
               descritption={
-                "Struggling to find the right angle? Our AI asks the  right questions to uncover your most compelling stories for each prompt."
+                "Struggling to find the right angle? Our AI asks the right questions to uncover your most compelling stories for each prompt."
               }
               style={"bg-[#00A5BB]"}
             />
@@ -162,7 +162,7 @@ export default function Home() {
               icon={"fluent-mdl2:date-time-12"}
               title={"Unlimited Iterations"}
               descritption={
-                "Struggling to find the right angle? Our AI asks the  right questions to uncover your most compelling stories for each prompt."
+                "Struggling to find the right angle? Our AI asks the right questions to uncover your most compelling stories for each prompt."
               }
               style={"bg-[#FC64CE]"}
             />
@@ -203,21 +203,21 @@ export default function Home() {
               icon={"streamline-plump:desktop-lock-remix"}
               title={"Bank-Level Security"}
               description={
-                "Your documents are encrypted and stored securely. We  never share or sell your information."
+                "Your documents are encrypted and stored securely. We never share or sell your information."
               }
             />
             <SecurityCard
               icon={"streamline-plump:graduation-cap"}
               title={"FERPA Compliant"}
               description={
-                "We follow strict educational privacy standards to protect  student data."
+                "We follow strict educational privacy standards to protect student data."
               }
             />
             <SecurityCard
               icon={"streamline-plump:graduation-cap"}
               title={"You're In Control"}
               description={
-                "Delete your data anytime. We don't keep anything you don't  want us to."
+                "Delete your data anytime. We don't keep anything you don't want us to."
               }
             />
           </div>

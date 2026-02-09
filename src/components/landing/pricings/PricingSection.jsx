@@ -8,7 +8,7 @@ import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getAllPlans, apiGet } from "@/lib/api";
-import { isAuthenticated, getDashboardRoute } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth";
 import toast from "react-hot-toast";
 
 export default function PricingSection() {
@@ -37,7 +37,7 @@ export default function PricingSection() {
           toast.error("Failed to initialize checkout. Please try again.");
         }
       } catch (err) {
-        console.error("Checkout error:", err);
+        // console.error("Checkout error:", err);
         // If 401, they might have been logged out, so redirect to signin
         if (err?.status === 401) {
           router.push("/signin");

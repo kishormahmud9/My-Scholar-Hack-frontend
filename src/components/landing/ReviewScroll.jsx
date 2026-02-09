@@ -3,8 +3,7 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Autoplay } from "swiper/modules";
-import { Rating } from "@smastrom/react-rating";
+import { Autoplay } from "swiper/modules"
 import "@smastrom/react-rating/style.css";
 import ReviewCard from "./ReviewCard";
 
@@ -23,7 +22,7 @@ export default function ReviewScroll() {
           className="w-full"
           breakpoints={{
             0: {
-              slidesPerView: 1, 
+              slidesPerView: 1,
             },
             640: {
               slidesPerView: 2,
@@ -37,57 +36,36 @@ export default function ReviewScroll() {
             <ReviewCard
               star={5}
               message={
-                "I was so worried about AI detection tools, but MyScholarHack  helped me write essays that were 100% me. I won $8,000 in scholarships my first  semester using it!"
+                "I was so worried about AI detection tools, but MyScholarHack helped me write essays that were 100% me.  I won $8000 in scholarships in 3 months!"
               }
-              username={"Sarah M"}
-              address={"Freshman, UCLA"}
-              profileImage={"/ReviewUser.png"}
+              username={"Courtney M. Senior"}
+              address={"Fort Worth, TX"}
+              profileImage={"/Reviewer1.png"}
             />
           </SwiperSlide>
           <SwiperSlide>
             <ReviewCard
               star={5}
               message={
-                "I was so worried about AI detection tools, but MyScholarHack  helped me write essays that were 100% me. I won $8,000 in scholarships my first  semester using it!"
+                "The voice matching is incredible. It actually sounds like I wrote it. I  went from avoiding essay scholarships to applying to 15 in one month."
               }
-              username={"Sarah M"}
-              address={"Freshman, UCLA"}
-              profileImage={"/ReviewUser.png"}
+              username={" Marcus  T"}
+              address={"High School Senior, Texas"}
+              profileImage={"/Reviewer2.png"}
             />
           </SwiperSlide>
           <SwiperSlide>
             <ReviewCard
               star={5}
               message={
-                "I was so worried about AI detection tools, but MyScholarHack  helped me write essays that were 100% me. I won $8,000 in scholarships my first  semester using it!"
+                "Finally, a tool that doesn't just spit out generic garbage. It helped me tell MY story, and I won my first scholarship!"
               }
-              username={"Sarah M"}
-              address={"Freshman, UCLA"}
+              username={"Priya K"}
+              address={"Sophomore, MIT"}
               profileImage={"/ReviewUser.png"}
             />
           </SwiperSlide>
-          <SwiperSlide>
-            <ReviewCard
-              star={5}
-              message={
-                "I was so worried about AI detection tools, but MyScholarHack  helped me write essays that were 100% me. I won $8,000 in scholarships my first  semester using it!"
-              }
-              username={"Sarah M"}
-              address={"Freshman, UCLA"}
-              profileImage={"/ReviewUser.png"}
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <ReviewCard
-              star={5}
-              message={
-                "I was so worried about AI detection tools, but MyScholarHack  helped me write essays that were 100% me. I won $8,000 in scholarships my first  semester using it!"
-              }
-              username={"Sarah M"}
-              address={"Freshman, UCLA"}
-              profileImage={"/ReviewUser.png"}
-            />
-          </SwiperSlide>
+         
         </Swiper>
       </div>
     </div>
