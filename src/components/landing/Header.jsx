@@ -76,13 +76,31 @@ export default function Header() {
                   <div className="flex justify-center">
                     <Title title={"About Us"} />
                   </div>
-                  <h1 className="w-full max-w-[565px] font-semibold text-3xl md:text-5xl lg:text-[64px] text-white text-center py-4">
-                    We're Students Too—We Get It
+                  <h1 className="w-full max-w-[765px] font-semibold text-3xl md:text-5xl lg:text-[64px] text-white text-center py-4">
+                    Scholarships Don’t Have to Feel Overwhelming.
                   </h1>
-                  <p className="w-full max-w-[565px] mx-auto text-center text-white/70 text-base md:text-xl">
-                    We built this tool from the same late-night essay struggles
-                    we lived through.
-                  </p>
+                  <div className="w-full max-w-[765px] mx-auto text-left text-white/70 text-base md:text-xl">
+                    <p >
+                      Organize everything once. Create stronger essays faster.
+                      Apply with confidence.
+                    </p>
+                    <p>
+                      MyScholarHack helps families stay on top of deadlines,
+                      reuse stories strategically, and generate structured first
+                      drafts built on real experiences — so students spend less
+                      time starting from scratch and more time strengthening
+                      what matters.
+                    </p>
+                    <p>
+                      <br />
+                      No chaos.
+                      <br /> No robotic essays.
+                      <br />
+                      No missed opportunities.
+                      <br />
+                    </p>
+                    <p> Private by design • Cancel anytime • Parent-approved</p>
+                  </div>
 
                   <div className="w-full max-w-[1240px] h-auto md:h-[569px] mt-9">
                     <Image
