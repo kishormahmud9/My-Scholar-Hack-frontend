@@ -33,15 +33,21 @@ export default function FeatureCard({
           <h2 className="text-2xl font-bold text-gray-900 mb-4">{title}</h2>
 
           {description && (
-            <p className="text-gray-700 leading-relaxed mb-4">{description}</p>
+            <>
+            <h3 className="font-bold text-gray-900 mb-3">What it is:</h3>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              
+              {description}
+              </p>
+            </>
           )}
 
           {whyItMatters && (
             <>
+              <h3 className="font-bold text-gray-900 mb-3">Why It Matters:</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
                 {whyItMatters}
               </p>
-              <h3 className="font-bold text-gray-900 mb-3">Why It Matters:</h3>
             </>
           )}
 

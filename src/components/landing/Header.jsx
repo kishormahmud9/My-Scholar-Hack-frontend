@@ -117,21 +117,22 @@ export default function Header() {
           {Pathname === "/feature" && (
             <>
               <div className="w-full flex items-center justify-center">
-                <div className="pt-20 pb-14 flex flex-col items-center w-full max-w-[1063px] justify-center px-4 md:px-0">
+                <div className="pt-6 pb-14 flex flex-col items-center w-full max-w-[1063px] justify-center px-4 md:px-0">
                   <div className="flex justify-center">
                     <Title title={"Feature"} />
                   </div>
                   <h1 className="font-semibold text-3xl md:text-5xl lg:text-[64px] text-white text-center py-4">
-                    The Only Scholarship Essay Tool Built on Your Authentic
-                    Voice
+                    The only all-in-one scholarship system that organizes
+                    everything and creates first-draft essays in your student’s
+                    voice.
                   </h1>
                   <p className="mx-auto text-center text-white/70 text-base md:text-xl">
-                    Most AI essay tools treat you like everyone else. They
-                    generate generic content that sounds robotic and gets
-                    flagged by AI detectors. MyScholarHack is different —we
-                    learn who YOU are, how YOU write, and what makes YOUR story
-                    unique. Then we help you tell that story in a way that wins
-                    scholarships
+                    Most scholarship tools treat students like templates. They
+                    don’t know their experiences, their goals, or their story.
+                    MyScholarHack is different. We organize who your student
+                    is—activities, interests, and experiences—so creating strong
+                    first-draft essays feels natural, personal, and easy to
+                    refine.
                   </p>
                 </div>
               </div>
@@ -149,7 +150,7 @@ export default function Header() {
                   </h1>
                   <p className="mx-auto text-center text-white/70 text-base md:text-xl">
                     One scholarship win covers months of MyScholarHack. Invest
-                    in your future
+                    in your future.
                   </p>
                 </div>
               </div>
@@ -168,7 +169,7 @@ export default function Header() {
                   <p className="mx-auto text-center text-white/70 text-base md:text-xl">
                     MyScholarHack guides you through the entire scholarship
                     essay process. No more staring at blank screens or wondering
-                    what to write. Here's exactly how it works
+                    what to write. Here's exactly how it works.
                   </p>
                 </div>
               </div>
@@ -182,12 +183,11 @@ export default function Header() {
                     <Title title={"How to Work"} />
                   </div>
                   <h1 className="font-semibold text-3xl md:text-5xl lg:text-[64px] text-white text-center py-4">
-                    From Blank Page to Winning Essay in 4 Simple Steps
+                    No More Blank Screens. No More Guessing.
                   </h1>
                   <p className="mx-auto text-center text-white/70 text-base md:text-xl">
-                    MyScholarHack guides you through the entire scholarship
-                    essay process. No more staring at blank screens or wondering
-                    what to write. Here's exactly how it works
+                    Just a clear, guided path from first draft to final
+                    submission. <br/> Here’s how MyScholarHack makes it simple:
                   </p>
                 </div>
               </div>

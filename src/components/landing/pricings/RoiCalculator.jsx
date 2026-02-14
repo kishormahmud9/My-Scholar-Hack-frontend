@@ -3,20 +3,11 @@ import React, { useState, useEffect } from "react";
 
 const RoiCalculator = () => {
     const [scholarshipsPerMonth, setScholarshipsPerMonth] = useState(5);
-    const [averageAmount, setAverageAmount] = useState(500);
-    const [winRate, setWinRate] = useState(8);
+    const [averageAmount, setAverageAmount] = useState(1000);
+    const [winRate, setWinRate] = useState(10);
     const [expectedWins, setExpectedWins] = useState(0);
 
     useEffect(() => {
-        // Formula: (Scholarships per month * Win Rate %) * Average Amount
-        // Wait, "Expected monthly scholarship wins" usually means money.
-        // Let's check the image.
-        // Image:
-        // Scholarships per month: 5
-        // Average amount: $500
-        // Win rate: 8%
-        // Result: $200
-        // Calculation: 5 * 500 * 0.08 = 2500 * 0.08 = 200. Correct.
         const wins = scholarshipsPerMonth * averageAmount * (winRate / 100);
         setExpectedWins(wins);
     }, [scholarshipsPerMonth, averageAmount, winRate]);
@@ -70,16 +61,11 @@ const RoiCalculator = () => {
                             type="number"
                             value={averageAmount}
                             onChange={(e) => setAverageAmount(Number(e.target.value))}
-                            className="w-full p-4 border border-gray-200 rounded-lg text-gray-800 outline-none focus:border-blue-500 transition-colors text-lg"
+                            className="w-full p-4 pl-8 border border-gray-200 rounded-lg text-gray-800 outline-none focus:border-blue-500 transition-colors text-lg"
                         />
-                        <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">
                             $
                         </span>
-                        {/* Adjust padding left to accommodate the dollar sign if needed, but standard input usually handles text well. 
-                Actually, with the dollar sign inside, we should add padding-left. 
-                Let's use a prefix approach or just rely on the user seeing the $ outside or inside.
-                The design shows $500 inside the box. So I'll add pl-8.
-            */}
                         <style jsx>{`
               input[type="number"]::-webkit-inner-spin-button,
               input[type="number"]::-webkit-outer-spin-button {
@@ -124,7 +110,7 @@ const RoiCalculator = () => {
                 </div>
 
                 <p className="text-gray-600 mb-8 text-lg">
-                    Cost of Essay Hack+: $19.99/month
+                    Cost of Essay Hack+: $29.99/month
                 </p>
 
                 <div className="flex items-center gap-6 mb-8">

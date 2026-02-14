@@ -93,8 +93,8 @@ export default function PricingSection() {
           <SectionHead
             Status="Pricing"
             statusStyle="text-[#FFB834] border-[#FFB834]"
-            title="Select a plan that will empower your business growth"
-            description="Each package includes personalized consultation and revisions to guarantee your satisfaction."
+            title="Find the Right Plan for a Stress-Free Scholarship Season"
+            description="Whether you’re preparing early or in the middle of application season, there’s a plan designed to keep everything organized and moving forward."
           />
 
           <div className="py-10">
