@@ -72,7 +72,7 @@ export default function Header() {
           {Pathname === "/about" && (
             <>
               <div className="w-full flex items-center justify-center">
-                <div className="pt-20 pb-14 flex flex-col items-center w-full max-w-[1063px] justify-center px-4 md:px-0">
+                <div className="pt-10 pb-14 flex flex-col items-center w-full max-w-[1063px] justify-center px-4 md:px-0">
                   <div className="flex justify-center">
                     <Title title={"About Us"} />
                   </div>
@@ -80,19 +80,18 @@ export default function Header() {
                     Scholarships Don’t Have to Feel Overwhelming.
                   </h1>
                   <div className="w-full max-w-[765px] mx-auto text-left text-white/70 text-base md:text-xl">
-                    <p >
+                    <p className="font-bold">
                       Organize everything once. Create stronger essays faster.
                       Apply with confidence.
                     </p>
-                    <p>
+                    <p className="font-thin py-2">
                       MyScholarHack helps families stay on top of deadlines,
                       reuse stories strategically, and generate structured first
                       drafts built on real experiences — so students spend less
                       time starting from scratch and more time strengthening
                       what matters.
                     </p>
-                    <p>
-                      <br />
+                    <p className="font-semibold pb-2">
                       No chaos.
                       <br /> No robotic essays.
                       <br />

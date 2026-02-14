@@ -5,7 +5,7 @@ export default function AboutPage() {
   return (
     <div className=" lg:mt-[305px]">
       <Container>
-        <div className="py-20">
+        <div className="py-34">
           <div>
             <h3 className="text-3xl font-semibold mb-2.5">About Us</h3>
             <p className="text-xl font-normal text-[#404040]">
@@ -98,9 +98,9 @@ export default function AboutPage() {
           <SectionHead
             Status={"Teams"}
             statusStyle={"text-[#0D8E55] border-[#0D8E55] "}
-            title={"Meet the Team"}
+            title={"Meet Your Big Sis in College Prep"}
             description={
-              "Built by students and engineers who know the scholarship grind we design tools that actually help."
+              "I’m your ScholarHackSis who’s been through college prep with my three kids plus dozens of others. I’ve seen how many scholarships get missed—not because students aren’t qualified, but because the process is overwhelming. I built MyScholarHack to give you a simple system that actually works."
             }
           />
 
