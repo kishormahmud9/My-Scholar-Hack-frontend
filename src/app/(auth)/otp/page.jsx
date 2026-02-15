@@ -35,7 +35,7 @@ export default function OTPPage() {
         const newOtp = [...otp];
         newOtp[index] = value.substring(value.length - 1);
         setOtp(newOtp);
-        setError(""); 
+        setError("");
 
         if (value && index < 5 && inputRefs.current[index + 1]) {
             inputRefs.current[index + 1].focus();
@@ -51,24 +51,24 @@ export default function OTPPage() {
     const handlePaste = (e) => {
         e.preventDefault();
         const pastedData = e.clipboardData.getData('text');
-        
-        
+
+
         const numbers = pastedData.replace(/\D/g, '').slice(0, 6).split('');
-        
+
         if (numbers.length === 0) return;
 
         const newOtp = [...otp];
         numbers.forEach((num, i) => {
-             newOtp[i] = num;
+            newOtp[i] = num;
         });
 
         setOtp(newOtp);
         setError("");
-        
-    
+
+
         const focusIndex = Math.min(numbers.length, 5);
         if (inputRefs.current[focusIndex]) {
-             inputRefs.current[focusIndex].focus();
+            inputRefs.current[focusIndex].focus();
         }
     };
 
@@ -96,18 +96,18 @@ export default function OTPPage() {
                 return;
             }
 
-            
+
             const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
             const isOnOTPPage = currentPath.includes('/otp') || currentPath.includes('/verify-email');
 
             let response;
             try {
                 response = await apiPost("/otp/verify", { email: email, otp: otpCode });
-                console.log("response", response);
+                        
                 if (response && response.success === true) {
                     toast.success("Email verified successfully!");
                     setTimeout(() => {
-                        router.push("/");
+                        router.push("/signin");
                     }, 500);
                 } else {
                     const errorMsg = response?.message || "Failed to verify code";
@@ -133,13 +133,13 @@ export default function OTPPage() {
                     }
 
                     setIsVerifying(false);
-                    return; 
+                    return;
                 }
                 throw apiError;
-            } 
+            }
 
 
-          
+
         } catch (err) {
 
 
@@ -293,12 +293,12 @@ export default function OTPPage() {
                                 disabled={isResending || timer > 0 || resendCount >= 3}
                                 className="text-[#FFCA42] hover:text-[#eeb526] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
-                                {isResending 
-                                    ? "Resending..." 
-                                    : timer > 0 
-                                        ? `Resend in ${timer}s` 
-                                        : resendCount >= 3 
-                                            ? "Max attempts reached" 
+                                {isResending
+                                    ? "Resending..."
+                                    : timer > 0
+                                        ? `Resend in ${timer}s`
+                                        : resendCount >= 3
+                                            ? "Max attempts reached"
                                             : "Resend Code"}
                             </button>
                         </p>

@@ -93,14 +93,8 @@ function ViewEssayContent() {
       setLoading(true);
       // Fetch full essay details to ensure we have the content
       const response = await apiGet(`/generate-essay/${row.id}`);
-      console.log("Edit click - API response:", response);
+        
       if (response.success) {
-        console.log("Edit click - Essay data:", response.data);
-        console.log("Edit click - Content fields:", {
-          contentFinal: response.data?.contentFinal,
-          content: response.data?.content,
-          essay: response.data?.essay
-        });
         setSelectedEssay(response.data);
         // Small delay to ensure state is set before opening modal
         setTimeout(() => {

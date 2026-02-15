@@ -45,7 +45,6 @@ export default function Settings() {
 
     useEffect(() => {
         if (response?.success && settings) {
-            console.log("Fetched Settings:", settings);
             setFormData({
                 fullName: settings.fullName || "",
                 emailNotifications: settings.emailNotifications ?? false,

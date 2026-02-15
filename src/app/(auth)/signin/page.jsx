@@ -30,27 +30,27 @@ export default function SignInPage() {
     setNotVerified(false);
 
     try {
-      console.log("Attempting login...");
+        
       const response = await apiPost("/auth/login", { email, password });
-      console.log("Login API Response:", response);
+        
 
       // Check if response has the expected structure
       if (response?.success) {
-        // console.log("response", response, "response.data", response.data);
+        
         const { accessToken, refreshToken, user } = response.data;
-        console.log("User data:", user);
+          
 
         // Store authentication data (tokens and user info)
         try {
             storeAuthData(accessToken, refreshToken, user);
-            console.log("Auth data stored successfully");
+            
         } catch (storageError) {
             console.error("Storage error:", storageError);
         }
 
         // Redirect to appropriate dashboard based on user role
         const dashboardRoute = getDashboardRoute();
-        console.log("Redirecting to:", dashboardRoute);
+          
 
         // Show success toast before navigation
         toast.success("Login successful");
@@ -58,7 +58,7 @@ export default function SignInPage() {
         // Redirect logic based on plan status
         if (!user.isPlan && user.role === "STUDENT") {
            // No plan -> Redirect to Home
-           console.log("No plan, redirecting to home");
+              
            router.push("/");
         } else {
            // Has plan (or Admin) -> Redirect to Dashboard

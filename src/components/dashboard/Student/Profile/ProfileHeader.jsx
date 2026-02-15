@@ -74,7 +74,6 @@ export default function ProfileHeader() {
                 // Construct full image URL
                 const baseURL = process.env.NEXT_PUBLIC_API_MAIN_URL || '';
                 const imageUrl = `${baseURL}/${profileData.filePath}`;
-                console.log(imageUrl);
                 setImage(imageUrl);
             } else if (profileData.profilePicture) {
                 // Fallback to profilePicture field if filePath is not available

@@ -6,7 +6,7 @@ import { apiClient } from "@/lib/apiClient";
  */
 export const getStudentSubscriptions = async () => {
     const response = await apiClient.get("/subscription-student/me");
-    console.log(response.data);
+        
     return response.data;
 };
 /**

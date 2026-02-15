@@ -163,7 +163,7 @@ export default function Navbar() {
             >
               <div className="text-white text-right">
                 <p className="font-semibold text-2xl tracking-wider leading-5">
-                  {userData?.fullName?.split(" ").slice(0, 1).join(" ") || "User"}
+                  {/* {userData?.fullName?.split(" ").slice(0, 1).join(" ") || "User"} */}
                 </p>
                 {/* Email removed as per request */}
               </div>
@@ -185,6 +185,7 @@ export default function Navbar() {
             {/* Dropdown Menu */}
             {showProfileMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 text-gray-800 animate-in fade-in slide-in-from-top-5">
+                <p className="pl-5 text-lg font-medium">Hello, {userData?.fullName?.split(" ").slice(0, 1).join(" ") || "User"}</p>
                 <button
                   onClick={handleDashboardClick}
                   className="w-full text-left flex items-center gap-4 px-4 py-2 hover:bg-gray-50 transition-colors font-medium"

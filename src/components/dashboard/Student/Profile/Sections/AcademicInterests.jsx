@@ -33,7 +33,7 @@ export default function AcademicInterests() {
     const updateMutation = useMutation({
         mutationFn: async (payload) => {
             try {
-                console.log(payload);
+                
                 const response = await apiPost('/profile/academic-interest/upsert', payload);
                 return response;
             } catch (apiError) {

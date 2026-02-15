@@ -57,11 +57,11 @@ export default function ApplicationTracker() {
     };
 
     const handleStatusChange = async (applicationId, newStatus) => {
-        console.log("handleStatusChange called:", { applicationId, newStatus });
+          
         
         if (!applicationId) {
             toast.error("Application ID is missing");
-            console.error("Application ID is missing");
+              
             return;
         }
 
@@ -71,15 +71,15 @@ export default function ApplicationTracker() {
         // Update local state immediately for better UX
         const updateLocalState = () => {
             setApplications(prev => {
-                console.log("Updating local state:", { prev, applicationId, newStatus });
+                  
                 const updated = prev.map(app => {
                     if (app.id === applicationId) {
-                        console.log("Found matching app, updating status:", { oldStatus: app.status, newStatus });
+                          
                         return { ...app, status: newStatus };
                     }
                     return app;
                 });
-                console.log("Updated applications:", updated);
+                  
                 // Update localStorage with the new state
                 localStorage.setItem("application_tracker_data", JSON.stringify(updated));
                 return updated;
@@ -99,12 +99,12 @@ export default function ApplicationTracker() {
 
             if (response?.success) {
                 // Successfully synced with backend
-                console.log("Status synced with backend");
+                  
             }
         } catch (error) {
             // Silently handle API errors - local update is what matters
             // The error "Application not found" is expected for local-only applications
-            console.log("API sync skipped (application may be local-only):", error?.message);
+              
         } finally {
             setUpdatingStatusId(null);
         }
@@ -228,7 +228,6 @@ export default function ApplicationTracker() {
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
-                                            console.log("Changing status:", { applicationId: row.id, newStatus: status });
                                             handleStatusChange(row.id, status);
                                         }}
                                         className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-2 ${
