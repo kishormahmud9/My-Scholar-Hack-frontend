@@ -43,13 +43,15 @@ export default function Footer() {
                 />
                 <h1 className="text-4xl font-semibold">MyScholarHack</h1>
               </div>
-              <p className="text-[#ECECEC] mt-4 text-justify">
+              <p className="text-[#ECECEC] mt-4 font-thin">
                 MyScholarHack gives families a smarter, organized system for
                 scholarships — helping students turn real experiences into
                 structured, authentic essays while keeping every application on
                 track.
               </p>
-              <p className="text-[#ECECEC] mt-2 text-justify">Organize once. Apply with confidence.</p>
+              <p className="text-[#ECECEC] mt-2 font-semibold text-justify">
+                Organize once. Apply with confidence.
+              </p>
             </div>
             <div className="flex justify-start lg:justify-end mt-8 lg:mt-0">
               <div className="">
