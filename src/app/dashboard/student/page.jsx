@@ -63,11 +63,9 @@ export default function StudentDashboard() {
     const syncResult = async () => {
       try {
         // Trigger sync (user sees existing data meanwhile)
-        await apiPost("/essay-recommendation/sync-scholarships");
+        await apiPost("/essay-recommendation/generate");
 
         console.log("syncResult");
-
-
 
         // Once synced, refetch the dashboard data to update UI
         if (isMounted) fetchDashboardStats(true);

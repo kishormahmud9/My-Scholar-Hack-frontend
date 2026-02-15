@@ -1,6 +1,6 @@
 "use client";
 import { Icon } from "@iconify/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ScholershipCard from "@/components/dashboard/Student/ScholershipCard";
 import Loader from "@/components/Loader";
@@ -9,11 +9,13 @@ import { apiPost, apiGet } from "@/lib/api";
 export default function AllScholarship() {
   const [recommendedScholarships, setRecommendedScholarships] = useState([]);
   const [allScholarships, setAllScholarships] = useState([]);
+  const [originalScholarships, setOriginalScholarships] = useState([]); // Store all original data
   const [searchQuery, setSearchQuery] = useState("");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState("All Subjects");
   const [selectedScholarship, setSelectedScholarship] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const categoryDropdownRef = useRef(null);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,6 +25,7 @@ export default function AllScholarship() {
 
   const router = useRouter();
 
+  // Load all data on mount and when pagination changes (only if no filters)
   useEffect(() => {
     let isMounted = true;
     
@@ -67,6 +70,43 @@ export default function AllScholarship() {
                         return 0;
                     });
     
+                    // Load all pages to have complete data for filtering
+                    if (page === 1 && apiRes.meta && apiRes.meta.totalPage > 1) {
+                        // Fetch all remaining pages
+                        const remainingPromises = [];
+                        for (let p = 2; p <= apiRes.meta.totalPage; p++) {
+                            remainingPromises.push(apiGet(`/essay-recommendation/scholarships?page=${p}&limit=${itemsPerPage}`));
+                        }
+                        
+                        try {
+                            const remainingResults = await Promise.all(remainingPromises);
+                            remainingResults.forEach(res => {
+                                if (res && res.success && res.data && isMounted) {
+                                    data = [...data, ...res.data];
+                                }
+                            });
+                            
+                            // Re-sort after adding all data
+                            data = data.sort((a, b) => {
+                                const getVal = (val) => {
+                                    if (!val) return 0;
+                                    const num = Number(String(val).replace(/[^0-9.-]+/g,""));
+                                    return isNaN(num) ? 0 : num;
+                                };
+                                const amountA = getVal(a.amount);
+                                const amountB = getVal(b.amount);
+                                
+                                if (amountA > 0 && amountB === 0) return -1;
+                                if (amountA === 0 && amountB > 0) return 1;
+                                if (amountA > 0 && amountB > 0) return amountB - amountA;
+                                return 0;
+                            });
+                        } catch (err) {
+                            console.error("Error loading additional pages:", err);
+                        }
+                    }
+    
+                    setOriginalScholarships(data);
                     setAllScholarships(data);
                     
                     if (apiRes.meta) {
@@ -95,11 +135,14 @@ export default function AllScholarship() {
         }
     };
 
-    // Initial load & Page Change
-    loadData(currentPage);
+    // Only load data if no filters are active (filters work on client-side)
+    const hasActiveFilters = searchQuery.trim() || selectedSubject !== "All Subjects";
+    if (!hasActiveFilters) {
+        loadData(currentPage);
+    }
 
     // Background Sync Logic (Only on mount)
-    if (currentPage === 1) {
+    if (currentPage === 1 && !hasActiveFilters) {
         const syncResult = async () => {
             try {
                 await apiPost("/essay-recommendation/sync-scholarships");
@@ -115,10 +158,82 @@ export default function AllScholarship() {
     return () => { isMounted = false; };
   }, [currentPage]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target)
+      ) {
+        setShowCategoryDropdown(false);
+      }
+    };
+
+    if (showCategoryDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showCategoryDropdown]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedSubject]);
+
+  // Filter scholarships based on search query and selected subject
+  const filteredScholarships = useMemo(() => {
+    let filtered = [...originalScholarships];
+
+    // Filter by subject
+    if (selectedSubject !== "All Subjects") {
+      filtered = filtered.filter(
+        (item) => item.subject === selectedSubject
+      );
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((item) => {
+        const title = (item.title || "").toLowerCase();
+        const description = (item.description || "").toLowerCase();
+        const provider = (item.provider || "").toLowerCase();
+        const subject = (item.subject || "").toLowerCase();
+        const amount = String(item.amount || "").toLowerCase();
+
+        return (
+          title.includes(query) ||
+          description.includes(query) ||
+          provider.includes(query) ||
+          subject.includes(query) ||
+          amount.includes(query)
+        );
+      });
+    }
+
+    return filtered;
+  }, [originalScholarships, searchQuery, selectedSubject]);
+
+  // Get unique subjects from all original scholarships with counts
+  const subjectsWithCounts = useMemo(() => {
+    const subjectCounts = {};
+    originalScholarships.forEach((item) => {
+      if (item.subject) {
+        subjectCounts[item.subject] = (subjectCounts[item.subject] || 0) + 1;
+      }
+    });
+    
+    return Object.entries(subjectCounts)
+      .map(([subject, count]) => ({ subject, count }))
+      .sort((a, b) => a.subject.localeCompare(b.subject));
+  }, [originalScholarships]);
+
   if (loading) return <Loader fullScreen={false} />;
 
   const Recomended = recommendedScholarships;
-  const subjects = [...new Set(allScholarships.map((item) => item.subject))];
 
   const handleApplyClick = (scholarship) => {
     setSelectedScholarship(scholarship);
@@ -162,44 +277,54 @@ export default function AllScholarship() {
             />
           </div>
 
-          <div className="relative">
+          <div className="relative z-50" ref={categoryDropdownRef}>
             <button
               onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-              className="px-5 py-2.5 border border-gray-200 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 justify-center min-w-[150px]"
+              className="px-5 py-2.5 border border-gray-200 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 justify-center min-w-[150px] max-w-[250px] relative z-50"
             >
-              <Icon icon="lucide:filter" width={18} height={18} />
-              <span className="flex-1 text-left">{selectedSubject === "All Subjects" ? "Categorize" : selectedSubject}</span>
-              <Icon icon={showCategoryDropdown ? "lucide:chevron-up" : "lucide:chevron-down"} width={16} height={16} />
+              <Icon icon="lucide:filter" width={18} height={18} className="flex-shrink-0" />
+              <span className="flex-1 text-left truncate">{selectedSubject === "All Subjects" ? "Categorize" : selectedSubject}</span>
+              <Icon icon={showCategoryDropdown ? "lucide:chevron-up" : "lucide:chevron-down"} width={16} height={16} className="flex-shrink-0" />
             </button>
 
             {showCategoryDropdown && (
-              <div className="absolute right-0 z-10 mt-2 w-56 rounded-lg bg-white shadow-lg border border-gray-200 max-h-60 overflow-y-auto scrollbar-hide">
+              <div className="absolute right-0 top-full z-[9999] mt-2 w-80 rounded-lg bg-white shadow-2xl border border-gray-200 max-h-60 overflow-y-auto scrollbar-hide">
                 <div className="py-2">
                   <button
                     onClick={() => {
                       setSelectedSubject("All Subjects");
                       setShowCategoryDropdown(false);
                     }}
-                    className={`block px-4 py-2.5 text-sm w-full text-left transition-colors ${selectedSubject === "All Subjects"
+                    className={`flex items-center justify-between px-4 py-2.5 text-sm w-full text-left transition-colors ${selectedSubject === "All Subjects"
                       ? "bg-amber-50 text-amber-900 font-medium"
                       : "text-gray-700 hover:bg-gray-50"
                       }`}
                   >
-                    All Subjects
+                    <span className="flex-1 min-w-0 pr-2">All Subjects</span>
+                    <span className="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0">
+                      {originalScholarships.length}
+                    </span>
                   </button>
-                  {subjects.map((subject) => (
+                  {subjectsWithCounts.map(({ subject, count }) => (
                     <button
                       key={subject}
                       onClick={() => {
                         setSelectedSubject(subject);
                         setShowCategoryDropdown(false);
                       }}
-                      className={`block px-4 py-2.5 text-sm w-full text-left transition-colors ${selectedSubject === subject
+                      className={`flex items-start justify-between px-4 py-2.5 text-sm w-full text-left transition-colors group ${selectedSubject === subject
                         ? "bg-amber-50 text-amber-900 font-medium"
                         : "text-gray-700 hover:bg-gray-50"
                         }`}
                     >
-                      {subject}
+                      <span className="flex-1 min-w-0 pr-2 break-words leading-relaxed">{subject}</span>
+                      <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 mt-0.5 ${
+                        selectedSubject === subject
+                          ? "bg-amber-200 text-amber-800"
+                          : "bg-gray-100 text-gray-600 group-hover:bg-gray-200"
+                      }`}>
+                        {count}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -231,45 +356,88 @@ export default function AllScholarship() {
         )}
 
         <div className="bg-white p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            All Available Scholarships
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {allScholarships.map((item, idx) => (
-              <ScholershipCard key={idx} Details={item} onApply={handleApplyClick} />
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              All Available Scholarships
+            </h3>
+            {(searchQuery || selectedSubject !== "All Subjects") && (
+              <span className="text-sm text-gray-600">
+                Showing {filteredScholarships.length} of {originalScholarships.length} scholarships
+              </span>
+            )}
           </div>
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center mt-8 gap-2">
-              <button
-                onClick={() => {
-                  setCurrentPage(prev => Math.max(prev - 1, 1));
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                disabled={currentPage === 1}
-                className={`p-2 rounded-lg border ${currentPage === 1 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-              >
-                <Icon icon="lucide:chevron-left" width={20} height={20} />
-              </button>
-              
-              <span className="text-sm text-gray-600 font-medium px-2">
-                 Page {currentPage} of {totalPages}
-              </span>
+          {/* Pagination for filtered results */}
+          {(() => {
+            const filteredTotalPages = Math.ceil(filteredScholarships.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedScholarships = filteredScholarships.slice(startIndex, endIndex);
 
-              <button
-                onClick={() => {
-                   setCurrentPage(prev => Math.min(prev + 1, totalPages));
-                   window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                disabled={currentPage === totalPages}
-                className={`p-2 rounded-lg border ${currentPage === totalPages ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-              >
-                <Icon icon="lucide:chevron-right" width={20} height={20} />
-              </button>
-            </div>
-          )}
+            return (
+              <>
+                {paginatedScholarships.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {paginatedScholarships.map((item, idx) => (
+                      <ScholershipCard key={item.id || idx} Details={item} onApply={handleApplyClick} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Icon icon="lucide:search-x" width={48} height={48} className="mx-auto text-gray-400 mb-4" />
+                    <p className="text-lg font-medium text-gray-600 mb-2">No scholarships found</p>
+                    <p className="text-sm text-gray-500">
+                      {searchQuery || selectedSubject !== "All Subjects"
+                        ? "Try adjusting your search or filter criteria"
+                        : "No scholarships available at the moment"}
+                    </p>
+                    {(searchQuery || selectedSubject !== "All Subjects") && (
+                      <button
+                        onClick={() => {
+                          setSearchQuery("");
+                          setSelectedSubject("All Subjects");
+                        }}
+                        className="mt-4 text-sm text-[#FFCA42] hover:text-[#FFB834] font-medium"
+                      >
+                        Clear filters
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Pagination Controls */}
+                {filteredTotalPages > 1 && (
+                  <div className="flex justify-center items-center mt-8 gap-2">
+                    <button
+                      onClick={() => {
+                        setCurrentPage(prev => Math.max(prev - 1, 1));
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-lg border ${currentPage === 1 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      <Icon icon="lucide:chevron-left" width={20} height={20} />
+                    </button>
+                    
+                    <span className="text-sm text-gray-600 font-medium px-2">
+                      Page {currentPage} of {filteredTotalPages}
+                    </span>
+
+                    <button
+                      onClick={() => {
+                        setCurrentPage(prev => Math.min(prev + 1, filteredTotalPages));
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      disabled={currentPage === filteredTotalPages}
+                      className={`p-2 rounded-lg border ${currentPage === filteredTotalPages ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      <Icon icon="lucide:chevron-right" width={20} height={20} />
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
 

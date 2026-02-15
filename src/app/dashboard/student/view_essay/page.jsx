@@ -2,7 +2,7 @@
 import Table from "@/components/dashboard/Table";
 import { Icon } from "@iconify/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import ViewEssayModal from "@/components/dashboard/Student/ViewEssayModal";
 import EditEssayModal from "@/components/dashboard/Student/EditEssayModal";
 import Loader from "@/components/Loader";
@@ -23,6 +23,7 @@ function ViewEssayContent() {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
   const [essays, setEssays] = useState([]);
+  const filterDropdownRef = useRef(null);
 
   const fetchEssays = async () => {
      setLoading(true);
@@ -52,7 +53,39 @@ function ViewEssayContent() {
     }
   }, [searchParams]);
 
-  const uniqueSubjects = ["All Subjects", ...new Set(essays.map(item => item.subject))];
+  // Get unique subjects with counts
+  const subjectsWithCounts = useMemo(() => {
+    const subjectCounts = {};
+    essays.forEach((item) => {
+      if (item.subject) {
+        subjectCounts[item.subject] = (subjectCounts[item.subject] || 0) + 1;
+      }
+    });
+    
+    return Object.entries(subjectCounts)
+      .map(([subject, count]) => ({ subject, count }))
+      .sort((a, b) => a.subject.localeCompare(b.subject));
+  }, [essays]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target)
+      ) {
+        setShowFilterDropdown(false);
+      }
+    };
+
+    if (showFilterDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showFilterDropdown]);
 
   const filteredEssays = selectedSubject === "All Subjects"
     ? essays
@@ -242,35 +275,59 @@ function ViewEssayContent() {
         </div>
 
         {/* Filter Dropdown */}
-        <div className="relative">
+        <div className="relative z-50" ref={filterDropdownRef}>
           <button
             onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-            className="px-4 py-2 bg-white border border-[#E2E4E9] rounded-lg text-sm font-medium text-[#0C0C0D] hover:bg-[#F8F9FA] shadow-sm flex items-center gap-2 min-w-[180px] justify-between"
+            className="px-4 py-2 bg-white border border-[#E2E4E9] rounded-lg text-sm font-medium text-[#0C0C0D] hover:bg-[#F8F9FA] shadow-sm flex items-center gap-2 min-w-[180px] max-w-[250px] justify-between"
           >
-            <div className="flex items-center gap-2">
-              <Icon icon="lucide:filter" width={16} height={16} className="text-[#6D6E73]" />
-              <span className="truncate max-w-[140px]">{selectedSubject}</span>
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Icon icon="lucide:filter" width={16} height={16} className="text-[#6D6E73] flex-shrink-0" />
+              <span className="truncate">{selectedSubject === "All Subjects" ? "All Subjects" : selectedSubject}</span>
             </div>
-            <Icon icon={showFilterDropdown ? "lucide:chevron-up" : "lucide:chevron-down"} width={16} height={16} className="text-[#6D6E73]" />
+            <Icon icon={showFilterDropdown ? "lucide:chevron-up" : "lucide:chevron-down"} width={16} height={16} className="text-[#6D6E73] flex-shrink-0" />
           </button>
 
           {showFilterDropdown && (
-            <div className="absolute right-0 z-20 mt-2 w-56 rounded-lg bg-white shadow-xl border border-[#E2E4E9] py-1 max-h-60 overflow-y-auto">
-              {uniqueSubjects.map((subject) => (
+            <div className="absolute right-0 top-full z-[9999] mt-2 w-80 rounded-lg bg-white shadow-2xl border border-[#E2E4E9] max-h-60 overflow-y-auto scrollbar-hide">
+              <div className="py-2">
                 <button
-                  key={subject}
                   onClick={() => {
-                    setSelectedSubject(subject);
+                    setSelectedSubject("All Subjects");
                     setShowFilterDropdown(false);
                   }}
-                  className={`block px-4 py-2.5 text-sm w-full text-left transition-colors ${selectedSubject === subject
+                  className={`flex items-center justify-between px-4 py-2.5 text-sm w-full text-left transition-colors ${selectedSubject === "All Subjects"
                     ? "bg-[#FFF9E5] text-[#0C0C0D] font-medium"
                     : "text-[#6D6E73] hover:bg-[#F8F9FA]"
                     }`}
                 >
-                  {subject}
+                  <span className="flex-1 min-w-0 pr-2">All Subjects</span>
+                  <span className="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0">
+                    {essays.length}
+                  </span>
                 </button>
-              ))}
+                {subjectsWithCounts.map(({ subject, count }) => (
+                  <button
+                    key={subject}
+                    onClick={() => {
+                      setSelectedSubject(subject);
+                      setShowFilterDropdown(false);
+                    }}
+                    className={`flex items-start justify-between px-4 py-2.5 text-sm w-full text-left transition-colors group ${selectedSubject === subject
+                      ? "bg-[#FFF9E5] text-[#0C0C0D] font-medium"
+                      : "text-[#6D6E73] hover:bg-[#F8F9FA]"
+                      }`}
+                  >
+                    <span className="flex-1 min-w-0 pr-2 break-words leading-relaxed">{subject}</span>
+                    <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 mt-0.5 ${
+                      selectedSubject === subject
+                        ? "bg-amber-200 text-amber-800"
+                        : "bg-gray-100 text-gray-600 group-hover:bg-gray-200"
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
