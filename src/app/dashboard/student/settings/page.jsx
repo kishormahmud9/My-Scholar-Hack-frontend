@@ -11,11 +11,12 @@ export default function Settings() {
     const { data: profileResponse } = useQuery({
         queryKey: ["userProfileSettings"],
         queryFn: async () => {
-             return await apiGet("/profile/me");
+            return await apiGet("/user/me");
         }
     });
-    
+
     const userEmail = profileResponse?.data?.email;
+
 
     const { data: response, isLoading, isError, error } = useQuery({
         queryKey: ["studentSettings"],
@@ -23,6 +24,7 @@ export default function Settings() {
     });
 
     const settings = response?.data;
+    
 
     const mutation = useMutation({
         mutationFn: updateStudentSettings,

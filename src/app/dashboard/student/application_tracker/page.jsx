@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 import { useState, useEffect, useRef } from "react";
 import { apiPatch } from "@/lib/api";
 import toast from "react-hot-toast";
+import { apiGet } from "@/lib/api";
 
 export default function ApplicationTracker() {
     const [applications, setApplications] = useState([]);
@@ -14,15 +15,14 @@ export default function ApplicationTracker() {
     const dropdownRefs = useRef({});
 
     useEffect(() => {
-        // Load data from localStorage
-        // Simulating a small delay to prevent fetch flicker if it was real async, 
-        // but for localStorage it's instant. However, to be consistent with "loading", 
-        // we can just set it false after setting state.
-        const savedData = localStorage.getItem("application_tracker_data");
-        if (savedData) {
-            setApplications(JSON.parse(savedData));
+        const fetchApplications = async () => {
+            const response = await apiGet("/application");
+            if (response?.success) {
+                setApplications(response?.data);
+                setLoading(false);
+            }
         }
-        setLoading(false);
+        fetchApplications();
     }, []);
 
 
@@ -57,11 +57,11 @@ export default function ApplicationTracker() {
     };
 
     const handleStatusChange = async (applicationId, newStatus) => {
-          
-        
+
+
         if (!applicationId) {
             toast.error("Application ID is missing");
-              
+
             return;
         }
 
@@ -71,15 +71,15 @@ export default function ApplicationTracker() {
         // Update local state immediately for better UX
         const updateLocalState = () => {
             setApplications(prev => {
-                  
+
                 const updated = prev.map(app => {
                     if (app.id === applicationId) {
-                          
+
                         return { ...app, status: newStatus };
                     }
                     return app;
                 });
-                  
+
                 // Update localStorage with the new state
                 localStorage.setItem("application_tracker_data", JSON.stringify(updated));
                 return updated;
@@ -99,12 +99,12 @@ export default function ApplicationTracker() {
 
             if (response?.success) {
                 // Successfully synced with backend
-                  
+
             }
         } catch (error) {
             // Silently handle API errors - local update is what matters
             // The error "Application not found" is expected for local-only applications
-              
+
         } finally {
             setUpdatingStatusId(null);
         }
@@ -120,7 +120,7 @@ export default function ApplicationTracker() {
                     clickedOutside = false;
                 }
             });
-            
+
             if (clickedOutside) {
                 setOpenDropdownId(null);
             }
@@ -142,10 +142,10 @@ export default function ApplicationTracker() {
 
     const TableHeads = [
         { Title: "No", key: "no", width: "5%", render: (_, idx) => idx + 1 },
-        { Title: "Scholarship Title", key: "title", width: "35%" },
-        { 
-            Title: "Amount", 
-            key: "amount", 
+        { Title: "Scholarship Title", key: "essayTitle", width: "35%" },
+        {
+            Title: "Amount",
+            key: "amount",
             width: "15%",
             render: (row) => {
                 const amount = row.amount;
@@ -208,17 +208,17 @@ export default function ApplicationTracker() {
                             ) : (
                                 <>
                                     <span>{currentStatus}</span>
-                                    <Icon 
-                                        icon={isOpen ? "mdi:chevron-up" : "mdi:chevron-down"} 
-                                        width={16} 
-                                        height={16} 
+                                    <Icon
+                                        icon={isOpen ? "mdi:chevron-up" : "mdi:chevron-down"}
+                                        width={16}
+                                        height={16}
                                     />
                                 </>
                             )}
                         </button>
 
                         {isOpen && !isUpdating && (
-                            <div 
+                            <div
                                 className="absolute top-full mt-1 right-0 z-50 bg-white rounded-lg shadow-xl border border-gray-200 min-w-[160px] overflow-hidden"
                                 onClick={(e) => e.stopPropagation()}
                             >
@@ -230,11 +230,10 @@ export default function ApplicationTracker() {
                                             e.stopPropagation();
                                             handleStatusChange(row.id, status);
                                         }}
-                                        className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-2 ${
-                                            currentStatus === status
+                                        className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-2 ${currentStatus === status
                                                 ? `${getStatusStyles(status)} font-bold`
                                                 : 'text-gray-700 hover:bg-gray-50'
-                                        }`}
+                                            }`}
                                     >
                                         {currentStatus === status && (
                                             <Icon icon="mdi:check" width={16} height={16} />
