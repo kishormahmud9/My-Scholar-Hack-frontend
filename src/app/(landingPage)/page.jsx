@@ -85,7 +85,7 @@ export default function Home() {
             icon={"hugeicons:note-02"}
             title={"Generate Your Essay"}
             descrtion={
-              "Get a personalized first draft written in YOUR voice, based on YOUR real achievements. Edit and refine until it's perfect. Or, if you already have an idea but just need help to get it on paper, opt for \"Coach Me\" and MyScholarHack will help you think through your first draft versus writing it for you"
+              "Get a personalized first draft written in YOUR voice, based on YOUR real achievements. Edit and refine until it's perfect. Or, if you already have an idea but just need help to get it on paper and MyScholarHack will help you think through your first draft versus writing it for you"
             }
             step={3}
           />

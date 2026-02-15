@@ -8,6 +8,7 @@ import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
 import { getDashboardStats, apiPost, apiGet } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -104,13 +105,12 @@ export default function StudentDashboard() {
       render: (row) => (
         <div className="flex justify-center">
           <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${
-              row.status === "SAVED"
+            className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "SAVED"
                 ? "bg-green-100 text-green-700"
                 : row.status === "EDITED"
                   ? "bg-blue-100 text-blue-700"
                   : "bg-gray-100 text-gray-700"
-            }`}
+              }`}
           >
             {row.status}
           </span>
@@ -270,18 +270,18 @@ export default function StudentDashboard() {
             Featured Scholarships
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {isLoadingRecommendations ? (
+            { isLoadingRecommendations ? (
               <div className="col-span-2 flex flex-col items-center justify-center py-16 bg-gradient-to-br from-[#FFF9E5] to-[#FFFAEC] rounded-2xl border-2 border-[#FFCA42]/20 shadow-lg">
                 <div className="relative">
                   {/* Animated Spinner */}
                   <div className="w-16 h-16 border-4 border-[#FFCA42]/20 border-t-[#FFCA42] rounded-full animate-spin mb-4"></div>
                   {/* Pulsing Icon */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Icon 
-                      icon="mdi:school-outline" 
-                      className="text-[#FFCA42] animate-pulse" 
-                      width={32} 
-                      height={32} 
+                    <Icon
+                      icon="mdi:school-outline"
+                      className="text-[#FFCA42] animate-pulse"
+                      width={32}
+                      height={32}
                     />
                   </div>
                 </div>
@@ -296,7 +296,7 @@ export default function StudentDashboard() {
                   </p>
                 </div>
               </div>
-            ) : filteredRecommendations.length > 0 ? (
+            ) : filteredRecommendations.length < 0 ? (
               filteredRecommendations.map((item, idx) => {
                 const scholarship = item.scholarship || item;
                 return (
@@ -311,7 +311,8 @@ export default function StudentDashboard() {
               })
             ) : (
               <div className="col-span-2 text-gray-500 text-center py-10 bg-white rounded-2xl border border-gray-100">
-                No recommendations available.
+                Please fill out your profile information first to get personalized recommendations. <br />
+                <Link href="/dashboard/student/profile" className="text-blue-500 hover:text-blue-700 cursor-pointer hover:underline">Fill out your profile information</Link>
               </div>
             )}
           </div>

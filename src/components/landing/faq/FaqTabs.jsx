@@ -5,18 +5,18 @@ import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "@/lib/api";
 
 const CATEGORY_API_TO_UI = {
-  "PRICING": "Pricing",
-  "GETTING_STARTED": "Getting Started",
-  "HOW_IT_WORKS": "How It Works",
-  "PRIVACY": "Privacy",
-  "SCHOLARSHIPS": "Scholarships",
-  "TECHNICAL": "Technical Questions",
-  "SUPPORT": "Support",
-  "ACADEMIC_INTEGRITY": "Academic Integrity"
+    "PRICING": "Pricing",
+    "GETTING_STARTED": "Getting Started",
+    "HOW_IT_WORKS": "How It Works",
+    "PRIVACY": "Privacy",
+    "SCHOLARSHIPS": "Scholarships",
+    "TECHNICAL": "Technical Questions",
+    "SUPPORT": "Support",
+    "ACADEMIC_INTEGRITY": "Academic Integrity"
 };
 
 const FaqTabs = () => {
-    const [activeTab, setActiveTab] = useState("Pricing");
+    const [activeTab, setActiveTab] = useState("All");
     const [openIndex, setOpenIndex] = useState(0);
 
     const { data: faqsResponse } = useQuery({
@@ -50,9 +50,10 @@ const FaqTabs = () => {
 
         // Normalize categories and group by category
         const groupedData = {};
-        
+
         // Initialize with predefined categories to maintain order
         const PREDEFINED_CATEGORIES = [
+            "All",
             "Pricing",
             "Getting Started",
             "How It Works",
@@ -64,6 +65,7 @@ const FaqTabs = () => {
         ];
 
         PREDEFINED_CATEGORIES.forEach(cat => groupedData[cat] = []);
+        groupedData.All = faqsList;
 
         faqsList.forEach(faq => {
             const normalizedCategory = CATEGORY_API_TO_UI[faq.category] || faq.category;
@@ -78,16 +80,19 @@ const FaqTabs = () => {
 
         return {
             faqData: groupedData,
-            categories: PREDEFINED_CATEGORIES // Or activeCategories if you only want to show populated ones
+            categories: PREDEFINED_CATEGORIES
         };
     }, [faqsResponse]);
 
     // Effect to set active tab if not set
     React.useEffect(() => {
         if (categories.length > 0 && !categories.includes(activeTab)) {
-            setActiveTab(categories[0]);
+            setActiveTab("All");
         }
     }, [categories, activeTab]);
+
+    const visibleFaqs =
+        activeTab === "All" ? faqData?.All || [] : faqData[activeTab] || [];
 
     const toggleFaq = (index) => {
         setOpenIndex(openIndex === index ? -1 : index);
@@ -125,7 +130,7 @@ const FaqTabs = () => {
 
             {/* Accordion */}
             <div className="max-w-4xl mx-auto flex flex-col gap-4">
-                {faqData[activeTab]?.map((faq, index) => (
+                {visibleFaqs.map((faq, index) => (
                     <div
                         key={index}
                         className={`border rounded-lg transition-all duration-300 overflow-hidden ${openIndex === index
@@ -175,6 +180,11 @@ const FaqTabs = () => {
                         </div>
                     </div>
                 ))}
+                {visibleFaqs.length === 0 && (
+                    <div className="rounded-xl border border-gray-100 bg-white p-8 text-center text-gray-500">
+                        Not found
+                    </div>
+                )}
             </div>
         </div>
     );
