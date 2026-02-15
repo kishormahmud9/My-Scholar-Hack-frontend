@@ -23,9 +23,15 @@ export default function PaymentCompletePage() {
               Payment Complete
             </h1>
             <p className="mt-4 max-w-xl text-base text-slate-200/90 sm:text-lg">
-              Your subscription is active. You can now access your dashboard and
-              start working on your goals right away.
+              Your payment was successful 🎉
+              Your subscription is being activated and may take up to
+              <span className="font-semibold text-white"> 1-2 minutes </span>
+              to reflect in your account.
+              <br /><br />
+              You can go to your dashboard now. If your plan isn't active yet,
+              please wait a moment and refresh the page.
             </p>
+
             <div className="mt-10 flex w-full flex-col gap-4 sm:flex-row sm:justify-center">
               <Link
                 href="/dashboard/student"
