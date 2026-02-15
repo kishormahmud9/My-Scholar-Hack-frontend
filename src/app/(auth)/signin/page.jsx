@@ -30,39 +30,38 @@ export default function SignInPage() {
     setNotVerified(false);
 
     try {
-        
+
       const response = await apiPost("/auth/login", { email, password });
-        
+
 
       // Check if response has the expected structure
       if (response?.success) {
-        
+
         const { accessToken, refreshToken, user } = response.data;
-          
+
 
         // Store authentication data (tokens and user info)
         try {
-            storeAuthData(accessToken, refreshToken, user);
-            
+          storeAuthData(accessToken, refreshToken, user);
+
         } catch (storageError) {
-            console.error("Storage error:", storageError);
+          console.error("Storage error:", storageError);
         }
 
         // Redirect to appropriate dashboard based on user role
         const dashboardRoute = getDashboardRoute();
-          
 
+        console.log("user", user);
         // Show success toast before navigation
         toast.success("Login successful");
-        
+
         // Redirect logic based on plan status
         if (!user.isPlan && user.role === "STUDENT") {
-           // No plan -> Redirect to Home
-              
-           router.push("/");
+          // No plan -> Redirect to Home
+          router.push("/");
         } else {
-           // Has plan (or Admin) -> Redirect to Dashboard
-           router.push(dashboardRoute);
+          // Has plan (or Admin) -> Redirect to Dashboard
+          router.push(dashboardRoute);
         }
       } else {
         console.warn("Login failed: Success flag false", response);
@@ -154,15 +153,15 @@ export default function SignInPage() {
                   placeholder="••••••••"
                 />
                 <Icon icon="solar:lock-password-linear" className="absolute left-3.5 top-3.5 text-gray-400 text-lg transition-colors group-hover:text-gray-500" />
-                
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                 >
-                  <Icon 
-                    icon={showPassword ? "solar:eye-bold" : "solar:eye-closed-bold"} 
-                    className="text-lg" 
+                  <Icon
+                    icon={showPassword ? "solar:eye-bold" : "solar:eye-closed-bold"}
+                    className="text-lg"
                   />
                 </button>
               </div>

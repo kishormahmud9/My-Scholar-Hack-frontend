@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import { isAuthenticated, logout, getDashboardRoute } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "@/lib/api";
 
+
 import toast from "react-hot-toast";
 
 export default function Navbar() {
@@ -19,6 +20,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const profileMenuRef = useRef(null);
 
   useEffect(() => {
     // Check authentication status on client side
@@ -34,6 +37,26 @@ export default function Navbar() {
     return () => window.removeEventListener("storage", checkAuth);
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    if (showProfileMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showProfileMenu]);
+
   // Fetch profile data from API
   const { data: profileResponse, isLoading } = useQuery({
     queryKey: ['userProfile'],
@@ -41,6 +64,9 @@ export default function Navbar() {
       if (!isLoggedIn) return null;
       try {
         const response = await apiGet('/profile/me');
+
+        const userInfo = await apiGet('/user/me');
+        setUserInfo(userInfo?.data || null);
         return response;
       } catch (error) {
         // If 401, maybe logout? For now just return null
@@ -66,31 +92,36 @@ export default function Navbar() {
     e.preventDefault();
     setIsOpen(false);
     setShowProfileMenu(false);
+    console.log("userData", userInfo);
 
-    if (userData?.role === "STUDENT" && !userData?.isPlan) {
-        toast.error("Please buy a plan to access the dashboard.");
-        setTimeout(() => {
-            router.push("/pricing");
-        }, 1000);
+    if (userInfo?.role === "STUDENT" && !userInfo?.isPlan) {
+      toast.error("Please buy a plan to access the dashboard.");
+
+      setTimeout(() => {
+        router.push("/pricing");
+      }, 1000);
     } else {
-        router.push(dashboardRoute);
+
+      console.log("dashboardRoute");
+      document.cookie = `activePlan=${userInfo?.isPlan}; path=/`;
+      router.push(dashboardRoute);
     }
   };
 
   const getProfileImage = () => {
     if (!userData) return "/ceoProfile.png"; // Default placeholder
-    
+
     // Check for filePath (common pattern in this codebase)
     if (userData.filePath) {
       const baseURL = process.env.NEXT_PUBLIC_API_MAIN_URL || "";
       return `${baseURL}/${userData.filePath}`;
-    } 
+    }
     // Check for profilePicture field
     else if (userData.profilePicture) {
       const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
       return `${baseURL}/uploads/profile/${userData.profilePicture}`;
     }
-    
+
     return "/ceoProfile.png";
   };
 
@@ -156,7 +187,7 @@ export default function Navbar() {
             </Link>
           </>
         ) : (
-          <div className="relative">
+          <div className="relative" ref={profileMenuRef}>
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center gap-3 focus:outline-none"
@@ -336,9 +367,9 @@ export default function Navbar() {
               ) : (
                 <>
                   <PrimaryBtn
-                      style={"w-full justify-center rounded-lg"}
-                      title={"Dashboard"}
-                      hendleClick={handleDashboardClick}
+                    style={"w-full justify-center rounded-lg"}
+                    title={"Dashboard"}
+                    hendleClick={handleDashboardClick}
                   />
                   <button
                     onClick={() => {

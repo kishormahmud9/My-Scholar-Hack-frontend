@@ -145,6 +145,7 @@ export const getDashboardRoute = (role = null) => {
     if (userRole === "ADMIN") {
         return "/dashboard/admin";
     } else if (userRole === "STUDENT") {
+      
         return "/dashboard/student";
     }
     // Default fallback
