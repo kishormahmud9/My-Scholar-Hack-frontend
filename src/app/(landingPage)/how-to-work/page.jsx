@@ -7,7 +7,7 @@ export default function Howtowork() {
       number: 1,
       title: "Build Your Profile (One-Time Setup)",
       description:
-        "What You'll Do: Create your comprehensive profile by uploading key documents and filling out your background information.",
+        "Create your comprehensive profile by uploading key documents and filling out your background information.",
       columns: [
         {
           heading: "Upload These Documents:",
@@ -33,14 +33,15 @@ export default function Howtowork() {
         },
       ],
       timeInvestment: "30-45 minutes (one time only)",
-      whyItMatters:
+      whyItMatters: [
         "Why This Matters: This comprehensive profile becomes the foundation for every essay you write. The more detail you provide, the more personalized and authentic your essays will be.",
+      ],
     },
     {
       number: 2,
       title: "Add a Scholarship",
       description:
-        "What You'll Do: Create your comprehensive profile by uploading key documents and filling out your background information.",
+        "Add scholarship details including organization, prompt, word or character count, etc.",
       columns: [
         {
           heading: "Input Required:",
@@ -69,7 +70,7 @@ export default function Howtowork() {
       number: 3,
       title: "Generate Your Essay",
       description:
-        'What You\'ll Do: Click "Generate Essay" and let our AI guide you through creating an authentic, personalized draft.',
+        'Click "Generate Essay" and let our AI guide you through creating an authentic, personalized draft.',
       columns: [
         {
           heading: "The Process:",
@@ -83,14 +84,15 @@ export default function Howtowork() {
         },
       ],
       timeInvestment: "10-15 minutes (including question answering)",
-      whyItMatters:
+      whyItMatters: [
         "What You Get: A complete essay draft that sounds like you, tells your real story, and directly addresses the scholarship prompt.",
+      ],
     },
     {
       number: 4,
       title: "Refine and Perfect",
       description:
-        "What You'll Do: Review your essay draft and refine it until it perfectly captures your story and voice.",
+        "Review your essay draft and refine it until it perfectly captures your story and voice.",
       columns: [
         {
           heading: "Refinement Options:",
@@ -122,8 +124,9 @@ export default function Howtowork() {
           text: "5-30 minutes per essay (unlimited iterations)",
         },
       ],
-      whyItMatters:
-        "What You Get: A complete essay draft that sounds like you, tells your real story, and directly addresses the scholarship prompt.",
+      whyItMatters: [
+        "A complete essay draft that sounds like you, tells your real story, and directly addresses the scholarship prompt.",
+      ],
       highlightBox: {
         heading: "When You're Done:",
         items: [
@@ -137,31 +140,23 @@ export default function Howtowork() {
     {
       number: 5,
       title: "Submit and Track",
-      description:
-        "What You'll Do: Copy your finished essay into the scholarship application and mark it as submitted in your dashboard.",
+      description: "",
       columns: [
         {
-          heading: "Tracking Features:",
+          heading: "What You’ll Do",
           items: [
-            "See all scholarships at a glance",
-            "Filter by status (not started, in progress, submitted, results pending)",
-            "View upcoming deadlines in calendar view",
-            "Get email reminders before deadlines",
-            "Track which scholarships you've won",
-          ],
-        },
-        {
-          heading: "After Submission:",
-          items: [
-            "Won the scholarship (and how much)",
-            "Was a finalist but didn't win",
-            "Didn't receive the scholarship",
-            "View your success rate",
+            "Generate and refine your essay inside MyScholarHack until it feels strong, authentic, and aligned with the scholarship prompt.",
+            "Paste the draft into Word, Google Docs, or your preferred editor to format it properly, double-check guidelines, and make any final personal tweaks.",
+            "Submit your finalized essay directly to the scholarship organization.",
+            "Come back and save your final version inside your dashboard — so it becomes part of your growing library of reusable stories.",
           ],
         },
       ],
-      whyItMatters:
-        "Why Track Results: Over time, you'll see patterns in which types of essays and scholarships you're most successful with. Double down on what works!",
+      whyItMatters: [
+        "Each completed essay strengthens your long-term strategy.",
+        "Instead of starting over each time, you build momentum.",
+        "Your work stays organized and reusable for future scholarships.",
+      ],
     },
   ];
 

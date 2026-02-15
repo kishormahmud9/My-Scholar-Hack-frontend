@@ -17,7 +17,10 @@ export default function WorkingSteps({
       </h2>
 
       {description && (
-        <p className="text-gray-700 mb-6 text-xl">{description}</p>
+        <>
+          <p className="text-gray-700 text-2xl font-semibold ">What You’ll Do</p>
+          <p className="text-gray-700 mb-6 text-xl">{description}</p>
+        </>
       )}
 
       {columns && (
@@ -55,7 +58,9 @@ export default function WorkingSteps({
         ))}
 
       {whyItMatters && (
-        <p className="text-gray-700 italic text-2xl">{whyItMatters}</p>
+        whyItMatters.map((info, index) => (
+          <p key={index} className="text-gray-700 italic text-2xl">{info}</p>
+        ))
       )}
 
       {highlightBox && (

@@ -89,7 +89,7 @@ export default function PricingSection() {
         }`}
     >
       <Container>
-        <div className="pt-20 lg:pt-[120px] pb-10 lg:pb-[72px] flex flex-col items-center justify-center gap-y-10 lg:gap-y-[60px]">
+        <div className="pt-20 lg:pt-[120px] pb-10 lg:pb-[72px] flex flex-col items-center justify-center gap-y-10 lg:gap-y-[50px]">
           <SectionHead
             Status="Pricing"
             statusStyle="text-[#FFB834] border-[#FFB834]"
@@ -97,9 +97,15 @@ export default function PricingSection() {
             description="Whether you’re preparing early or in the middle of application season, there’s a plan designed to keep everything organized and moving forward."
           />
 
-          <div className="py-10">
+          <div className="pt-10">
             <SwitchBtn plans={plans} setPlans={setPlans} />
           </div>
+
+          
+          {/* <p className="py-2 w-[50%] text-center">Most families choose <strong className="text-amber-300">MyScholarHack Plus</strong> because it offers enough flexibility to apply consistently — without feeling limited.</p> */}
+          
+
+
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-10 lg:gap-14">
             {pricingPlans.map((plan, idx) => (
