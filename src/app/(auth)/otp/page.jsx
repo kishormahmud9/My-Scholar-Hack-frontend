@@ -103,6 +103,17 @@ export default function OTPPage() {
             let response;
             try {
                 response = await apiPost("/otp/verify", { email: email, otp: otpCode });
+                console.log("response", response);
+                if (response && response.success === true) {
+                    toast.success("Email verified successfully!");
+                    setTimeout(() => {
+                        router.push("/");
+                    }, 500);
+                } else {
+                    const errorMsg = response?.message || "Failed to verify code";
+                    setError(errorMsg);
+                    toast.error(errorMsg);
+                }
             } catch (apiError) {
 
                 if (isOnOTPPage && typeof window !== 'undefined') {
@@ -125,78 +136,10 @@ export default function OTPPage() {
                     return; 
                 }
                 throw apiError;
-            }
+            } 
 
 
-            if (response && response.success === true) {
-
-                if (typeof window !== 'undefined') {
-                    sessionStorage.removeItem('pendingVerificationEmail');
-                }
-
-                toast.success("Email verified successfully!");
-
-                
-                const selectedPlan = typeof window !== 'undefined' ? localStorage.getItem('selectedPlan') : null;
-
-
-                if (!selectedPlan) {
-                    setTimeout(() => {
-                        if (isPlan === true) {
-                            router.push(getDashboardRoute());
-                        } else {
-                            if (userData?.role === "STUDENT") {
-                                toast.error("please buy a plan to get access to go to the essage genaration page");
-                            }
-                            router.push("/pricing");
-                        }
-                    }, 500);
-                } else {
-                    // Scenario: Plan selected before registration
-                    try {
-                        const checkoutResponse = await apiPost(`/payment/checkout/${selectedPlan}`, {
-                            email: email
-                        });
-
-                        if (checkoutResponse?.url) {
-                            // Redirect to payment gateway
-                            window.location.href = checkoutResponse.url;
-                        } else {
-                            // Fallback to dashboard
-                            router.push(getDashboardRoute());
-                        }
-                    } catch (checkoutError) {
-                        console.error("Checkout initialization failed:", checkoutError);
-                        toast.error("Preparing checkout failed. Please login to continue.");
-                        router.push("/signin");
-                    }
-                }
-
-                // Clear selected plan from storage after use
-                if (typeof window !== 'undefined') {
-                    localStorage.removeItem('selectedPlan');
-                }
-            } else {
-
-
-                const errorMsg = response?.message ||
-                    response?.data?.message ||
-                    response?.error ||
-                    "Invalid verification code. Please try again.";
-
-                setError(errorMsg);
-                toast.error(errorMsg);
-
-                // Reset OTP inputs so user can try again
-                setOtp(['', '', '', '', '', '']);
-                if (inputRefs.current[0]) {
-                    inputRefs.current[0].focus();
-                }
-
-                // IMPORTANT: Do NOT redirect - stay on this page
-                setIsVerifying(false);
-                return;
-            }
+          
         } catch (err) {
 
 
