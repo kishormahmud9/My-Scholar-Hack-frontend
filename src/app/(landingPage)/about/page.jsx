@@ -104,7 +104,33 @@ export default function AboutPage() {
             }
           />
 
-          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-10 ">
+          <div>
+            <div className="border border-[#C4C4C4] rounded-2xl flex flex-col justify-center items-center p-4">
+              <div className="w-full max-w-[568px] h-auto aspect-square h md:h-[478px]">
+                <Image
+                  className="w-full h-full object-cover rounded-t-2xl"
+                  src={"/founder.jpeg"}
+                  width={500}
+                  height={500}
+                  alt="C.E.O of MyScholerHack"
+                />
+              </div>
+              <div className="max-w-[568px]">
+                <h3 className="text-3xl font-semibold mt-5 mb-2.5">
+                  Henry, Arthur
+                </h3>
+                <p className="text-xl font-medium my-3 text-[#404040]">
+                  Co-Founder & CEO, MyScholarHack
+                </p>
+                <p className="text-base text-[#404040]">
+                  Built MyScholarHack after winning multiple merit scholarships;
+                  leads product vision and student outreach.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-10 ">
             <div className="border border-[#C4C4C4] rounded-2xl flex flex-col justify-center items-center p-4">
               <div className="w-full max-w-[568px] h-auto aspect-square h md:h-[478px]">
                 <Image
@@ -152,7 +178,7 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
         </section>
       </Container>
     </div>
