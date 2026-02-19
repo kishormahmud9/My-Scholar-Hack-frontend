@@ -104,8 +104,8 @@ export default function Header() {
                   <div className="w-full max-w-[1240px] h-auto md:h-[569px] mt-9">
                     <Image
                       className="w-full h-full object-cover object-center rounded-2xl"
-                      src={"/teambanner.png"}
-                      width={1000}
+                      src={"/AboutBanner1.jpeg"}
+                      width={1020}
                       height={330}
                       alt="My Scholar Hack Dashboard"
                     />
@@ -187,7 +187,7 @@ export default function Header() {
                   </h1>
                   <p className="mx-auto text-center text-white/70 text-base md:text-xl">
                     Just a clear, guided path from first draft to final
-                    submission. <br/> Here’s how MyScholarHack makes it simple:
+                    submission. <br /> Here’s how MyScholarHack makes it simple:
                   </p>
                 </div>
               </div>

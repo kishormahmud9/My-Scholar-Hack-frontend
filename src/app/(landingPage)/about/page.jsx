@@ -108,8 +108,8 @@ export default function AboutPage() {
             <div className="border border-[#C4C4C4] rounded-2xl flex flex-col justify-center items-center p-4">
               <div className="w-full max-w-[568px] h-auto aspect-square h md:h-[478px]">
                 <Image
-                  className="w-full h-full object-cover"
-                  src={"/ceoProfile.png"}
+                  className="w-full h-full object-cover rounded-t-2xl"
+                  src={"/founder.jpeg"}
                   width={500}
                   height={500}
                   alt="C.E.O of MyScholerHack"
