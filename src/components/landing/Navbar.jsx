@@ -131,20 +131,20 @@ export default function Navbar() {
       pathName: "/about",
     },
     {
-      Tiltle: "Feature",
-      pathName: "/feature",
+      Tiltle: "Features",
+      pathName: "/features",
     },
     {
       Tiltle: "Pricing",
       pathName: "/pricing",
     },
     {
-      Tiltle: "How to Work",
-      pathName: "/how-to-work",
+      Tiltle: "How it Works",
+      pathName: "/how-it-works",
     },
     {
-      Tiltle: "FAQ",
-      pathName: "/faq",
+      Tiltle: "FAQs",
+      pathName: "/faqs",
     },
   ];
 
