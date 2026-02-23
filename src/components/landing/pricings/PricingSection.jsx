@@ -112,10 +112,10 @@ export default function PricingSection() {
               <div
                 key={idx}
                 className={`border ${plan.name === "essay_hack_plus" ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
-                  } px-8 py-8 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
+                  } px-7 py-8 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
               >
                 <div className="flex flex-col h-full">
-                  <h2 className="text-3xl font-semibold">{plan.name === "essay_hack" ? "Essay Hack" : plan.name === "essay_hack_plus" ? "Essay Hack Plus" : plan.name === "essay_hack_pro" ? "Essay Hack Pro" : plan.name}</h2>
+                  <h2 className="text-3xl font-semibold">{plan.name === "essay_hack" ? "MyScholarHack Starter" : plan.name === "essay_hack_plus" ? "MyScholarHack Plus (Most Popular)" : plan.name === "hack_pro" ? "Essay Hack Pro" : plan.name}</h2>
                   <p className="text-base pt-5 pb-10 opacity-80">
                     {plan.description}
                   </p>
