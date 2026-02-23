@@ -162,7 +162,7 @@ export default function Header() {
               <div className="w-full flex items-center justify-center">
                 <div className="pt-20 pb-14 flex flex-col items-center w-full max-w-[1063px] justify-center px-4 md:px-0">
                   <div className="flex justify-center">
-                    <Title title={"How to Work"} />
+                    <Title title={"How It Work"} />
                   </div>
                   <h1 className="font-semibold text-3xl md:text-5xl lg:text-[64px] text-white text-center py-4">
                     From Blank Page to Winning Essay in 4 Simple Steps
@@ -181,7 +181,7 @@ export default function Header() {
               <div className="w-full flex items-center justify-center">
                 <div className="pt-20 pb-14 flex flex-col items-center w-full max-w-[1063px] justify-center px-4 md:px-0">
                   <div className="flex justify-center">
-                    <Title title={"How to Work"} />
+                    <Title title={"FAQs"} />
                   </div>
                   <h1 className="font-semibold text-3xl md:text-5xl lg:text-[64px] text-white text-center py-4">
                     No More Blank Screens. No More Guessing.

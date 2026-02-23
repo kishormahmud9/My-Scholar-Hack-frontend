@@ -132,7 +132,7 @@ export default function Navbar() {
     },
     {
       Tiltle: "Features",
-      pathName: "/features",
+      pathName: "/feature",
     },
     {
       Tiltle: "Pricing",
@@ -140,11 +140,11 @@ export default function Navbar() {
     },
     {
       Tiltle: "How it Works",
-      pathName: "/how-it-works",
+      pathName: "/how-to-work",
     },
     {
       Tiltle: "FAQs",
-      pathName: "/faqs",
+      pathName: "/faq",
     },
   ];
 
