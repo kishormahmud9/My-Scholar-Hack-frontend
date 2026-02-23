@@ -7,6 +7,7 @@ import Title from "./Title";
 import PrimaryBtn from "./PrimaryBtn";
 import SecoundryBtn from "./SecoundryBtn";
 import Image from "next/image";
+import dashboard from "../../../public/Dashboard.png";
 
 export default function Header() {
   const Pathname = usePathname();
@@ -61,8 +62,8 @@ export default function Header() {
               <div className="w-full h-[184px] md:h-[367px] lg:h-[547px] bg-[#FFCA42] rounded-t-2xl absolute">
                 <Image
                   className="w-full h-full object-cover object-top px-2 pt-2 rounded-t-2xl"
-                  src={"/Dashboard.png"}
-                  width={1000}
+                  src={dashboard}
+                  width={2000}
                   height={550}
                   alt="My Scholar Hack Dashboard"
                 />
