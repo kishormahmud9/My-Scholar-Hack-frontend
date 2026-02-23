@@ -102,7 +102,7 @@ export default function PricingSection() {
           </div>
 
           
-          {/* <p className="py-2 w-[50%] text-center">Most families choose <strong className="text-amber-300">MyScholarHack Plus</strong> because it offers enough flexibility to apply consistently — without feeling limited.</p> */}
+          <p className="py-2 w-[50%] text-center">Most families choose <strong className="text-amber-300">MyScholarHack Plus</strong> because it offers enough flexibility to apply consistently — without feeling limited.</p>
           
 
 
