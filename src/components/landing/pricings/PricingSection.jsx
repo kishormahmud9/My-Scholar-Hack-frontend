@@ -20,6 +20,8 @@ export default function PricingSection() {
     queryFn: getAllPlans,
   });
 
+
+
   const handlePlanClick = async (planName) => {
     // Check authentication strictly (dependent on cookies now)
     const isUserAuthenticated = isAuthenticated();
@@ -80,6 +82,7 @@ export default function PricingSection() {
   }
 
   const pricingPlans = (plansResponse?.data || []).filter(plan => plan.isActive === true);
+  console.log(pricingPlans)
 
   return (
     <section
@@ -110,8 +113,9 @@ export default function PricingSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-10 lg:gap-14">
             {pricingPlans.map((plan, idx) => (
               <div
+
                 key={idx}
-                className={`border ${plan.name === "essay_hack_plus" ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
+                className={`border ${plan.isFeatured === true ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
                   } px-7 py-8 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
               >
                 <div className="flex flex-col h-full">
