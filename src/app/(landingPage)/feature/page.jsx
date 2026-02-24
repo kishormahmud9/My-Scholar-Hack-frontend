@@ -11,7 +11,8 @@ export default function Feature() {
         "The stronger the profile, the stronger every essay.",
         "One thoughtful setup saves hours later."
       ],
-      imagePosition: "right"
+      imagePosition: "right",
+      image: "/Smart Profile System.png"
     },
     {
       title: "Story Discovery Engine",
@@ -21,7 +22,8 @@ export default function Feature() {
         "Students don’t struggle because they lack stories — they struggle because they don’t know which story fits.",
         "This removes second-guessing and builds confidence fast."
       ],
-      imagePosition: "left"
+      imagePosition: "left",
+      image: "/Story Discovery Engine.png"
     },
     {
       title: "Application Tracking Dashboard",
@@ -31,7 +33,8 @@ export default function Feature() {
         "Opportunities aren’t lost from lack of talent — they’re lost from overwhelm.",
         "Clear visibility keeps everything on track."
       ],
-      imagePosition: "right"
+      imagePosition: "right",
+      image: "/Application Tracking Dashboard.png"
     },
     {
       title: "Multiple Essay Management",
@@ -41,7 +44,8 @@ export default function Feature() {
         "The real drain isn’t writing — it’s starting over.",
         "Work smarter. Apply more. Avoid burnout."
       ],
-      imagePosition: "left"
+      imagePosition: "left",
+      image: "/Multiple Essay Management.png"
     },
     {
       title: "Unlimited Refinement",
@@ -52,7 +56,8 @@ export default function Feature() {
         "Students build momentum instead of frustration.",
         "Better essays. Less stress. More confidence."
       ],
-      imagePosition: "right"
+      imagePosition: "right",
+      image: "/Unlimited Refinement.png"
     },
     {
       title: "Built Around Proven Essay Structure",
@@ -62,7 +67,8 @@ export default function Feature() {
         "Students don’t just get paragraphs.",
         "They start with structure — then personalize it in their own voice."
       ],
-      imagePosition: "left"
+      imagePosition: "left",
+      image: "/Built Around Proven Essay Structure.png"
     },
     {
       title: "Private, Closed AI System",
@@ -72,7 +78,8 @@ export default function Feature() {
         "Nothing is shared, reused, or added to public AI databases.",
         "Their story belongs to them."
       ],
-      imagePosition: "right"
+      imagePosition: "right",
+      image: "/Private, Closed AI System.png"
     }
   ];
 

@@ -20,6 +20,8 @@ export default function PricingSection() {
     queryFn: getAllPlans,
   });
 
+
+
   const handlePlanClick = async (planName) => {
     // Check authentication strictly (dependent on cookies now)
     const isUserAuthenticated = isAuthenticated();
@@ -80,6 +82,7 @@ export default function PricingSection() {
   }
 
   const pricingPlans = (plansResponse?.data || []).filter(plan => plan.isActive === true);
+  console.log(pricingPlans)
 
   return (
     <section
@@ -102,7 +105,7 @@ export default function PricingSection() {
           </div>
 
           
-          {/* <p className="py-2 w-[50%] text-center">Most families choose <strong className="text-amber-300">MyScholarHack Plus</strong> because it offers enough flexibility to apply consistently — without feeling limited.</p> */}
+          <p className="py-2 w-[50%] text-center">Most families choose <strong className="text-amber-300">MyScholarHack Plus</strong> because it offers enough flexibility to apply consistently — without feeling limited.</p>
           
 
 
@@ -110,12 +113,13 @@ export default function PricingSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-10 lg:gap-14">
             {pricingPlans.map((plan, idx) => (
               <div
+
                 key={idx}
-                className={`border ${plan.name === "essay_hack_plus" ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
-                  } px-8 py-8 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
+                className={`border ${plan.isFeatured === true ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
+                  } px-7 py-8 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
               >
                 <div className="flex flex-col h-full">
-                  <h2 className="text-3xl font-semibold">{plan.name === "essay_hack" ? "Essay Hack" : plan.name === "essay_hack_plus" ? "Essay Hack Plus" : plan.name === "essay_hack_pro" ? "Essay Hack Pro" : plan.name}</h2>
+                  <h2 className="text-3xl font-semibold">{plan.name === "essay_hack" ? "MyScholarHack Starter" : plan.name === "essay_hack_plus" ? "MyScholarHack Plus (Most Popular)" : plan.name === "hack_pro" ? "Essay Hack Pro" : plan.name}</h2>
                   <p className="text-base pt-5 pb-10 opacity-80">
                     {plan.description}
                   </p>

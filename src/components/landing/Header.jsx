@@ -7,6 +7,7 @@ import Title from "./Title";
 import PrimaryBtn from "./PrimaryBtn";
 import SecoundryBtn from "./SecoundryBtn";
 import Image from "next/image";
+import dashboard from "../../../public/Dashboard.png";
 
 export default function Header() {
   const Pathname = usePathname();
@@ -61,7 +62,7 @@ export default function Header() {
               <div className="w-full h-[184px] md:h-[367px] lg:h-[547px] bg-[#FFCA42] rounded-t-2xl absolute">
                 <Image
                   className="w-full h-full object-cover object-top px-2 pt-2 rounded-t-2xl"
-                  src={"/Dashboard.svg"}
+                  src={"/Dashboard.png"}
                   width={1000}
                   height={550}
                   alt="My Scholar Hack Dashboard"
@@ -161,7 +162,7 @@ export default function Header() {
               <div className="w-full flex items-center justify-center">
                 <div className="pt-20 pb-14 flex flex-col items-center w-full max-w-[1063px] justify-center px-4 md:px-0">
                   <div className="flex justify-center">
-                    <Title title={"How to Work"} />
+                    <Title title={"How It Work"} />
                   </div>
                   <h1 className="font-semibold text-3xl md:text-5xl lg:text-[64px] text-white text-center py-4">
                     From Blank Page to Winning Essay in 4 Simple Steps
@@ -180,7 +181,7 @@ export default function Header() {
               <div className="w-full flex items-center justify-center">
                 <div className="pt-20 pb-14 flex flex-col items-center w-full max-w-[1063px] justify-center px-4 md:px-0">
                   <div className="flex justify-center">
-                    <Title title={"How to Work"} />
+                    <Title title={"FAQs"} />
                   </div>
                   <h1 className="font-semibold text-3xl md:text-5xl lg:text-[64px] text-white text-center py-4">
                     No More Blank Screens. No More Guessing.

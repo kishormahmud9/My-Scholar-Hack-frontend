@@ -62,16 +62,17 @@ export default function StudentDashboard() {
 
     // Background Sync Logic
     const syncResult = async () => {
+      if (isMounted) setIsLoadingRecommendations(true);
       try {
         // Trigger sync (user sees existing data meanwhile)
         await apiPost("/essay-recommendation/generate");
 
-        console.log("syncResult");
-
         // Once synced, refetch the dashboard data to update UI
-        if (isMounted) fetchDashboardStats(true);
+        if (isMounted) await fetchDashboardStats(true);
       } catch (error) {
         console.error("Background sync failed:", error);
+      } finally {
+        if (isMounted) setIsLoadingRecommendations(false);
       }
     };
 
@@ -296,7 +297,7 @@ export default function StudentDashboard() {
                   </p>
                 </div>
               </div>
-            ) : filteredRecommendations.length < 0 ? (
+            ) : filteredRecommendations.length > 0 ? (
               filteredRecommendations.map((item, idx) => {
                 const scholarship = item.scholarship || item;
                 return (
