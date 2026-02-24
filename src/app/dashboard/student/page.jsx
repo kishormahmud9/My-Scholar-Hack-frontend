@@ -154,7 +154,7 @@ export default function StudentDashboard() {
     },
     {
       icon: "mdi:clock-time-four-outline",
-      label: "Upcoming Application Datelines",
+      label: "Upcoming Application Deadlines",
       value:
         dashboardData?.upcomingDeadlineCount?.toString().padStart(2, "0") ||
         "00",

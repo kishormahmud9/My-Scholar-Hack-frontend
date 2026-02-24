@@ -9,18 +9,39 @@ export default function AboutPage() {
           <div>
             <h3 className="text-3xl font-semibold mb-2.5">About Us</h3>
             <p className="text-xl font-normal text-[#404040]">
-              Applying for scholarships is one of the most overwhelming — and misunderstood — parts of the college process. Families are often left navigating vague prompts, tight deadlines, and high stakes with little guidance, while students struggle to translate who they are into clear, compelling writing — all while trying to stay authentic. We created this AI Scholarship Agent to change that experience.
+              Applying for scholarships is one of the most overwhelming — and
+              misunderstood — parts of the college process. Families are often
+              left navigating vague prompts, tight deadlines, and high stakes
+              with little guidance, while students struggle to translate who
+              they are into clear, compelling writing — all while trying to stay
+              authentic. We created this AI Scholarship Agent to change that
+              experience.
               <br /> <br />
-              Our work sits at the intersection of <strong> college planning, student development, and responsible technology</strong>. We believe students deserve tools that support their thinking, not replace it — tools that help them clarify their ideas, organize their experiences, and communicate in their own voice with confidence.This platform was built for students who want to do their own work — and for parents and educators who want ethical, transparent support that respects student voice and institutional values.No shortcuts. No guarantees. Just smart structure, clarity, and guidance.
-
-
+              Our work sits at the intersection of{" "}
+              <strong>
+                {" "}
+                college planning, student development, and responsible
+                technology
+              </strong>
+              . We believe students deserve tools that support their thinking,
+              not replace it — tools that help them clarify their ideas,
+              organize their experiences, and communicate in their own voice
+              with confidence.This platform was built for students who want to
+              do their own work — and for parents and educators who want
+              ethical, transparent support that respects student voice and
+              institutional values.No shortcuts. No guarantees. Just smart
+              structure, clarity, and guidance.
             </p>
           </div>
           <div className="my-9">
             <h3 className="text-3xl font-semibold mb-2.5">Our Misson</h3>
             <p className="text-xl font-normal text-[#404040]">
-              Our mission is to help students <strong>express their real stories clearly and confidently —</strong> while keeping the scholarship process ethical, student-led, and aligned with how colleges and institutions expect work to be done.
-
+              Our mission is to help students{" "}
+              <strong>
+                express their real stories clearly and confidently —
+              </strong>{" "}
+              while keeping the scholarship process ethical, student-led, and
+              aligned with how colleges and institutions expect work to be done.
             </p>
           </div>
 
@@ -33,23 +54,41 @@ export default function AboutPage() {
               <ul className="space-y-3 lg:space-y-4 text-xl font-normal text-[#404040] list-none">
                 <li className="flex items-start gap-3">
                   <span className="text-[#FFCA42] mt-1.5">•</span>
-                  <span>Students should remain the <strong>authors of their own words</strong>.</span>
+                  <span>
+                    Students should remain the{" "}
+                    <strong>authors of their own words</strong>.
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#FFCA42] mt-1.5">•</span>
-                  <span>AI should act as a <strong>coach and guide</strong>, not a replacement.</span>
+                  <span>
+                    AI should act as a <strong>coach and guide</strong>, not a
+                    replacement.
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#FFCA42] mt-1.5">•</span>
-                  <span>Scholarship writing should develop <strong>self-awareness, reflection, and communication skills</strong>.</span>
+                  <span>
+                    Scholarship writing should develop{" "}
+                    <strong>
+                      self-awareness, reflection, and communication skills
+                    </strong>
+                    .
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#FFCA42] mt-1.5">•</span>
-                  <span>Families deserve tools that <strong>reduce stress</strong>, not increase pressure.</span>
+                  <span>
+                    Families deserve tools that <strong>reduce stress</strong>,
+                    not increase pressure.
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#FFCA42] mt-1.5">•</span>
-                  <span>Educators and counselors should feel confident recommending the resources students use.</span>
+                  <span>
+                    Educators and counselors should feel confident recommending
+                    the resources students use.
+                  </span>
                 </li>
               </ul>
             </div>
@@ -70,11 +109,15 @@ export default function AboutPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#FFCA42] mt-1.5">•</span>
-                  <span>Support planning, drafting, and revision responsibly.</span>
+                  <span>
+                    Support planning, drafting, and revision responsibly.
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#FFCA42] mt-1.5">•</span>
-                  <span>Help families manage opportunities without overwhelm.</span>
+                  <span>
+                    Help families manage opportunities without overwhelm.
+                  </span>
                 </li>
               </ul>
             </div>
@@ -82,7 +125,9 @@ export default function AboutPage() {
             {/* Concluding Statement */}
             <div className="pt-4 lg:pt-0">
               <p className="text-xl lg:text-2xl font-normal text-[#404040] leading-relaxed">
-                Our goal isn't just better essays—it's a healthier, more thoughtful scholarship process that helps students grow while staying true to who they are.
+                Our goal isn't just better essays—it's a healthier, more
+                thoughtful scholarship process that helps students grow while
+                staying true to who they are.
               </p>
             </div>
           </div>
@@ -120,11 +165,10 @@ export default function AboutPage() {
                   Henry, Arthur
                 </h3>
                 <p className="text-xl font-medium my-3 text-[#404040]">
-                  Co-Founder & CEO, MyScholarHack
+                  Meet Your Big Sis in College Prep
                 </p>
                 <p className="text-base text-[#404040]">
-                  Built MyScholarHack after winning multiple merit scholarships;
-                  leads product vision and student outreach.
+                  I’m your ScholarHackSis who’s been through college prep with my three kids plus dozens of others. I’ve seen how many scholarships get missed—not because students aren’t qualified, but because the process is overwhelming. I built MyScholarHack to give you a simple system that actually works.
                 </p>
               </div>
             </div>

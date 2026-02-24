@@ -7,7 +7,7 @@ export default function HeaderBG({Height, children}) {
   return (
     <section
       style={{
-        backgroundImage: "url('/HeroSection.png')",
+        backgroundImage: "url('/HeroSection.svg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
