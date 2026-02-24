@@ -11,7 +11,7 @@ export default function Pricing() {
 
       <Container>
         <FaqSection />
-        <RoiCalculator />
+        {/* <RoiCalculator /> */}
       </Container>
     </>
 

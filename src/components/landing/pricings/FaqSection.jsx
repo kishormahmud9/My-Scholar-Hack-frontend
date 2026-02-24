@@ -54,11 +54,7 @@ const FaqSection = () => {
                 <h2 className="text-5xl font-semibold text-gray-800 mb-6 leading-tight">
                     Frequently Asked Questions
                 </h2>
-                <p className="text-gray-500 text-lg leading-relaxed">
-                    Each package includes personalized consultation and revisions to
-                    guarantee your satisfaction.
-                </p>
-            </div>
+                      </div>
 
             {/* Right Column: Accordion */}
             <div className="lg:col-span-7 flex flex-col gap-4">
