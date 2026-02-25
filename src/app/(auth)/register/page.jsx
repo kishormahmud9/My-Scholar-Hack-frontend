@@ -51,21 +51,22 @@ export default function RegisterPage() {
         router.push("/verify-email");
       } else {
         const errorMsg = response?.message || "Registration failed. Please try again later.";
-        setSubmitError(errorMsg);
+        
+        // setSubmitError(errorMsg);
         toast.error(errorMsg);
       }
     } catch (err) {
 
-      setSubmitError("Registration failed. Please try again later.");
-      toast.error("Registration failed. Please try again later.");
+      setSubmitError("This Email Is already Registered. please login or Try with another Email");
+      toast.error("This Email Is already Registered. please login or Try with another Email");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50/50 p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50/50  p-4">
+      <div className={`max-w-md w-full bg-white rounded-2xl  ${submitError? "border border-red-300 shadow-lg shadow-red-200" : "border border-gray-100 shadow-lg"} overflow-hidden`}>
         <div className="p-8">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FFFAEC] mb-4">
@@ -164,10 +165,6 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
-
-            {submitError ? (
-              <p className="text-sm text-red-500">{submitError}</p>
-            ) : null}
 
             <PrimaryBtn
               title={isSubmitting ? "Signing Up..." : "Sign Up"}

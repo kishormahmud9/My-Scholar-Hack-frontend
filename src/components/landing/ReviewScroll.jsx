@@ -40,7 +40,7 @@ export default function ReviewScroll() {
               }
               username={"Courtney M. Senior"}
               address={"Fort Worth, TX"}
-              profileImage={"/Reviewer1.png"}
+              profileImage={"/user1.png"}
             />
           </SwiperSlide>
           <SwiperSlide>
@@ -51,7 +51,7 @@ export default function ReviewScroll() {
               }
               username={" Marcus  T"}
               address={"High School Senior, Texas"}
-              profileImage={"/Reviewer2.png"}
+              profileImage={"/user2.png"}
             />
           </SwiperSlide>
           <SwiperSlide>
@@ -62,7 +62,7 @@ export default function ReviewScroll() {
               }
               username={"Priya K"}
               address={"Sophomore, MIT"}
-              profileImage={"/ReviewUser.png"}
+              profileImage={"/user3.png"}
             />
           </SwiperSlide>
          

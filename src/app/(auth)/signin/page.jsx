@@ -96,6 +96,7 @@ export default function SignInPage() {
           sessionStorage.setItem('pendingVerificationEmail', email);
         }
         setSubmitError("Your email is not verified. Please verify your email to continue.");
+        toast.error(submitError);
       } else {
         setSubmitError(errorMessage);
         toast.error(errorMessage);
@@ -107,7 +108,7 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50/50 p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className={`max-w-md w-full bg-white rounded-2xl  ${submitError? "border border-red-400 shadow-sm shadow-red-400":"border border-gray-100 shadow-sm"} overflow-hidden`}>
         <div className="p-8">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FFFAEC] mb-4">
@@ -179,11 +180,10 @@ export default function SignInPage() {
 
             {submitError ? (
               <div className="space-y-2">
-                <p className="text-sm text-red-500">{submitError}</p>
                 {notVerified && (
                   <Link
                     href="/verify-email"
-                    className="text-sm font-semibold text-[#FFCA42] hover:text-[#eeb526] transition-colors inline-block"
+                    className="text-sm font-semibold text-[#ff5842] hover:text-[#ff5842] transition-colors inline-block"
                   >
                     Verify Email →
                   </Link>

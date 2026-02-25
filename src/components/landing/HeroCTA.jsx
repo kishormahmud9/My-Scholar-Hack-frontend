@@ -35,26 +35,27 @@ export default function HeroCTA() {
 
           {/* Profile images */}
           <div className="flex items-center gap-2 mt-2">
+            
             <Image
-              src="/user1.png"
+              src="/user01.png"
               width={35}
               height={35}
               className="rounded-full"
-              alt="user"
+              alt="Featured User"
             />
             <Image
-              src="/user2.png"
+              src="/user02.png"
               width={35}
               height={35}
               className="rounded-full"
-              alt="user"
+              alt="Featured User"
             />
             <Image
-              src="/user3.png"
+              src="/user03.png"
               width={35}
               height={35}
               className="rounded-full"
-              alt="user"
+              alt="Featured User"
             />
 
             <div className="bg-white text-black text-xs px-3 py-3 rounded-full">
