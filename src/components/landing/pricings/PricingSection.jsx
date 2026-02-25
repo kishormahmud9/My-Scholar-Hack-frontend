@@ -50,7 +50,7 @@ export default function PricingSection() {
     } else {
       // Sync localStorage if cookies were manually cleared
       if (typeof window !== "undefined") {
-        localStorage.setItem("selectedPlan", planName);
+        localStorage.setItem("selectedPlan", plan.planType);
       }
       router.push("/signin");
     }
