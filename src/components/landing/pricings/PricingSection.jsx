@@ -22,13 +22,13 @@ export default function PricingSection() {
 
 
 
-  const handlePlanClick = async (planName) => {
+  const handlePlanClick = async (plan) => {
     // Check authentication strictly (dependent on cookies now)
     const isUserAuthenticated = isAuthenticated();
 
     if (isUserAuthenticated) {
       try {
-        const response = await apiGet(`/payment/checkout/${planName}`);
+        const response = await apiGet(`/payment/checkout/${plan.planType}?durationType=${plan.durationType}`);
 
         // Try different response structures as API might return data wrapped or direct
         const checkoutUrl = response?.url || response?.data?.url || response?.checkoutUrl || response?.data?.checkoutUrl;
@@ -142,7 +142,7 @@ export default function PricingSection() {
                     ))}
                   </div>
                   <PrimaryBtn
-                    hendleClick={() => handlePlanClick(plan.name)}
+                    hendleClick={() => handlePlanClick(plan)}
                     style="w-full rounded-full"
                     title={plan.buttonText || "Get Started"}
                   />

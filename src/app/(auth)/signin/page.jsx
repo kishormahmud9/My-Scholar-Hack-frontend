@@ -40,7 +40,7 @@ export default function SignInPage() {
         const { accessToken, refreshToken, user } = response.data;
 
 
-        // Store authentication data (tokens and user info)
+
         try {
           storeAuthData(accessToken, refreshToken, user);
 
@@ -48,8 +48,10 @@ export default function SignInPage() {
           console.error("Storage error:", storageError);
         }
 
+
         // Redirect to appropriate dashboard based on user role
         const dashboardRoute = getDashboardRoute();
+
 
         console.log("user", user);
         // Show success toast before navigation
@@ -97,10 +99,7 @@ export default function SignInPage() {
         }
         setSubmitError("Your email is not verified. Please verify your email to continue.");
         toast.error(submitError);
-      } else {
-        setSubmitError(errorMessage);
-        toast.error(errorMessage);
-      }
+      } 
     } finally {
       setIsSubmitting(false);
     }

@@ -12,7 +12,7 @@ export default function Feature() {
         "One thoughtful setup saves hours later."
       ],
       imagePosition: "right",
-      image: "/Smart Profile System.png"
+      image: "/Smart-Profile-System.png"
     },
     {
       title: "Story Discovery Engine",
@@ -23,7 +23,7 @@ export default function Feature() {
         "This removes second-guessing and builds confidence fast."
       ],
       imagePosition: "left",
-      image: "/Story Discovery Engine.png"
+      image: "/Story-Discovery-Engine.png"
     },
     {
       title: "Application Tracking Dashboard",
@@ -34,7 +34,7 @@ export default function Feature() {
         "Clear visibility keeps everything on track."
       ],
       imagePosition: "right",
-      image: "/Application Tracking Dashboard.png"
+      image: "/Application-Tracking-Dashboard.png"
     },
     {
       title: "Multiple Essay Management",
@@ -45,7 +45,7 @@ export default function Feature() {
         "Work smarter. Apply more. Avoid burnout."
       ],
       imagePosition: "left",
-      image: "/Multiple Essay Management.png"
+      image: "/Multiple-Essay-Management.png"
     },
     {
       title: "Unlimited Refinement",
@@ -57,7 +57,7 @@ export default function Feature() {
         "Better essays. Less stress. More confidence."
       ],
       imagePosition: "right",
-      image: "/Unlimited Refinement.png"
+      image: "/Unlimited-Refinement.png"
     },
     {
       title: "Built Around Proven Essay Structure",
@@ -68,7 +68,7 @@ export default function Feature() {
         "They start with structure — then personalize it in their own voice."
       ],
       imagePosition: "left",
-      image: "/Built Around Proven Essay Structure.png"
+      image: "/Built-Around-Proven-Essay-Structure.png"
     },
     {
       title: "Private, Closed AI System",
@@ -79,7 +79,7 @@ export default function Feature() {
         "Their story belongs to them."
       ],
       imagePosition: "right",
-      image: "/Private, Closed AI System.png"
+      image: "/Private-Closed-AI-System.png"
     }
   ];
 
