@@ -138,7 +138,7 @@ export default function Home() {
               icon={"healthicons:i-note-action-outline"}
               title={"Story Discovery Engine"}
               descritption={
-                "Struggling to find the right angle? Our AI asks the right questions to uncover your most compelling stories for each prompt."
+                "Our Essay Comparison Engine analyzes multiple drafts to highlight differences in tone, structure, and clarity. \n It helps students refine strategically — so every revision moves the essay closer to submission-ready strength."
               }
               style={"bg-[#FC9550]"}
             />
@@ -146,7 +146,7 @@ export default function Home() {
               icon={"healthicons:i-note-action-outline"}
               title={"Authentic Content Only"}
               descritption={
-                "Struggling to find the right angle? Our AI asks the right questions to uncover your most compelling stories for each prompt."
+                "Every essay is built from your student’s real experiences — nothing fabricated, copied, or generic.\n We help refine and structure their story, not replace it."
               }
               style={"bg-[#3CA7E9]"}
             />
@@ -154,7 +154,7 @@ export default function Home() {
               icon={"healthicons:i-note-action-outline"}
               title={"Application Tracking"}
               descritption={
-                "Struggling to find the right angle? Our AI asks the right questions to uncover your most compelling stories for each prompt."
+                "Keep every scholarship, deadline, requirement, and status update in one organized dashboard. No more missed due dates or scattered spreadsheets — just clear, structured execution from start to submission."
               }
               style={"bg-[#00A5BB]"}
             />
@@ -162,14 +162,14 @@ export default function Home() {
               icon={"fluent-mdl2:date-time-12"}
               title={"Unlimited Iterations"}
               descritption={
-                "Struggling to find the right angle? Our AI asks the right questions to uncover your most compelling stories for each prompt."
+                "Refine your essay as many times as needed without worrying about limits or extra fees. Adjust tone, strengthen impact, and polish details until the final version truly reflects your student’s best work."
               }
               style={"bg-[#FC64CE]"}
             />
           </div>
         </section>
 
-        {/* Features */}
+        {/* Reviews */}
         <section className="pt-20 lg:pt-[120px] pb-10 lg:pb-[72px] flex flex-col items-center justify-center gap-y-10 lg:gap-y-[60px]">
           <SectionHead
             Status={"Testimonial"}

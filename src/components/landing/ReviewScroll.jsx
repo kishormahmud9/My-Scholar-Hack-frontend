@@ -61,7 +61,7 @@ export default function ReviewScroll() {
                 "Finally, a tool that doesn't just spit out generic garbage. It helped me tell MY story, and I won my first scholarship!"
               }
               username={"Priya K"}
-              address={"Sophomore, MIT"}
+              address={"Sophomore, Northwestern"}
               profileImage={"/user3.png"}
             />
           </SwiperSlide>

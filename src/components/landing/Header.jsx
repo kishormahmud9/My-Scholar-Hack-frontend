@@ -52,7 +52,7 @@ export default function Header() {
                     />
                     <SecoundryBtn
                       hendleClick={() => redirect("/how-to-work")}
-                      title={"How to Works"}
+                      title={"How it Works"}
                       icon={"line-md:arrow-right"}
                       style={"rounded-full"}
                     />
