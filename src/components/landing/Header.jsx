@@ -41,7 +41,7 @@ export default function Header() {
                     MyScholarHack uses your real stories, achievements, and
                     writing voice to help you create authentic scholarship
                     essays that win. No made-up experiences. No generic AI
-                    fluff. Just your unique story, told powerfully
+                    fluff. Just your unique story, told powerfully.
                   </p>
                   <div className="pt-10 px-10 lg:px-0 flex flex-col md:flex-row gap-4 justify-center w-full">
                     <PrimaryBtn
