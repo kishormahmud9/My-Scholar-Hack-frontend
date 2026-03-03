@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiGet, apiPost } from "@/lib/api";
 import { logout } from "@/lib/auth";
 import toast from "react-hot-toast";
-import defaultProfileImage from "../../../public/user1.png";
+
 import NotificationDropdown from "./NotificationDropdown";
 
 export default function Topbar({ onMenuClick }) {
@@ -127,7 +127,7 @@ export default function Topbar({ onMenuClick }) {
               {isAdmin ? (
                  <Icon icon="solar:user-bold" className="text-indigo-600 w-8 h-8" />
               ) : (
-                profileImage ? 
+                profileImage && profileImage !== "/user1.png" ? 
                 <Image
                   src={profileImage}
                   fill
@@ -138,8 +138,8 @@ export default function Topbar({ onMenuClick }) {
                     setProfileImage("/user1.png");
                   }}
                 /> :
-                <div className="text-black/60 font-bold bg-amber-400">
-                  {userName.split(0,1)}                  
+                <div className="flex items-center justify-center w-full h-full bg-gray-500 text-white text-xl font-bold">
+                  {userName ? userName.charAt(0).toUpperCase() : 'U'}
                 </div>
               )}
             </div>

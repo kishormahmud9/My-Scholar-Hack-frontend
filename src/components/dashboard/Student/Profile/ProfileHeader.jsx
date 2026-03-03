@@ -140,12 +140,12 @@ export default function ProfileHeader() {
     return (
         <div className="flex flex-col items-center justify-center mb-8">
             <div className="relative group">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg relative">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg relative bg-gray-500 text-white flex items-center justify-center text-4xl font-bold">
                     {uploading ? (
                         <div className="w-full h-full flex items-center justify-center bg-gray-100">
                             <Icon icon="svg-spinners:3-dots-fade" width="32" height="32" className="text-[#FFCA42]" />
                         </div>
-                    ) : (
+                    ) : image && image !== "/ceoProfile.png" ? (
                         <Image
                             src={image}
                             alt="Profile"
@@ -156,6 +156,8 @@ export default function ProfileHeader() {
                                 setImage("/ceoProfile.png");
                             }}
                         />
+                    ) : (
+                        <span>{fullName ? fullName.charAt(0).toUpperCase() : 'U'}</span>
                     )}
                 </div>
 
