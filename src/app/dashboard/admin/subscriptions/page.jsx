@@ -107,6 +107,8 @@ export default function Subscriptions() {
         mutationFn: async (payload) => {
             return apiPost("/admin/plans", payload);
         },
+
+
         onSuccess: () => {
             toast.success("Plan created successfully");
             queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
@@ -157,7 +159,7 @@ export default function Subscriptions() {
     const openEditModal = (plan) => {
         setSelectedPlan(plan);
         setEditForm({
-            name: plan.name || "",
+            name: plan.planType || "",
             monthlyPrice: plan.monthlyPrice || "",
             yearlyPrice: plan.yearlyPrice || "",
             description: plan.description || "",
@@ -319,7 +321,7 @@ export default function Subscriptions() {
                                 </div>
                             </div>
 
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.planType}</h3>
                             <p className="text-sm text-gray-500 mb-6 min-h-[40px]">{plan.description}</p>
 
                             <div className="flex items-baseline gap-1 mb-6">

@@ -26,9 +26,11 @@ export default function PricingSection() {
     // Check authentication strictly (dependent on cookies now)
     const isUserAuthenticated = isAuthenticated();
 
+    console.log(plan.name)
+
     if (isUserAuthenticated) {
       try {
-        const response = await apiGet(`/payment/checkout/${plan.planType}?durationType=${plan.durationType}`);
+        const response = await apiGet(`/payment/checkout/${plan.name}?durationType=${plan.durationType}`);
 
         // Try different response structures as API might return data wrapped or direct
         const checkoutUrl = response?.url || response?.data?.url || response?.checkoutUrl || response?.data?.checkoutUrl;
@@ -50,7 +52,7 @@ export default function PricingSection() {
     } else {
       // Sync localStorage if cookies were manually cleared
       if (typeof window !== "undefined") {
-        localStorage.setItem("selectedPlan", plan.planType);
+        localStorage.setItem("selectedPlan", plan.name);
       }
       router.push("/signin");
     }
@@ -111,15 +113,15 @@ export default function PricingSection() {
 
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-10 lg:gap-14">
-            {pricingPlans.map((plan, idx) => (
+            {pricingPlans.map((plan) => (<>
+           
               <div
-
-                key={idx}
+                key={plan.sortOrder}
                 className={`border ${plan.isFeatured === true ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
                   } px-7 py-8 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
               >
                 <div className="flex flex-col h-full">
-                  <h2 className="text-3xl font-semibold">{plan.name === "essay_hack" ? "MyScholarHack Starter" : plan.name === "essay_hack_plus" ? "MyScholarHack Plus (Most Popular)" : plan.name === "hack_pro" ? "Essay Hack Pro" : plan.name}</h2>
+                  <h2 className="text-3xl font-semibold">{plan.planType}</h2>
                   <p className="text-base pt-5 pb-10 opacity-80">
                     {plan.description}
                   </p>
@@ -148,6 +150,8 @@ export default function PricingSection() {
                   />
                 </div>
               </div>
+            </>
+              
             ))}
           </div>
         </div>
