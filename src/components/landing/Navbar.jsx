@@ -108,7 +108,7 @@ export default function Navbar() {
   };
 
   const getProfileImage = () => {
-    if (!userData) return userInfo.fullName.slice(0,1); // Default placeholder
+    if (!userData) return userInfo.name.slice(0,1); // Default placeholder
 
     // Check for filePath (common pattern in this codebase)
     if (userData.filePath) {
