@@ -37,21 +37,21 @@ export default function HeroCTA() {
           <div className="flex items-center gap-2 mt-2">
             
             <Image
-              src="/user01.png"
+              src="/Courtney-M2.jpg"
               width={35}
               height={35}
               className="rounded-full"
               alt="Featured User"
             />
             <Image
-              src="/user02.png"
+              src="/Marcus-T2.png"
               width={35}
               height={35}
               className="rounded-full"
               alt="Featured User"
             />
             <Image
-              src="/user03.png"
+              src="/Priya-K2.png"
               width={35}
               height={35}
               className="rounded-full"

@@ -40,7 +40,7 @@ export default function ReviewScroll() {
               }
               username={"Courtney M. Senior"}
               address={"Fort Worth, TX"}
-              profileImage={"/user1.png"}
+              profileImage={"/Courtney-M1.jpg"}
             />
           </SwiperSlide>
           <SwiperSlide>
@@ -49,9 +49,9 @@ export default function ReviewScroll() {
               message={
                 "The voice matching is incredible. It actually sounds like I wrote it. I  went from avoiding essay scholarships to applying to 15 in one month."
               }
-              username={" Marcus  T"}
+              username={"Marcus T"}
               address={"High School Senior, Texas"}
-              profileImage={"/user2.png"}
+              profileImage={"/Marcus-T1.png"}
             />
           </SwiperSlide>
           <SwiperSlide>
@@ -62,7 +62,7 @@ export default function ReviewScroll() {
               }
               username={"Priya K"}
               address={"Sophomore, Northwestern"}
-              profileImage={"/user3.png"}
+              profileImage={"/Priya-K1.png"}
             />
           </SwiperSlide>
          
