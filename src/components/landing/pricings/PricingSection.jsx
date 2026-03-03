@@ -126,8 +126,7 @@ export default function PricingSection() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-10 lg:gap-14">
             {pricingPlans.map((plan) => (
-              <>
-                <div
+              <div
                   key={plan.sortOrder}
                   className={`border ${
                     plan.isFeatured === true
@@ -173,7 +172,6 @@ export default function PricingSection() {
                     />
                   </div>
                 </div>
-              </>
             ))}
           </div>
         </div>
