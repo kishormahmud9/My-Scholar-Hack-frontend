@@ -54,7 +54,7 @@ export default function Subscriptions() {
 
     // Edit/Create Form State
     const [editForm, setEditForm] = useState({
-        name: "",
+        planType: "",
         monthlyPrice: "",
         yearlyPrice: "",
         description: "",
@@ -159,7 +159,7 @@ export default function Subscriptions() {
     const openEditModal = (plan) => {
         setSelectedPlan(plan);
         setEditForm({
-            name: plan.planType || "",
+            planType: plan.planType || "",
             monthlyPrice: plan.monthlyPrice || "",
             yearlyPrice: plan.yearlyPrice || "",
             description: plan.description || "",
@@ -193,7 +193,7 @@ export default function Subscriptions() {
     };
 
     const savePlan = async () => {
-        if (!editForm.name || !editForm.monthlyPrice || !editForm.yearlyPrice) {
+        if (!editForm.planType || !editForm.monthlyPrice || !editForm.yearlyPrice) {
             toast.error("Please fill in all required fields (Name, Monthly Price, Yearly Price)");
             return;
         }
@@ -204,7 +204,7 @@ export default function Subscriptions() {
             .filter(f => f !== "");
 
         const payload = {
-            name: editForm.name.trim(),
+            planType: editForm.planType.trim(),
             monthlyPrice: parseFloat(editForm.monthlyPrice),
             yearlyPrice: parseFloat(editForm.yearlyPrice),
             description: editForm.description.trim() || "",
@@ -224,7 +224,7 @@ export default function Subscriptions() {
     };
 
     const createPlan = async () => {
-        if (!editForm.name || !editForm.monthlyPrice || !editForm.yearlyPrice) {
+        if (!editForm.planType || !editForm.monthlyPrice || !editForm.yearlyPrice) {
             toast.error("Please fill in all required fields (Name, Monthly Price, Yearly Price)");
             return;
         }
@@ -235,7 +235,7 @@ export default function Subscriptions() {
             .filter(f => f !== "");
 
         const payload = {
-            name: editForm.name.trim(),
+            planType: editForm.planType.trim(),
             monthlyPrice: parseFloat(editForm.monthlyPrice),
             yearlyPrice: parseFloat(editForm.yearlyPrice),
             description: editForm.description.trim() || "",
@@ -370,8 +370,8 @@ export default function Subscriptions() {
                                 <input
                                     type="text"
                                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-[#FFCA42] focus:ring-1 focus:ring-[#FFCA42] transition-colors"
-                                    value={editForm.name}
-                                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                    value={editForm.planType}
+                                    onChange={(e) => setEditForm({ ...editForm, planType: e.target.value })}
                                 />
                             </div>
 
@@ -498,7 +498,7 @@ export default function Subscriptions() {
                                 <input
                                     type="text"
                                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-[#FFCA42] focus:ring-1 focus:ring-[#FFCA42] transition-colors"
-                                    value={editForm.name}
+                                    value={editForm.planType}
                                     onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                                     placeholder="e.g., Essay Hack"
                                 />
