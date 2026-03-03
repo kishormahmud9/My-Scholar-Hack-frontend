@@ -15,25 +15,33 @@ export default function PricingSection() {
   const [plans, setPlans] = useState(false);
   const router = useRouter();
 
-  const { data: plansResponse, isLoading, error } = useQuery({
+  const {
+    data: plansResponse,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["allPlans"],
     queryFn: getAllPlans,
   });
-
-
 
   const handlePlanClick = async (plan) => {
     // Check authentication strictly (dependent on cookies now)
     const isUserAuthenticated = isAuthenticated();
 
-    console.log(plan.name)
+    console.log(plan.name);
 
     if (isUserAuthenticated) {
       try {
-        const response = await apiGet(`/payment/checkout/${plan.name}?durationType=${plan.durationType}`);
+        const response = await apiGet(
+          `/payment/checkout/${plan.name}?durationType=${plan.durationType}`,
+        );
 
         // Try different response structures as API might return data wrapped or direct
-        const checkoutUrl = response?.url || response?.data?.url || response?.checkoutUrl || response?.data?.checkoutUrl;
+        const checkoutUrl =
+          response?.url ||
+          response?.data?.url ||
+          response?.checkoutUrl ||
+          response?.data?.checkoutUrl;
 
         if (checkoutUrl) {
           window.location.href = checkoutUrl;
@@ -83,15 +91,18 @@ export default function PricingSection() {
     );
   }
 
-  const pricingPlans = (plansResponse?.data || []).filter(plan => plan.isActive === true);
-  console.log(pricingPlans)
+  const pricingPlans = (plansResponse?.data || []).filter(
+    (plan) => plan.isActive === true,
+  );
+  console.log(pricingPlans);
 
   return (
     <section
-      className={`w-full ${!plans
-        ? "bg-[url('/backgroundImage.png')] bg-cover bg-center text-white"
-        : "bg-white text-black"
-        }`}
+      className={`w-full ${
+        !plans
+          ? "bg-[url('/backgroundImage.png')] bg-cover bg-center text-white"
+          : "bg-white text-black"
+      }`}
     >
       <Container>
         <div className="pt-20 lg:pt-[120px] pb-10 lg:pb-[72px] flex flex-col items-center justify-center gap-y-10 lg:gap-y-[50px]">
@@ -106,52 +117,63 @@ export default function PricingSection() {
             <SwitchBtn plans={plans} setPlans={setPlans} />
           </div>
 
-          
-          <p className="py-2 w-[50%] text-center">Most families choose <strong className="text-amber-300">MyScholarHack Plus</strong> because it offers enough flexibility to apply consistently — without feeling limited.</p>
-          
-
-
+          <p className="py-2 w-[50%] text-center">
+            Most families choose{" "}
+            <strong className="text-amber-300">MyScholarHack Plus</strong>{" "}
+            because it offers enough flexibility to apply consistently — without
+            feeling limited.
+          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-10 lg:gap-14">
-            {pricingPlans.map((plan) => (<>
-           
-              <div
-                key={plan.sortOrder}
-                className={`border ${plan.isFeatured === true ? "border-[#FFCA42]" : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
+            {pricingPlans.map((plan) => (
+              <>
+                <div
+                  key={plan.sortOrder}
+                  className={`border ${
+                    plan.isFeatured === true
+                      ? "border-[#FFCA42]"
+                      : `${plans ? "border-[#31313114]" : "border-[#FFFFFF14]"}`
                   } px-7 py-8 rounded-2xl bg-[#FFFFFF05] backdrop-blur-sm`}
-              >
-                <div className="flex flex-col h-full">
-                  <h2 className="text-3xl font-semibold">{plan.planType}</h2>
-                  <p className="text-base pt-5 pb-10 opacity-80">
-                    {plan.description}
-                  </p>
-                  <div className="flex items-end">
-                    <h4 className="text-4xl font-semibold">${!plans ? plan.monthlyPrice : plan.yearlyPrice}</h4>
-                    <p className="text-base opacity-70">/{!plans ? "per Month" : "per Year"}</p>
+                >
+                  <div className="flex flex-col h-full">
+                    <h2 className="text-3xl font-semibold">{plan.planType}</h2>
+                    <p className="text-base pt-5 pb-10 opacity-80">
+                      {plan.description}
+                    </p>
+                    <div className="flex items-end">
+                      <h4 className="text-4xl font-semibold">
+                        ${!plans ? plan.monthlyPrice : plan.yearlyPrice}
+                      </h4>
+                      <p className="text-base opacity-70">
+                        /{!plans ? "per Month" : "per Year"}
+                      </p>
+                    </div>
+                    <div
+                      className={`flex-1 space-y-5 px-4 py-5 ${plans ? "bg-[#5858580a] border border-[#52525214]" : "bg-[#FFFFFF0A] border border-[#FFFFFF14]"} rounded-lg my-4`}
+                    >
+                      {/* Assuming features are returned as an array or JSON string */}
+                      {(Array.isArray(plan.features) ? plan.features : []).map(
+                        (feature, index) => (
+                          <div key={index} className="flex gap-4">
+                            <Icon
+                              className="text-green-500"
+                              icon="mdi:tick-circle"
+                              height={20}
+                              width={20}
+                            />
+                            <p>{feature}</p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                    <PrimaryBtn
+                      hendleClick={() => handlePlanClick(plan)}
+                      style="w-full rounded-full"
+                      title={plan.buttonText || "Get Started"}
+                    />
                   </div>
-                  <div className={`flex-1 space-y-5 px-4 py-5 ${plans ? "bg-[#5858580a] border border-[#52525214]" : "bg-[#FFFFFF0A] border border-[#FFFFFF14]"} rounded-lg my-4`}>
-                    {/* Assuming features are returned as an array or JSON string */}
-                    {(Array.isArray(plan.features) ? plan.features : []).map((feature, index) => (
-                      <div key={index} className="flex gap-4">
-                        <Icon
-                          className="text-green-500"
-                          icon="mdi:tick-circle"
-                          height={20}
-                          width={20}
-                        />
-                        <p>{feature}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <PrimaryBtn
-                    hendleClick={() => handlePlanClick(plan)}
-                    style="w-full rounded-full"
-                    title={plan.buttonText || "Get Started"}
-                  />
                 </div>
-              </div>
-            </>
-              
+              </>
             ))}
           </div>
         </div>

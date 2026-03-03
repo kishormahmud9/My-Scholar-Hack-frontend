@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 export default function SignInPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+  const [submitError, setSubmitError] = useState();
   const [notVerified, setNotVerified] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -63,28 +63,28 @@ export default function SignInPage() {
       }
     } catch (err) {
 
+      // setSubmitError("");
       if (err.message === "User is not verified") {
-        setSubmitError("");
         setSubmitError("This Email is not verified. Please Verify Email");
+        setNotVerified(true)
         toast.error(submitError);
       } else if (
         err.message === "Incorrect password" ||
         err.message === "User does not exist"
       ) {
-        setSubmitError("");
+        // setSubmitError("");
         setSubmitError(
           "Login Creadentials are wrong please try with right Email and Password",
         );
         toast.error(submitError);
       } else {
-        setSubmitError("");
+        // setSubmitError("");
         setSubmitError(
           "Server is busy",
         );
         toast.error(submitError);
       }
 
-      console.log();
     } finally {
       setIsSubmitting(false);
     }

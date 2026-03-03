@@ -11,9 +11,13 @@ import PricingSection from "@/components/landing/pricings/PricingSection";
 import SecurityCard from "@/components/landing/securityCard";
 import HeroCTA from "@/components/landing/HeroCTA";
 import { redirect } from "next/navigation";
+import { getUserData, hasActivePlan } from "@/lib/auth";
 
 
 export default function Home() {
+
+  console.log(getUserData())
+  console.log(hasActivePlan())
   return (
     <>
       <Container>
