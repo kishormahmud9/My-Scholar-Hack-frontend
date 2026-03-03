@@ -127,8 +127,9 @@ export default function Topbar({ onMenuClick }) {
               {isAdmin ? (
                  <Icon icon="solar:user-bold" className="text-indigo-600 w-8 h-8" />
               ) : (
+                profileImage ? 
                 <Image
-                  src={profileImage || defaultProfileImage}
+                  src={profileImage}
                   fill
                   sizes="48px"
                   alt="Dashboard user"
@@ -136,7 +137,10 @@ export default function Topbar({ onMenuClick }) {
                   onError={() => {
                     setProfileImage("/user1.png");
                   }}
-                />
+                /> :
+                <div className="text-black/60 font-bold bg-amber-400">
+                  {userName.split(0,1)}                  
+                </div>
               )}
             </div>
             <div className="hidden sm:block">

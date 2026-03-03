@@ -102,14 +102,13 @@ export default function Navbar() {
       }, 1000);
     } else {
 
-      console.log("dashboardRoute");
       document.cookie = `activePlan=${userInfo?.isPlan}; path=/`;
       router.push(dashboardRoute);
     }
   };
 
   const getProfileImage = () => {
-    if (!userData) return "/ceoProfile.png"; // Default placeholder
+    if (!userData) return userInfo.fullName.slice(0,1); // Default placeholder
 
     // Check for filePath (common pattern in this codebase)
     if (userData.filePath) {
@@ -192,13 +191,6 @@ export default function Navbar() {
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center gap-3 focus:outline-none"
             >
-              <div className="text-white text-right">
-                <p className="font-semibold text-2xl tracking-wider leading-5">
-                  {/* {userData?.fullName?.split(" ").slice(0, 1).join(" ") || "User"} */}
-                </p>
-                {/* Email removed as per request */}
-              </div>
-
               <div className="relative w-15 h-15 rounded-full overflow-hidden border-4 border-[#FFCA42] hover:scale-105 transition-transform">
                 <Image
                   src={getProfileImage()}
