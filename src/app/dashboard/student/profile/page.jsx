@@ -23,8 +23,8 @@ const TABS = [
     { id: 'experiences', label: 'Unique Experiences', component: UniqueExperiences },
     { id: 'identity', label: 'Diversity and Identity', component: DiversityIdentity },
     { id: 'scholarship', label: 'Scholarship Specific Info', component: ScholarshipInfo },
+    { id: 'essay', label: 'Essay Story Questions', component: EssayQuestions },
     { id: 'misc', label: 'Anything Else', component: AnythingElse },
-    { id: 'essay', label: 'Essay Specific Questions', component: EssayQuestions },
 ];
 
 export default function ProfilePage() {
