@@ -2,7 +2,7 @@
 import HeaderBG from "./HeaderBG";
 import Container from "./Container";
 import Navbar from "./Navbar";
-import { redirect, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Title from "./Title";
 import PrimaryBtn from "./PrimaryBtn";
 import SecoundryBtn from "./SecoundryBtn";
@@ -11,6 +11,7 @@ import dashboard from "../../../public/Dashboard.png";
 
 export default function Header() {
   const Pathname = usePathname();
+  const router = useRouter();
 
   if (
     !Pathname.startsWith("/signin") &&
@@ -45,13 +46,13 @@ export default function Header() {
                   </p>
                   <div className="pt-10 px-10 lg:px-0 flex flex-col md:flex-row gap-4 justify-center w-full">
                     <PrimaryBtn
-                      hendleClick={() => redirect("/pricing")}
+                      hendleClick={() => router.push("/pricing")}
                       title={"Start Free Trial"}
                       icon={"line-md:arrow-right"}
                       style={"rounded-full"}
                     />
                     <SecoundryBtn
-                      hendleClick={() => redirect("/how-to-work")}
+                      hendleClick={() => router.push("/how-to-work")}
                       title={"How it Works"}
                       icon={"line-md:arrow-right"}
                       style={"rounded-full"}

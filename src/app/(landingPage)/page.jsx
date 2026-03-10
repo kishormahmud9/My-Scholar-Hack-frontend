@@ -10,11 +10,12 @@ import ReviewScroll from "@/components/landing/ReviewScroll";
 import PricingSection from "@/components/landing/pricings/PricingSection";
 import SecurityCard from "@/components/landing/securityCard";
 import HeroCTA from "@/components/landing/HeroCTA";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { getUserData, hasActivePlan } from "@/lib/auth";
 
 
 export default function Home() {
+  const router = useRouter();
 
   console.log(getUserData())
   console.log(hasActivePlan())
@@ -103,7 +104,7 @@ export default function Home() {
           />
 
           <PrimaryBtn
-            hendleClick={() => redirect("/signin")}
+            hendleClick={() => router.push("/signin")}
             icon={"ri:arrow-right-line"}
             title={"Start Writing Authentic Essays Today"}
             style={"rounded-full"}

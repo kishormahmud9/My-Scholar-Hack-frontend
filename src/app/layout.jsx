@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 import ClientProvider from "@/components/ClientProvider/ClientProvider";
 
 const urbanist = Urbanist({
-  subsets: ["urbanist"],
+  subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 
