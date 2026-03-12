@@ -1,0 +1,258 @@
+"use client";
+import React, { useState } from "react";
+import { Icon } from "@iconify/react";
+import Table from "@/components/dashboard/Table";
+import AddScholarshipModal from "@/components/dashboard/Student/AddScholarshipModal";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
+import Loader from "@/components/Loader";
+
+export default function ManualApplicationTrackerPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingApplication, setEditingApplication] = useState(null); // holds the fetched data for edit
+  const [isFetchingEdit, setIsFetchingEdit] = useState(false);
+  const queryClient = useQueryClient();
+
+  // ── Fetch all manual applications ─────────────────────────────────────────
+  const { data: applicationsRes, isLoading, isError } = useQuery({
+    queryKey: ["manualApplications"],
+    queryFn: () => apiGet("/manual-application"),
+  });
+
+  const applications = applicationsRes?.data || [];
+
+  // ── Add mutation ───────────────────────────────────────────────────────────
+  const { mutate: addApplication, isPending: isAdding } = useMutation({
+    mutationFn: (payload) => apiPost("/manual-application", payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["manualApplications"]);
+      setIsModalOpen(false);
+    },
+  });
+
+  // ── Update mutation ────────────────────────────────────────────────────────
+  const { mutate: updateApplication, isPending: isUpdating } = useMutation({
+    mutationFn: ({ id, payload }) => apiPatch(`/manual-application/${id}`, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["manualApplications"]);
+      setIsModalOpen(false);
+      setEditingApplication(null);
+    },
+    onError: (err) => {
+      console.error("[PATCH error] status:", err?.status);
+      console.error("[PATCH error] message:", err?.message);
+      console.error("[PATCH error] data:", JSON.stringify(err?.data, null, 2));
+    },
+  });
+
+  // ── Delete mutation ────────────────────────────────────────────────────────
+  const { mutate: deleteApplication } = useMutation({
+    mutationFn: (id) => apiDelete(`/manual-application/${id}`),
+    onSuccess: () => queryClient.invalidateQueries(["manualApplications"]),
+  });
+
+  // ── Open edit modal — fetch by ID first ───────────────────────────────────
+  const handleEditClick = async (id) => {
+    setIsFetchingEdit(true);
+    try {
+      const res = await apiGet(`/manual-application/${id}`);
+      const data = res?.data || res;
+      setEditingApplication(data);
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error("Failed to fetch application:", err);
+    } finally {
+      setIsFetchingEdit(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingApplication(null);
+  };
+
+  const handleSubmit = (payload) => {
+    if (editingApplication) {
+      // Normalize deadline to full ISO string if only date string is provided
+      const normalizedPayload = {
+        ...payload,
+        scholarshipDeadline: payload.scholarshipDeadline
+          ? new Date(payload.scholarshipDeadline).toISOString()
+          : undefined,
+      };
+      console.log("[PATCH payload]", JSON.stringify(normalizedPayload, null, 2));
+      updateApplication({ id: editingApplication.id, payload: normalizedPayload });
+    } else {
+      addApplication(payload);
+    }
+  };
+
+  // ── Status badge ───────────────────────────────────────────────────────────
+  const StatusBadge = ({ status }) => {
+    const styles = {
+      DRAFT: "bg-gray-100 text-gray-600",
+      IN_PROGRESS: "bg-blue-100 text-blue-700",
+      SUBMITTED: "bg-green-100 text-green-700",
+      REJECTED: "bg-red-100 text-red-700",
+    };
+    const labels = {
+      DRAFT: "Draft",
+      IN_PROGRESS: "In Progress",
+      SUBMITTED: "Submitted",
+      REJECTED: "Rejected",
+    };
+    return (
+      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status] || "bg-gray-100 text-gray-600"}`}>
+        {labels[status] || status}
+      </span>
+    );
+  };
+
+  // ── Table columns ──────────────────────────────────────────────────────────
+  const TableHeads = [
+    {
+      Title: "No",
+      key: "no",
+      width: "4%",
+      render: (_, idx) => <span className="font-semibold text-gray-500">{idx}</span>,
+    },
+    {
+      Title: "Scholarship Name",
+      key: "scholarshipName",
+      width: "19%",
+      render: (row) => (
+        <div className="text-left space-y-1">
+          <p className="font-semibold text-gray-900">{row.scholarshipTitle || row.scholarshipName}</p>
+          <StatusBadge status={row.status} />
+        </div>
+      ),
+    },
+    {
+      Title: "Essay Prompts",
+      key: "prompt",
+      width: "21%",
+      render: (row) => (
+        <div className="text-left">
+          <p className="text-black font-medium line-clamp-1">{row.essayTitle}</p>
+          <p className="text-gray-500 text-sm mt-0.5 line-clamp-2">{row.prompt}</p>
+        </div>
+      ),
+    },
+    {
+      Title: "Requirements",
+      key: "requirements",
+      width: "18%",
+      render: (row) => <p className="text-black text-left line-clamp-3">{row.requirements}</p>,
+    },
+    {
+      Title: "Deadline",
+      key: "scholarshipDeadline",
+      width: "11%",
+      render: (row) => {
+        if (!row.scholarshipDeadline) return <span className="text-gray-400">—</span>;
+        const date = new Date(row.scholarshipDeadline);
+        const daysLeft = (date - new Date()) / (1000 * 60 * 60 * 24);
+        const isPast = daysLeft < 0;
+        const isNear = daysLeft <= 30 && !isPast;
+        return (
+          <div className="text-left">
+            <span className={`text-sm font-semibold ${isPast ? "text-red-500" : isNear ? "text-orange-500" : "text-gray-800"}`}>
+              {date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            </span>
+            {!isPast && <p className={`text-xs mt-0.5 ${isNear ? "text-orange-400" : "text-gray-400"}`}>{Math.ceil(daysLeft)}d left</p>}
+            {isPast && <p className="text-xs mt-0.5 text-red-400">Passed</p>}
+          </div>
+        );
+      },
+    },
+    {
+      Title: "Other Details",
+      key: "details",
+      width: "17%",
+      render: (row) => <p className="text-black  text-left line-clamp-3">{row.details}</p>,
+    },
+    {
+      Title: "Actions",
+      key: "actions",
+      width: "10%",
+      render: (row) => (
+        <div className="flex items-center justify-center gap-2">
+          {/* Edit */}
+          <button
+            onClick={() => handleEditClick(row.id)}
+            aria-label="Edit application"
+            disabled={isFetchingEdit}
+            className="w-9 h-9 rounded-lg border border-[#FFCA42]/60 text-[#b8941e] flex items-center justify-center hover:bg-[#FFFAEC] hover:border-[#FFCA42] transition-all disabled:opacity-50"
+          >
+            {isFetchingEdit ? (
+              <Icon icon="svg-spinners:3-dots-fade" width={16} />
+            ) : (
+              <Icon icon="mdi:pencil-outline" width={17} height={17} />
+            )}
+          </button>
+          {/* Delete */}
+          <button
+            onClick={() => deleteApplication(row.id)}
+            aria-label="Delete application"
+            className="w-9 h-9 rounded-lg border border-red-200 text-red-400 flex items-center justify-center hover:bg-red-50 hover:border-red-400 hover:text-red-600 transition-all"
+          >
+            <Icon icon="mdi:trash-can-outline" width={18} height={18} />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  if (isLoading) return <Loader fullScreen={false} />;
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Manual Application Tracker</h1>
+          <p className="text-gray-500 mt-1 text-sm">
+            Track scholarships you&apos;ve found and applied to manually.
+          </p>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#FFCA42] hover:bg-[#f5be2e] text-[#0C0C0D] font-semibold rounded-xl shadow-sm transition-all duration-200 hover:shadow-md active:scale-95 whitespace-nowrap"
+        >
+          <Icon icon="mdi:plus-circle-outline" width={20} height={20} />
+          Add Application
+        </button>
+      </div>
+
+      {/* Table Card */}
+      {isError ? (
+        <div className="bg-white rounded-2xl border border-red-100 p-12 text-center text-red-500 shadow-sm">
+          <Icon icon="mdi:alert-circle-outline" width={40} className="mx-auto mb-3 text-red-300" />
+          <p className="font-semibold">Failed to load applications</p>
+          <p className="text-sm text-gray-400 mt-1">Please try refreshing the page.</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 pt-5 pb-0 flex items-center justify-between">
+            <h2 className="text-base font-semibold text-gray-800">
+              All Applications
+              <span className="ml-2 text-xs font-normal text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
+                {applications.length} entries
+              </span>
+            </h2>
+          </div>
+          <Table TableHeads={TableHeads} TableRows={applications} />
+        </div>
+      )}
+
+      {/* Add / Edit Modal */}
+      <AddScholarshipModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmit}
+        isSubmitting={isAdding || isUpdating}
+        initialData={editingApplication}
+      />
+    </div>
+  );
+}

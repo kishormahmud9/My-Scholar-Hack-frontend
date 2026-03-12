@@ -36,6 +36,18 @@ export const apiPut = async (endpoint, body = {}, config = {}) => {
 };
 
 /**
+ * Generic UPDATE request (PUT alias)
+ * @param {string} endpoint - API endpoint
+ * @param {Object} body - Request body
+ * @param {Object} config - Axios config
+ * @returns {Promise} API response
+ */
+export const apiUpdate = async (endpoint, body = {}, config = {}) => {
+    const response = await apiClient.put(endpoint, body, config);
+    return response.data;
+};
+
+/**
  * Generic PATCH request
  * @param {string} endpoint - API endpoint
  * @param {Object} body - Request body

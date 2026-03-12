@@ -25,6 +25,11 @@ export const navLink_Student = [
     icon: "charm:notes-tick",
   },
   {
+    title: "Manual Application Tracker",
+    path: "/dashboard/student/manual_application_tracker",
+    icon: "charm:notes-tick",
+  },
+  {
     title: "Subscriptions Plan",
     path: "/dashboard/student/subscriptions_plan",
     icon: "lets-icons:dimond",
