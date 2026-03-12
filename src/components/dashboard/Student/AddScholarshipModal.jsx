@@ -100,7 +100,8 @@ function SearchableDropdown({ label, required, placeholder, isLoading, options, 
   );
 }
 
-// ── Main Modal ────────────────────────────────────────────────────────────────
+// ── Main Modal ──────────────────────────────────────────────
+// ──────────────────
 export default function 
 AddScholarshipModal({ isOpen, onClose, onSubmit, isSubmitting = false, initialData = null }) {
   const isEditMode = !!initialData;
