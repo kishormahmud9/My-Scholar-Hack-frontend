@@ -6,6 +6,7 @@ import AddScholarshipModal from "@/components/dashboard/Student/AddScholarshipMo
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import Loader from "@/components/Loader";
+import toast from "react-hot-toast";
 
 export default function ManualApplicationTrackerPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,6 +28,10 @@ export default function ManualApplicationTrackerPage() {
     onSuccess: () => {
       queryClient.invalidateQueries(["manualApplications"]);
       setIsModalOpen(false);
+      toast.success("Application added successfully!");
+    },
+    onError: (err) => {
+      toast.error(err?.data?.message || err?.message || "Failed to add application.");
     },
   });
 
@@ -37,18 +42,24 @@ export default function ManualApplicationTrackerPage() {
       queryClient.invalidateQueries(["manualApplications"]);
       setIsModalOpen(false);
       setEditingApplication(null);
+      toast.success("Application updated successfully!");
     },
     onError: (err) => {
-      console.error("[PATCH error] status:", err?.status);
-      console.error("[PATCH error] message:", err?.message);
       console.error("[PATCH error] data:", JSON.stringify(err?.data, null, 2));
+      toast.error(err?.data?.message || err?.message || "Failed to update application.");
     },
   });
 
   // ── Delete mutation ────────────────────────────────────────────────────────
   const { mutate: deleteApplication } = useMutation({
     mutationFn: (id) => apiDelete(`/manual-application/${id}`),
-    onSuccess: () => queryClient.invalidateQueries(["manualApplications"]),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["manualApplications"]);
+      toast.success("Application deleted.");
+    },
+    onError: (err) => {
+      toast.error(err?.data?.message || err?.message || "Failed to delete application.");
+    },
   });
 
   // ── Open edit modal — fetch by ID first ───────────────────────────────────
@@ -71,19 +82,20 @@ export default function ManualApplicationTrackerPage() {
     setEditingApplication(null);
   };
 
+  // ── Normalize payload — ensure deadline is full ISO-8601 ──────────────────
+  const normalizePayload = (payload) => ({
+    ...payload,
+    scholarshipDeadline: payload.scholarshipDeadline
+      ? new Date(payload.scholarshipDeadline).toISOString()
+      : undefined,
+  });
+
   const handleSubmit = (payload) => {
+    const normalized = normalizePayload(payload);
     if (editingApplication) {
-      // Normalize deadline to full ISO string if only date string is provided
-      const normalizedPayload = {
-        ...payload,
-        scholarshipDeadline: payload.scholarshipDeadline
-          ? new Date(payload.scholarshipDeadline).toISOString()
-          : undefined,
-      };
-      console.log("[PATCH payload]", JSON.stringify(normalizedPayload, null, 2));
-      updateApplication({ id: editingApplication.id, payload: normalizedPayload });
+      updateApplication({ id: editingApplication.id, payload: normalized });
     } else {
-      addApplication(payload);
+      addApplication(normalized);
     }
   };
 
