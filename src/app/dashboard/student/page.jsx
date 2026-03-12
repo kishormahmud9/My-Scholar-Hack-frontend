@@ -288,7 +288,7 @@ export default function StudentDashboard() {
                 </div>
                 <div className="text-center space-y-2">
                   <h3 className="text-lg font-bold text-gray-800 animate-pulse">
-                    Finding Perfect Scholarships
+                    Finding Scholarships
                   </h3>
                   <p className="text-sm text-gray-600 flex items-center gap-2 justify-center">
                     <span className="inline-block w-2 h-2 bg-[#FFCA42] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
