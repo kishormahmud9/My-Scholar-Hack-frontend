@@ -82,13 +82,23 @@ export default function ManualApplicationTrackerPage() {
     setEditingApplication(null);
   };
 
-  // ── Normalize payload — ensure deadline is full ISO-8601 ──────────────────
-  const normalizePayload = (payload) => ({
-    ...payload,
-    scholarshipDeadline: payload.scholarshipDeadline
-      ? new Date(payload.scholarshipDeadline).toISOString()
-      : undefined,
-  });
+  // ── Normalize payload — clean & convert fields before API call ───────────
+  const VALID_STATUSES = ["DRAFT", "PROCESSING", "COMPLETED", "FAILED", "REJECTED"];
+
+  const normalizePayload = (payload) => {
+    const normalized = {
+      ...payload,
+      scholarshipDeadline: payload.scholarshipDeadline
+        ? new Date(payload.scholarshipDeadline).toISOString()
+        : undefined,
+      // Only send status if it's a valid enum value
+      status: VALID_STATUSES.includes(payload.status) ? payload.status : "DRAFT",
+    };
+    // Remove undefined / empty string fields so backend doesn't choke
+    return Object.fromEntries(
+      Object.entries(normalized).filter(([, v]) => v !== undefined && v !== "")
+    );
+  };
 
   const handleSubmit = (payload) => {
     const normalized = normalizePayload(payload);
@@ -102,16 +112,18 @@ export default function ManualApplicationTrackerPage() {
   // ── Status badge ───────────────────────────────────────────────────────────
   const StatusBadge = ({ status }) => {
     const styles = {
-      DRAFT: "bg-gray-100 text-gray-600",
-      IN_PROGRESS: "bg-blue-100 text-blue-700",
-      SUBMITTED: "bg-green-100 text-green-700",
-      REJECTED: "bg-red-100 text-red-700",
+      DRAFT:      "bg-gray-100 text-gray-600",
+      PROCESSING: "bg-blue-100 text-blue-700",
+      COMPLETED:  "bg-green-100 text-green-700",
+      FAILED:     "bg-red-100 text-red-700",
+      REJECTED:   "bg-orange-100 text-orange-700",
     };
     const labels = {
-      DRAFT: "Draft",
-      IN_PROGRESS: "In Progress",
-      SUBMITTED: "Submitted",
-      REJECTED: "Rejected",
+      DRAFT:      "Draft",
+      PROCESSING: "Processing",
+      COMPLETED:  "Completed",
+      FAILED:     "Failed",
+      REJECTED:   "Rejected",
     };
     return (
       <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status] || "bg-gray-100 text-gray-600"}`}>

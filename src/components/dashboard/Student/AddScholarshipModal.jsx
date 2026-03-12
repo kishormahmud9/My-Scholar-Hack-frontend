@@ -5,10 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "@/lib/api";
 
 const STATUS_OPTIONS = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "SUBMITTED", label: "Submitted" },
-  { value: "REJECTED", label: "Rejected" },
+  { value: "DRAFT",      label: "Draft" },
+  { value: "PROCESSING", label: "Processing" },
+  { value: "COMPLETED",  label: "Completed" },
+  { value: "FAILED",     label: "Failed" },
+  { value: "REJECTED",   label: "Rejected" },
 ];
 
 const defaultForm = {
@@ -100,7 +101,8 @@ function SearchableDropdown({ label, required, placeholder, isLoading, options, 
 }
 
 // ── Main Modal ────────────────────────────────────────────────────────────────
-export default function AddScholarshipModal({ isOpen, onClose, onSubmit, isSubmitting = false, initialData = null }) {
+export default function 
+AddScholarshipModal({ isOpen, onClose, onSubmit, isSubmitting = false, initialData = null }) {
   const isEditMode = !!initialData;
 
   const [form, setForm] = useState(defaultForm);
