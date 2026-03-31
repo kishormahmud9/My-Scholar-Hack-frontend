@@ -88,8 +88,14 @@ export default function ManualApplicationTrackerPage() {
   const normalizePayload = (payload) => {
     const normalized = {
       ...payload,
-      scholarshipDeadline: payload.scholarshipDeadline
-        ? new Date(payload.scholarshipDeadline).toISOString()
+      deadline: payload.deadline
+        ? new Date(payload.deadline).toISOString()
+        : undefined,
+      amount: payload.amount !== "" && payload.amount !== undefined
+        ? Number(payload.amount)
+        : undefined,
+      images: Array.isArray(payload.images) && payload.images.length > 0
+        ? payload.images
         : undefined,
       // Only send status if it's a valid enum value
       status: VALID_STATUSES.includes(payload.status) ? payload.status : "DRAFT",
@@ -103,7 +109,7 @@ export default function ManualApplicationTrackerPage() {
   const handleSubmit = (payload) => {
     const normalized = normalizePayload(payload);
     if (editingApplication) {
-      updateApplication({ id: editingApplication.id, payload: normalized });
+      updateApplication({ id: editingApplication.id || editingApplication._id, payload: normalized });
     } else {
       addApplication(normalized);
     }
@@ -138,43 +144,63 @@ export default function ManualApplicationTrackerPage() {
       Title: "No",
       key: "no",
       width: "4%",
-      render: (_, idx) => <span className="font-semibold text-gray-500">{idx}</span>,
+      render: (_, idx) => <span className="font-semibold text-gray-500">{idx + 1}</span>,
     },
     {
-      Title: "Scholarship Name",
-      key: "scholarshipName",
-      width: "19%",
+      Title: "Scholarship",
+      key: "title",
+      width: "22%",
       render: (row) => (
         <div className="text-left space-y-1">
-          <p className="font-semibold text-gray-900">{row.scholarshipTitle || row.scholarshipName}</p>
+          <p className="font-semibold text-gray-900">
+            {row.title || row.scholarshipTitle || row.scholarshipName || "Untitled Scholarship"}
+          </p>
+          {(row.provider || row.subject) && (
+            <p className="text-sm text-gray-500">
+              {[row.provider, row.subject].filter(Boolean).join(" • ")}
+            </p>
+          )}
           <StatusBadge status={row.status} />
         </div>
       ),
     },
     {
-      Title: "Essay Prompts",
+      Title: "Prompt",
       key: "prompt",
-      width: "21%",
+      width: "24%",
       render: (row) => (
         <div className="text-left">
-          <p className="text-black font-medium line-clamp-1">{row.essayTitle}</p>
+          <p className="text-black font-medium line-clamp-1">
+            {row.type || row.essayTitle || "Manual Application"}
+          </p>
           <p className="text-gray-500 text-sm mt-0.5 line-clamp-2">{row.prompt}</p>
         </div>
       ),
     },
     {
-      Title: "Requirements",
-      key: "requirements",
-      width: "18%",
-      render: (row) => <p className="text-black text-left line-clamp-3">{row.requirements}</p>,
+      Title: "Amount / Type",
+      key: "amount",
+      width: "14%",
+      render: (row) => (
+        <div className="text-left">
+          <p className="font-medium text-gray-900">
+            {row.amount !== undefined && row.amount !== null && row.amount !== ""
+              ? `$${Number(row.amount).toLocaleString()}`
+              : "—"}
+          </p>
+          <p className="mt-0.5 text-sm text-gray-500">{row.type || "Not specified"}</p>
+        </div>
+      ),
     },
     {
       Title: "Deadline",
-      key: "scholarshipDeadline",
+      key: "deadline",
       width: "11%",
       render: (row) => {
-        if (!row.scholarshipDeadline) return <span className="text-gray-400">—</span>;
-        const date = new Date(row.scholarshipDeadline);
+        const deadline = row.deadline || row.scholarshipDeadline;
+        if (!deadline) return <span className="text-gray-400">—</span>;
+
+        const date = new Date(deadline);
         const daysLeft = (date - new Date()) / (1000 * 60 * 60 * 24);
         const isPast = daysLeft < 0;
         const isNear = daysLeft <= 30 && !isPast;
@@ -190,10 +216,25 @@ export default function ManualApplicationTrackerPage() {
       },
     },
     {
-      Title: "Other Details",
-      key: "details",
-      width: "17%",
-      render: (row) => <p className="text-black  text-left line-clamp-3">{row.details}</p>,
+      Title: "Details",
+      key: "description",
+      width: "19%",
+      render: (row) => (
+        <div className="text-left">
+          <p className="line-clamp-3 text-black">{row.description || row.details || "—"}</p>
+          {row.detailUrl && (
+            <a
+              href={row.detailUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+            >
+              View source
+              <Icon icon="mdi:open-in-new" width={14} height={14} />
+            </a>
+          )}
+        </div>
+      ),
     },
     {
       Title: "Actions",
@@ -203,7 +244,7 @@ export default function ManualApplicationTrackerPage() {
         <div className="flex items-center justify-center gap-2">
           {/* Edit */}
           <button
-            onClick={() => handleEditClick(row.id)}
+            onClick={() => handleEditClick(row.id || row._id)}
             aria-label="Edit application"
             disabled={isFetchingEdit}
             className="w-9 h-9 rounded-lg border border-[#FFCA42]/60 text-[#b8941e] flex items-center justify-center hover:bg-[#FFFAEC] hover:border-[#FFCA42] transition-all disabled:opacity-50"
@@ -216,7 +257,7 @@ export default function ManualApplicationTrackerPage() {
           </button>
           {/* Delete */}
           <button
-            onClick={() => deleteApplication(row.id)}
+            onClick={() => deleteApplication(row.id || row._id)}
             aria-label="Delete application"
             className="w-9 h-9 rounded-lg border border-red-200 text-red-400 flex items-center justify-center hover:bg-red-50 hover:border-red-400 hover:text-red-600 transition-all"
           >

@@ -63,6 +63,11 @@ export const navLink_Admin = [
     icon: "ant-design:usergroup-add-outlined",
   },
   {
+    title: "Student Instructions",
+    path: "/dashboard/admin/student_instructions",
+    icon: "hugeicons:note-02",
+  },
+  {
     title: "Make Offer",
     path: "/dashboard/admin/offer_plan",
     icon: "hugeicons:discount-tag-02",
