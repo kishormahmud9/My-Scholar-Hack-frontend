@@ -620,7 +620,7 @@ export default function Essays() {
 
                 
 
-                <div className="bg-white/90 backdrop-blur rounded-[28px] border border-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-8 mb-6 min-h-[220px] relative transition hover:shadow-[0_28px_70px_rgba(15,23,42,0.12)]">
+                <div className="mb-6 rounded-[28px] border border-white bg-white/90 p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur transition hover:shadow-[0_28px_70px_rgba(15,23,42,0.12)]">
                     {/* Active Scholarship Context */}
                     {activeScholarship && (
                         <div className="mb-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 p-4 shadow-sm">
@@ -650,50 +650,50 @@ export default function Essays() {
                         value={essayPrompt}
                         onChange={(e) => setEssayPrompt(e.target.value)}
                         placeholder="Write anything..."
-                        className="w-full h-[110px] resize-none rounded-2xl bg-transparent text-[15px] text-[#4A5568] placeholder-[#A0AEC0] focus:outline-none"
+                        className="min-h-[140px] w-full resize-none rounded-2xl bg-transparent px-1 py-2 text-[15px] text-[#4A5568] placeholder-[#A0AEC0] focus:outline-none"
                     />
 
-                    <div className="mt-4 flex items-center justify-between gap-3 pr-24 text-xs text-[#718096]">
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-[#718096]">
                         <p className="inline-flex items-center gap-2">
                             <Icon icon="mdi:flash-outline" width={16} height={16} className="text-[#B7791F]" />
                             Add a clear prompt for better essay results
                         </p>
-                        <span className="rounded-full bg-[#F8FAFC] px-3 py-1 font-medium text-[#4A5568] ring-1 ring-[#E2E8F0]">
-                            {promptCharacterCount} characters
-                        </span>
-                    </div>
+                        <div className="flex items-center gap-2">
+                            <span className="rounded-full bg-[#F8FAFC] px-3 py-1 font-medium text-[#4A5568] ring-1 ring-[#E2E8F0]">
+                                {promptCharacterCount} characters
+                            </span>
 
-                    <div className="absolute bottom-4 right-8 flex items-center gap-2">
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*,.pdf"
-                            multiple
-                            onChange={handleFileUpload}
-                            className="hidden"
-                        />
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="group rounded-full border border-[#E2E8F0] bg-white p-2.5 text-[#A0AEC0] shadow-sm transition hover:-translate-y-0.5 hover:border-[#F6C844] hover:text-[#B7791F]"
-                            title="Upload files"
-                        >
-                            <Icon icon="mdi:attachment" width={22} height={22} className="transition group-hover:rotate-12" />
-                        </button>
-
-                        <button
-                            onClick={isRecording ? stopRecording : startRecording}
-                            className={`flex h-11 w-11 items-center justify-center rounded-full shadow-md transition-all ${isRecording
-                                ? "scale-105 bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-red-200"
-                                : "bg-gradient-to-r from-[#F6C844] to-[#F59E0B] text-[#2D3748] hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(245,158,11,0.28)]"
-                                }`}
-                            title={isRecording ? "Stop recording" : "Start recording"}
-                        >
-                            <Icon
-                                icon={isRecording ? "mdi:stop" : "mdi:microphone"}
-                                width={22}
-                                height={22}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*,.pdf"
+                                multiple
+                                onChange={handleFileUpload}
+                                className="hidden"
                             />
-                        </button>
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="group rounded-full border border-[#E2E8F0] bg-white p-2.5 text-[#A0AEC0] shadow-sm transition hover:-translate-y-0.5 hover:border-[#F6C844] hover:text-[#B7791F]"
+                                title="Upload files"
+                            >
+                                <Icon icon="mdi:attachment" width={22} height={22} className="transition group-hover:rotate-12" />
+                            </button>
+
+                            <button
+                                onClick={isRecording ? stopRecording : startRecording}
+                                className={`flex h-11 w-11 items-center justify-center rounded-full shadow-md transition-all ${isRecording
+                                    ? "scale-105 bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-red-200"
+                                    : "bg-gradient-to-r from-[#F6C844] to-[#F59E0B] text-[#2D3748] hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(245,158,11,0.28)]"
+                                    }`}
+                                title={isRecording ? "Stop recording" : "Start recording"}
+                            >
+                                <Icon
+                                    icon={isRecording ? "mdi:stop" : "mdi:microphone"}
+                                    width={22}
+                                    height={22}
+                                />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
